@@ -4,14 +4,14 @@
   <img width="250" src="https://github.com/user-attachments/assets/c57b4b35-a08e-40a7-b01b-adda092b8bda" alt="Logo ByoID" />
 </p>
 
-> ** — Projeto de TCC desenvolvido pela equipe EyeCount.**
+> **— Projeto de TCC desenvolvido pela equipe EyeCount.**
 
 ## — O Projeto
 O **ByoID** é um ecossistema de registro de presença projetado para otimizar o tempo em sala de aula e eliminar falhas humanas. Através de reconhecimento facial, biometria digital e integração de matrículas, oferecemos um controle de frequência rápido, seguro e totalmente *touchless*.
 
 ---
 
-## — Equipe EyeCount
+## — Equipe **EyeCount**
 
 | Membro | Função | Especialidade |
 | :--- | :--- | :--- |
