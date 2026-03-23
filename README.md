@@ -1,4 +1,4 @@
-# Chamada-Senai
+# PRojeto TCC: Sistematização de chamada via biometria
 Nome da Equipe: EyeCount 
 
 
@@ -11,13 +11,10 @@ Nome Do Projeto:
 ByoID
 
 Integrantes:
-Lider: Lexander
-
-Design: Adrielly - Analista  , Jhon - suporte 
-
-Front-And: Jhon 
-
-Full-Stack: Kevyn
+- Lider: Lexander
+- Design: Adrielly - Analista  , Jhon - suporte 
+- Front-And: Jhon 
+- Full-Stack: Kevyn
 
 Descrição:
 Sistema automatizado de lista de chamada que utiliza reconhecimento biométrico e numero de matricula pra registrar presença de forma rapida, segura e sem contato, reduzindo erros e otimizando controle de frequencia 
