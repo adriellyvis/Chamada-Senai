@@ -25,4 +25,4 @@ O **ByoID** é um ecossistema de registro de presença projetado para otimizar o
 * **Segurança Biométrica:** Autenticação multifatorial (Facial + Digital).
 * **Eficiência:** Registro em tempo real com baixa latência.
 * **Inclusão:** Suporte alternativo via CPF/Matrícula para contingência.
-* **Higiene:** Tecnologia sem contato físico (Zero-Touch).
+* **Higiene:** Tecnologia sem necessidade de contato físico (Zero-Touch).
