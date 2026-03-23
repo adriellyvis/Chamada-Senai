@@ -1,8 +1,8 @@
-# PRojeto TCC: Sistematização de chamada via biometria
+# PRojeto TCC: Sistematização de Chamada via Biometria
 ## Nome da Equipe: EyeCount 
 
 
-## Logo do projeto:
+### Logo do projeto:
 
 
 <img width="211" height="159" alt="image" src="https://github.com/user-attachments/assets/c57b4b35-a08e-40a7-b01b-adda092b8bda" />
