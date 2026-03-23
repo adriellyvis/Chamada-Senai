@@ -14,7 +14,7 @@ O **ByoID** é um ecossistema de registro de presença projetado para otimizar o
 ## — Equipe EyeCount
 | Membro | Função | Especialidade |
 | :--- | :--- | :--- |
-| **Lexander** | Líder de Projeto | Gestão e Estratégia |
+| **Lexander** | Líder de Projeto, Front-End, Banco de Dados | Gestão e Estratégia |
 | **Adrielly** | Designer & Analista | UI/UX e Requisitos |
 | **Jhon** | Front-End & Design | Interface e Experiência |
 | **Kevyn** | Full-Stack Developer | Arquitetura de Sistemas e API |
