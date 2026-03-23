@@ -1,5 +1,5 @@
 # PRojeto TCC: Sistematização de chamada via biometria
-Nome da Equipe: EyeCount 
+## Nome da Equipe: EyeCount 
 
 
 Logo do projeto:
