@@ -17,7 +17,7 @@ O **ByoID** é um ecossistema de registro de presença projetado para otimizar o
 | :--- | :--- | :--- |
 | **Lexander** | Líder de Projeto, Front-End + Design, Banco de Dados | Gestão e estratégia |
 | **Adrielly** | Front-End + Design e Análise | Requisitos de UI/UX |
-| **Jhon** | Front-End e Front-End + Design | Interface e Experiência |
+| **Jhon** | Back-End e Front-End + Design | Interface e Experiência |
 | **Kevyn** | Desenvolvedor Full-Stack | Arquitetura de Sistemas e API |
 
 ---
