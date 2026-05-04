@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+
+/* ── RESET ── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── BASE ── */
+body {
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  background: #f4f4f8;
+  color: #1a1a2e;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px 60px;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ── CONTAINER PRINCIPAL ── */
+.container {
+  width: 100%;
+  max-width: 740px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInUp 0.5s ease both;
+}
+
+/* ── TÍTULO ── */
+.container > h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  color: #1a1a2e;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #e0e0ec;
+  margin-bottom: 4px;
+}
+
+/* ── BOTÃO HISTÓRICO (link estilizado) ── */
+.container > button:first-of-type {
+  align-self: flex-start;
+  background: #dddaf8;
+  border: 1.5px solid rgba(100, 80, 220, 0.18);
+  border-radius: 10px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  font-family: 'Syne', sans-serif;
+}
+
+.container > button:first-of-type a {
+  display: block;
+  padding: 9px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #3a3abf;
+  text-decoration: none;
+}
+
+.container > button:first-of-type:hover {
+  background: linear-gradient(135deg, #1a0a2e, #2a1050);
+  border-color: transparent;
+  box-shadow: 0 6px 20px rgba(26, 10, 46, 0.18);
+}
+
+.container > button:first-of-type:hover a {
+  color: #f0eaff;
+}
+
+/* ── SELECT DE TURMA ── */
+#turmaSelect {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238888aa' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  border: 1.5px solid #e0e0ec;
+  border-radius: 13px;
+  padding: 14px 40px 14px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a2e;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+#turmaSelect:focus {
+  border-color: #3a3abf;
+  box-shadow: 0 0 0 3px rgba(58, 58, 191, 0.1);
+}
+
+#turmaSelect option {
+  font-family: 'DM Sans', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ── BARRA DE AÇÕES (Abrir / Encerrar) ── */
+#btnAbrirChamada,
+#btnEncerrarChamada {
+  width: 100%;
+  border: none;
+  border-radius: 13px;
+  padding: 15px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#btnAbrirChamada {
+  background: linear-gradient(135deg, #1a0a2e, #0d1a3a);
+  color: #f0eaff;
+  box-shadow: 0 4px 16px rgba(26, 10, 46, 0.2);
+}
+
+#btnAbrirChamada:hover {
+  background: linear-gradient(135deg, #2a1050, #3a4fd4);
+  box-shadow: 0 8px 28px rgba(58, 79, 212, 0.3);
+  transform: translateY(-2px);
+}
+
+#btnEncerrarChamada {
+  background: #fff1f3;
+  color: #c0183a;
+  border: 1.5px solid #fecdd3;
+}
+
+#btnEncerrarChamada:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.25);
+  transform: translateY(-2px);
+}
+
+#btnAbrirChamada:active,
+#btnEncerrarChamada:active {
+  transform: translateY(0);
+}
+
+/* ── STATUS DA AULA ── */
+#statusAula {
+  min-height: 44px;
+  background: #ffffff;
+  border: 1.5px solid #e0e0ec;
+  border-radius: 13px;
+  padding: 13px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8888aa;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+#statusAula:not(:empty) {
+  color: #1a1a2e;
+  border-color: rgba(58, 58, 191, 0.25);
+  background: #f8f8ff;
+}
+
+#statusAula:not(:empty)::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── LISTA DE ALUNOS ── */
+#listaAlunos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── CARD DE ALUNO ── */
+.aluno-card {
+  background: #ffffff;
+  border: 1.5px solid #e0e0ec;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: all 0.22s ease;
+  animation: fadeInUp 0.35s ease both;
+}
+
+.aluno-card:hover {
+  box-shadow: 0 6px 20px rgba(58, 58, 191, 0.1);
+  border-color: rgba(58, 58, 191, 0.2);
+  transform: translateX(3px);
+}
+
+/* Nome do aluno */
+.aluno-card > span {
+  flex: 1;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── BOTÕES DE PRESENÇA ── */
+.aluno-card button {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Presente */
+.aluno-card button:nth-of-type(1) {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border: 1.5px solid rgba(34, 197, 94, 0.25);
+}
+
+.aluno-card button:nth-of-type(1):hover {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Ausente */
+.aluno-card button:nth-of-type(2) {
+  background: rgba(244, 63, 94, 0.1);
+  color: #c0183a;
+  border: 1.5px solid rgba(244, 63, 94, 0.2);
+}
+
+.aluno-card button:nth-of-type(2):hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Atrasado */
+.aluno-card button:nth-of-type(3) {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+  border: 1.5px solid rgba(245, 158, 11, 0.22);
+}
+
+.aluno-card button:nth-of-type(3):hover {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+  transform: translateY(-1px);
+}
+
+.aluno-card button:active {
+  transform: translateY(0) !important;
+}
+
+/* ── ANIMAÇÕES ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+  50%       { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.08); }
+}
+
+/* Entrada escalonada dos cards */
+#listaAlunos .aluno-card:nth-child(1)  { animation-delay: 0.04s; }
+#listaAlunos .aluno-card:nth-child(2)  { animation-delay: 0.08s; }
+#listaAlunos .aluno-card:nth-child(3)  { animation-delay: 0.12s; }
+#listaAlunos .aluno-card:nth-child(4)  { animation-delay: 0.16s; }
+#listaAlunos .aluno-card:nth-child(5)  { animation-delay: 0.20s; }
+#listaAlunos .aluno-card:nth-child(6)  { animation-delay: 0.24s; }
+#listaAlunos .aluno-card:nth-child(7)  { animation-delay: 0.28s; }
+#listaAlunos .aluno-card:nth-child(8)  { animation-delay: 0.32s; }
+#listaAlunos .aluno-card:nth-child(9)  { animation-delay: 0.36s; }
+#listaAlunos .aluno-card:nth-child(10) { animation-delay: 0.40s; }
+
+/* ── RESPONSIVO ── */
+@media (max-width: 520px) {
+  body { padding: 24px 14px 48px; }
+
+  .container > h1 { font-size: 24px; }
+
+  .aluno-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .aluno-card > span {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .aluno-card button {
+    flex: 1;
+    text-align: center;
+  }
+}
