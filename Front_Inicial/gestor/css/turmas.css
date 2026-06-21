@@ -1,0 +1,228 @@
+.tabela-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.tabela-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-card th,
+.tabela-card td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.tabela-card th {
+  font-weight: 700;
+}
+
+.tabela-card button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   DARK MODE - TABELA CARD / TURMAS
+   Paleta: roxo escuro EyeCount
+========================================================= */
+
+body.dark .pagina-spa {
+  color: #f8fafc;
+}
+
+body.dark .pagina-header h2 {
+  color: #ffffff;
+}
+
+body.dark .pagina-header p {
+  color: #c4b5fd;
+}
+
+body.dark .tabela-card {
+  background: #1a103d;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+body.dark .tabela-card table {
+  background: transparent;
+}
+
+body.dark .tabela-card thead {
+  background: #21124d;
+}
+
+body.dark .tabela-card th {
+  color: #a78bfa;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.22);
+
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.dark .tabela-card td {
+  color: #ddd6fe;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark .tabela-card tbody tr {
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+body.dark .tabela-card tbody tr:hover {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+body.dark .tabela-card tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Botões da tabela */
+body.dark .tabela-card button {
+  min-height: 34px;
+  padding: 8px 14px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 10px;
+  background: #2a1761;
+  color: #ddd6fe;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+body.dark .tabela-card button:hover {
+  transform: translateY(-1px);
+  background: #6d28d9;
+  border-color: #8b5cf6;
+  color: #ffffff;
+}
+
+/* Primeiro botão: Editar */
+body.dark .tabela-card button[data-editar-turma] {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+  border-color: rgba(129, 140, 248, 0.28);
+}
+
+body.dark .tabela-card button[data-editar-turma]:hover {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+/* Segundo botão: Detalhes */
+body.dark .tabela-card button[data-detalhes-turma] {
+  background: rgba(124, 58, 237, 0.18);
+  color: #ddd6fe;
+  border-color: rgba(167, 139, 250, 0.28);
+}
+
+body.dark .tabela-card button[data-detalhes-turma]:hover {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+/* Botão + Cadastrar turma */
+body.dark #btnCadastrarTurma {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  box-shadow: 0 14px 28px rgba(124, 58, 237, 0.28);
+}
+
+body.dark #btnCadastrarTurma:hover {
+  box-shadow: 0 18px 34px rgba(124, 58, 237, 0.38);
+}
+
+/* Modal de turma */
+body.dark .modal {
+  background: #1a103d;
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+body.dark .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark .modal-header h2 {
+  color: #ffffff;
+}
+
+body.dark .modal-header button {
+  color: #c4b5fd;
+}
+
+body.dark .modal-header button:hover {
+  color: #ffffff;
+}
+
+body.dark .grupo-form label {
+  color: #ddd6fe;
+}
+
+body.dark .grupo-form input,
+body.dark .grupo-form select,
+body.dark .grupo-form textarea {
+  background: #21124d;
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+}
+
+body.dark .grupo-form input:focus,
+body.dark .grupo-form select:focus,
+body.dark .grupo-form textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18);
+}
+
+body.dark .grupo-form input::placeholder,
+body.dark .grupo-form textarea::placeholder {
+  color: #a78bfa;
+}
+
+body.dark .modal form button[type="submit"] {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 12px 26px rgba(124, 58, 237, 0.28);
+}
+
+body.dark .modal form button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(124, 58, 237, 0.38);
+}
+
+/* Detalhes da turma */
+body.dark .detalhes-turma {
+  color: #ddd6fe;
+}
+
+body.dark .detalhes-turma p,
+body.dark .detalhes-turma li {
+  color: #ddd6fe;
+}
+
+body.dark .detalhes-turma strong,
+body.dark .detalhes-turma h3 {
+  color: #ffffff;
+}
+
+body.dark .detalhes-turma hr {
+  border: none;
+  border-top: 1px solid rgba(167, 139, 250, 0.22);
+}

@@ -1,0 +1,2 @@
+
+.historico-table-wrap{border-radius:16px;overflow:auto;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow)}.historico-table{width:100%;border-collapse:collapse}.historico-table th,.historico-table td{padding:16px 28px;border-bottom:1px solid var(--line-soft);text-align:left;font-size:13px;vertical-align:middle}.historico-table th{font-family:"Syne";font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--panel-2)}

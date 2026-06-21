@@ -1,0 +1,9 @@
+flask
+flask-cors
+opencv-python
+numpy
+
+pip install -r requirements.txt
+
+py -m pip uninstall opencv-python
+py -m pip install opencv-contrib-python flask flask-cors numpy

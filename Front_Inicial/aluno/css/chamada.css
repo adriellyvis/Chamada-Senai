@@ -1,0 +1,515 @@
+.chamada-page {
+  width: 100%;
+}
+
+.chamada-layout {
+  display: grid;
+  grid-template-columns: minmax(680px, 1fr) 360px;
+  gap: 22px;
+  align-items: start;
+}
+
+.chamada-camera-card {
+  padding: 24px;
+}
+
+.chamada-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.page-tag {
+  display: inline-block;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  border: 1px solid var(--primary);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.chamada-header h2 {
+  font-family: "Syne", sans-serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+
+.chamada-header p {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.chamada-status {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chamada-status--open {
+  background: rgba(79, 124, 255, 0.12);
+  color: var(--primary-strong);
+}
+
+.chamada-status--loading {
+  background: rgba(246, 201, 69, 0.18);
+  color: #b88700;
+}
+
+.chamada-status--success {
+  background: rgba(46, 204, 113, 0.14);
+  color: var(--success);
+}
+
+.chamada-status--confirmed {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.aula-resumo-mobile {
+  display: none;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.aula-resumo-mobile strong {
+  display: block;
+  font-size: 17px;
+}
+
+.aula-resumo-mobile span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.camera-stage {
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.camera-bar {
+  height: 46px;
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.camera-bar div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.camera-live {
+  width: 10px;
+  height: 10px;
+  background: var(--danger);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 77, 79, 0.8);
+}
+
+.camera-mode {
+  color: var(--primary-strong);
+}
+
+.camera-preview-area {
+  height: 430px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at center, rgba(79, 124, 255, 0.12), transparent 52%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(79, 124, 255, 0.04) 29px
+    ),
+    var(--primary-soft);
+  overflow: hidden;
+}
+
+.face-frame {
+  width: 260px;
+  height: 320px;
+  border: 2px solid rgba(79, 124, 255, 0.3);
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 40px rgba(79, 124, 255, 0.15);
+}
+
+.corner {
+  width: 34px;
+  height: 34px;
+  border-color: var(--primary);
+  position: absolute;
+}
+
+.corner-tl {
+  top: 22px;
+  left: 24px;
+  border-top: 4px solid;
+  border-left: 4px solid;
+}
+
+.corner-tr {
+  top: 22px;
+  right: 24px;
+  border-top: 4px solid;
+  border-right: 4px solid;
+}
+
+.corner-bl {
+  bottom: 22px;
+  left: 24px;
+  border-bottom: 4px solid;
+  border-left: 4px solid;
+}
+
+.corner-br {
+  bottom: 22px;
+  right: 24px;
+  border-bottom: 4px solid;
+  border-right: 4px solid;
+}
+
+.face-placeholder {
+  position: relative;
+  width: 150px;
+  height: 190px;
+}
+
+.face-head {
+  width: 90px;
+  height: 110px;
+  border: 3px solid var(--primary);
+  background: rgba(79, 124, 255, 0.14);
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.face-neck {
+  width: 42px;
+  height: 34px;
+  border-left: 3px solid var(--primary);
+  border-right: 3px solid var(--primary);
+  margin: -2px auto 0;
+}
+
+.face-shoulders {
+  width: 140px;
+  height: 58px;
+  border: 3px solid var(--primary);
+  border-radius: 60px 60px 20px 20px;
+  background: rgba(79, 124, 255, 0.14);
+  margin: -2px auto 0;
+}
+
+.scan-line {
+  width: 300px;
+  height: 3px;
+  position: absolute;
+  top: 90px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0;
+  z-index: 4;
+}
+
+.camera-preview-area.is-scanning .scan-line {
+  opacity: 1;
+  animation: scanMove 1.8s infinite ease-in-out;
+}
+
+.camera-preview-area.is-approved .face-frame {
+  border-color: rgba(46, 204, 113, 0.5);
+  box-shadow: 0 0 46px rgba(46, 204, 113, 0.25);
+}
+
+.camera-preview-area.is-approved .corner,
+.camera-preview-area.is-approved .face-head,
+.camera-preview-area.is-approved .face-neck,
+.camera-preview-area.is-approved .face-shoulders {
+  border-color: var(--success);
+}
+
+@keyframes scanMove {
+  0% {
+    top: 90px;
+  }
+
+  50% {
+    top: 310px;
+  }
+
+  100% {
+    top: 90px;
+  }
+}
+
+.camera-message {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.camera-message strong {
+  font-size: 17px;
+}
+
+.camera-message span {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chamada-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.chamada-actions button {
+  min-width: 190px;
+}
+
+.chamada-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.biometria-feedback {
+  margin-top: 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: var(--text-muted);
+  font-weight: 700;
+  background: var(--card-bg);
+}
+
+.biometria-feedback--loading {
+  background: rgba(246, 201, 69, 0.14);
+  border-color: var(--warning);
+  color: #b88700;
+}
+
+.biometria-feedback--success {
+  background: rgba(46, 204, 113, 0.14);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.chamada-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.aula-card,
+.fluxo-card,
+.retorno-card {
+  padding: 22px;
+}
+
+.aula-card h3,
+.fluxo-card h3,
+.retorno-card h3 {
+  font-family: "Syne", sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+
+.aula-destaque {
+  border: 1px solid var(--primary);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--primary-soft);
+}
+
+.aula-destaque span {
+  color: var(--primary-strong);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.aula-destaque strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 6px;
+}
+
+.aula-destaque p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.aula-info-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.aula-info-list div {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid var(--card-border);
+  gap: 12px;
+}
+
+.aula-info-list span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.status-open-text {
+  color: var(--primary-strong);
+}
+
+.fluxo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fluxo-item {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: center;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.fluxo-item span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.fluxo-item.is-active {
+  color: var(--primary-strong);
+}
+
+.fluxo-item.is-active span {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.fluxo-item.is-done {
+  color: var(--text-main);
+}
+
+.fluxo-item.is-done span {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.retorno-box {
+  min-height: 86px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  background: var(--primary-soft);
+  padding: 16px;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.retorno-box strong,
+.retorno-box b {
+  color: var(--text-main);
+}
+
+@media (max-width: 1250px) {
+  .chamada-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chamada-side {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .aula-resumo-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 900px) {
+  .chamada-header {
+    flex-direction: column;
+  }
+
+  .chamada-side {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-preview-area {
+    height: 360px;
+  }
+
+  .chamada-actions {
+    flex-direction: column;
+  }
+
+  .chamada-actions button {
+    width: 100%;
+  }
+}
+
+.video-biometria {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  transform: scaleX(-1);
+  z-index: 1;
+}
+
+.camera-preview-area {
+  position: relative;
+  overflow: hidden;
+}
+
+.camera-preview-area .scan-line,
+.camera-preview-area .face-frame,
+.camera-preview-area .camera-message {
+  position: relative;
+  z-index: 2;
+}

@@ -1,0 +1,289 @@
+.avisos-page {
+  width: 100%;
+}
+
+.avisos-layout {
+  display: grid;
+  grid-template-columns: minmax(720px, 1fr) 340px;
+  gap: 22px;
+  align-items: start;
+}
+
+.avisos-main-card {
+  padding: 24px;
+}
+
+.avisos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.avisos-header h2 {
+  font-family: "Syne", sans-serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+
+.avisos-header p {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.avisos-header .primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.avisos-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.aviso-filter {
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.aviso-filter:hover,
+.aviso-filter.is-active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.avisos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aviso-card {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 14px;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 16px;
+  background: var(--card-bg);
+  transition: 0.2s ease;
+}
+
+.aviso-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.aviso-card.is-important {
+  border-color: var(--warning);
+  background:
+    linear-gradient(90deg, rgba(246, 201, 69, 0.10), transparent),
+    var(--card-bg);
+}
+
+.aviso-card.is-read {
+  opacity: 0.72;
+}
+
+.aviso-marker {
+  width: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+.aviso-card.is-important .aviso-marker {
+  background: var(--warning);
+}
+
+.aviso-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.aviso-tag {
+  color: var(--primary-strong);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.aviso-new,
+.aviso-read {
+  min-width: 54px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.aviso-new {
+  background: rgba(79, 124, 255, 0.12);
+  color: var(--primary-strong);
+}
+
+.aviso-read {
+  background: var(--primary-soft);
+  color: var(--text-soft);
+}
+
+.aviso-content h3 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.aviso-content p {
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.avisos-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.avisos-resumo-card,
+.avisos-destaque-card,
+.avisos-contato-card {
+  padding: 22px;
+}
+
+.avisos-resumo-card h3,
+.avisos-destaque-card h3,
+.avisos-contato-card h3 {
+  font-family: "Syne", sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+
+.avisos-resumo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.avisos-resumo-list div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.avisos-resumo-list div:first-child {
+  border-top: none;
+}
+
+.avisos-resumo-list span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.avisos-resumo-list strong {
+  font-size: 24px;
+}
+
+.destaque-box {
+  border: 1px solid var(--primary);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background: var(--primary-soft);
+}
+
+.destaque-box span {
+  color: var(--primary-strong);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.destaque-box strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+}
+
+.destaque-box p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.avisos-destaque-card .outline-btn {
+  width: 100%;
+}
+
+.avisos-contato-card p {
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+
+.contato-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.contato-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--card-border);
+}
+
+.contato-list span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.contato-list strong {
+  text-align: right;
+}
+
+@media (max-width: 1200px) {
+  .avisos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .avisos-side {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .avisos-header {
+    flex-direction: column;
+  }
+
+  .avisos-side {
+    grid-template-columns: 1fr;
+  }
+
+  .aviso-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

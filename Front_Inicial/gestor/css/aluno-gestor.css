@@ -1,0 +1,719 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-overlay.ativo {
+  display: flex;
+}
+
+.modal {
+  width: 520px;
+  max-width: 95%;
+  background: white;
+  border-radius: 22px;
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.modal-header button {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.pagina-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.btn-cadastrar-usuario {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.25);
+  transition: 0.2s;
+}
+
+.btn-cadastrar-usuario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(124, 58, 237, 0.32);
+}
+
+.usuarios-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.usuarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.usuarios-eyebrow {
+  display: block;
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.usuarios-header h2 {
+  font-size: 32px;
+  color: #111827;
+}
+
+.usuarios-header p {
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.btn-cadastrar-usuario {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.25);
+  transition: 0.2s;
+}
+
+.btn-cadastrar-usuario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(124, 58, 237, 0.32);
+}
+
+.usuarios-resumo {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.usuario-resumo-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.usuario-resumo-card span {
+  display: block;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.usuario-resumo-card strong {
+  font-size: 34px;
+  color: #111827;
+}
+
+.usuario-resumo-card.aluno {
+  border-top: 4px solid #22c55e;
+}
+
+.usuario-resumo-card.professor {
+  border-top: 4px solid #6366f1;
+}
+
+.usuario-resumo-card.gestor {
+  border-top: 4px solid #8b5cf6;
+}
+
+.usuarios-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.usuarios-toolbar .select-pill {
+  height: 42px;
+  min-width: 170px;
+  padding: 0 42px 0 16px;
+  border: 1px solid #dbe0ea;
+  border-radius: 14px;
+  background-color: #fff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 18px,
+    calc(100% - 16px) 18px;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.usuarios-toolbar .select-pill:hover {
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.12);
+}
+
+.usuarios-toolbar .select-pill:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14);
+}
+
+.usuarios-toolbar .select-pill option {
+  color: #111827;
+  background: #fff;
+}
+
+.usuarios-busca {
+  flex: 1;
+  min-width: 280px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #dbe0ea;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+
+.usuarios-busca input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.usuarios-table-card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+}
+
+.usuarios-table-wrapper {
+  max-height: calc(100vh - 390px);
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.usuarios-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #edf0f5;
+  text-align: left;
+  font-size: 14px;
+}
+
+.usuarios-table th {
+  color: #9ca3af;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+}
+
+.usuario-identidade {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.usuario-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 900;
+}
+
+.usuario-avatar.aluno {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.usuario-avatar.professor {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.usuario-avatar.gestor {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.usuario-identidade strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 3px;
+}
+
+.usuario-identidade span {
+  display: block;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.usuario-perfil,
+.usuario-status {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.usuario-perfil.aluno {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.usuario-perfil.professor {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.usuario-perfil.gestor {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.usuario-status.ativo {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.usuario-status.inativo {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.usuario-acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-usuario {
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-usuario.editar {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.btn-usuario.detalhes {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-usuario.status.desativar {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.btn-usuario.status.ativar {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.btn-usuario:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+}
+
+/* =========================================================
+   DARK MODE - USUÁRIOS / GESTOR
+   Paleta roxo escuro EyeCount
+========================================================= */
+
+body.dark .usuarios-page {
+  color: #f8fafc;
+}
+
+body.dark .usuarios-eyebrow {
+  color: #a78bfa;
+}
+
+body.dark .usuarios-header h2 {
+  color: #ffffff;
+}
+
+body.dark .usuarios-header p {
+  color: #c4b5fd;
+}
+
+/* Cards de resumo */
+body.dark .usuario-resumo-card {
+  background: #1a103d;
+  border-color: rgba(167, 139, 250, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+body.dark .usuario-resumo-card span {
+  color: #a78bfa;
+}
+
+body.dark .usuario-resumo-card strong {
+  color: #ffffff;
+}
+
+body.dark .usuario-resumo-card.aluno {
+  border-top-color: #22c55e;
+}
+
+body.dark .usuario-resumo-card.professor {
+  border-top-color: #818cf8;
+}
+
+body.dark .usuario-resumo-card.gestor {
+  border-top-color: #a78bfa;
+}
+
+/* Busca e filtros */
+body.dark .usuarios-busca {
+  background: #1a103d;
+  border-color: rgba(167, 139, 250, 0.22);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+}
+
+body.dark .usuarios-busca input {
+  color: #ffffff;
+}
+
+body.dark .usuarios-busca input::placeholder {
+  color: #a78bfa;
+}
+
+body.dark .usuarios-busca span {
+  color: #c4b5fd;
+}
+
+body.dark .usuarios-toolbar .select-pill {
+  background-color: #1a103d;
+  color: #ffffff;
+  border-color: rgba(167, 139, 250, 0.22);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #c4b5fd 50%),
+    linear-gradient(135deg, #c4b5fd 50%, transparent 50%);
+}
+
+body.dark .usuarios-toolbar .select-pill:hover {
+  border-color: rgba(167, 139, 250, 0.55);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.22);
+}
+
+body.dark .usuarios-toolbar .select-pill:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18);
+}
+
+body.dark .usuarios-toolbar .select-pill option {
+  background: #21124d;
+  color: #ffffff;
+}
+
+/* Tabela */
+body.dark .usuarios-table-card {
+  background: #1a103d;
+  border-color: rgba(167, 139, 250, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+body.dark .usuarios-table {
+  background: transparent;
+}
+
+body.dark .usuarios-table thead th {
+  background: #21124d;
+}
+
+body.dark .usuarios-table th {
+  color: #a78bfa;
+  border-bottom-color: rgba(167, 139, 250, 0.22);
+}
+
+body.dark .usuarios-table td {
+  color: #ddd6fe;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .usuarios-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+body.dark .usuarios-table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+body.dark .usuario-identidade strong {
+  color: #ffffff;
+}
+
+body.dark .usuario-identidade span {
+  color: #a78bfa;
+}
+
+/* Avatares */
+body.dark .usuario-avatar {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+}
+
+body.dark .usuario-avatar.aluno {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+body.dark .usuario-avatar.professor {
+  background: rgba(99, 102, 241, 0.20);
+  color: #c7d2fe;
+}
+
+body.dark .usuario-avatar.gestor {
+  background: rgba(139, 92, 246, 0.22);
+  color: #ddd6fe;
+}
+
+/* Badges perfil */
+body.dark .usuario-perfil.aluno {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+body.dark .usuario-perfil.professor {
+  background: rgba(99, 102, 241, 0.20);
+  color: #c7d2fe;
+}
+
+body.dark .usuario-perfil.gestor {
+  background: rgba(139, 92, 246, 0.22);
+  color: #ddd6fe;
+}
+
+/* Badges status */
+body.dark .usuario-status.ativo {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+body.dark .usuario-status.inativo {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+/* Botões da tabela */
+body.dark .btn-usuario.editar {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+}
+
+body.dark .btn-usuario.editar:hover {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+body.dark .btn-usuario.detalhes {
+  background: rgba(124, 58, 237, 0.18);
+  color: #ddd6fe;
+}
+
+body.dark .btn-usuario.detalhes:hover {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+body.dark .btn-usuario.status.desativar {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+body.dark .btn-usuario.status.desativar:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+body.dark .btn-usuario.status.ativar {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+body.dark .btn-usuario.status.ativar:hover {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+/* Botão cadastrar */
+body.dark .btn-cadastrar-usuario {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(124, 58, 237, 0.28);
+}
+
+body.dark .btn-cadastrar-usuario:hover {
+  box-shadow: 0 18px 34px rgba(124, 58, 237, 0.38);
+}
+
+/* Modal */
+body.dark .modal-overlay {
+  background: rgba(3, 1, 12, 0.72);
+}
+
+body.dark .modal {
+  background: #1a103d;
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+body.dark .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+body.dark .modal-header h2 {
+  color: #ffffff;
+}
+
+body.dark .modal-header button {
+  color: #c4b5fd;
+}
+
+body.dark .modal-header button:hover {
+  color: #ffffff;
+}
+
+/* Forms do modal */
+body.dark .grupo-form label {
+  color: #ddd6fe;
+}
+
+body.dark .grupo-form input,
+body.dark .grupo-form select,
+body.dark .grupo-form textarea {
+  background: #21124d;
+  color: #ffffff;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+}
+
+body.dark .grupo-form input:focus,
+body.dark .grupo-form select:focus,
+body.dark .grupo-form textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18);
+}
+
+body.dark .grupo-form input::placeholder,
+body.dark .grupo-form textarea::placeholder {
+  color: #a78bfa;
+}
+
+body.dark .modal form button[type="submit"] {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 12px 26px rgba(124, 58, 237, 0.28);
+}
+
+body.dark .modal form button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(124, 58, 237, 0.38);
+}
+
+/* Detalhes do usuário */
+body.dark .detalhes-usuario {
+  color: #ddd6fe;
+}
+
+body.dark .detalhes-usuario p {
+  color: #ddd6fe;
+}
+
+body.dark .detalhes-usuario strong {
+  color: #ffffff;
+}
+
+/* Scroll da tabela */
+body.dark .usuarios-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+body.dark .usuarios-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.dark .usuarios-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.45);
+  border-radius: 999px;
+}

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Eyecount</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/area-login-gestor.css" />
+</head>
+<body>
+  <div class="card">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="illustration">
+
+        <svg
+          viewBox="0 0 200 220"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+
+          <rect
+            x="30"
+            y="30"
+            width="140"
+            height="95"
+            rx="6"
+            stroke="rgba(255,255,255,0.65)"
+            stroke-width="3"
+          />
+
+          <line
+            x1="100"
+            y1="125"
+            x2="100"
+            y2="150"
+            stroke="rgba(255,255,255,0.5)"
+            stroke-width="3"
+          />
+
+          <line
+            x1="75"
+            y1="150"
+            x2="125"
+            y2="150"
+            stroke="rgba(255,255,255,0.5)"
+            stroke-width="3"
+          />
+
+          <circle
+            cx="100"
+            cy="168"
+            r="14"
+            stroke="rgba(255,255,255,0.75)"
+            stroke-width="3"
+          />
+
+          <path
+            d="M80 210 Q100 195 120 210"
+            stroke="rgba(255,255,255,0.65)"
+            stroke-width="3"
+          />
+
+          <line
+            x1="83"
+            y1="196"
+            x2="55"
+            y2="108"
+            stroke="rgba(255,255,255,0.65)"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+
+          <line
+            x1="117"
+            y1="196"
+            x2="130"
+            y2="205"
+            stroke="rgba(255,255,255,0.65)"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+
+        </svg>
+
+      </div>
+
+      <h1>Bem-vindo ao Eyecount</h1>
+      <p>
+        Acesse o sistema para gerenciar presença,
+        acompanhar aulas e visualizar relatórios.
+      </p>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+      <a href="/index.html" class="back-link">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Voltar ao início
+      </a>
+
+      <h2>Entrar no sistema</h2>
+
+      <p class="subtitle">
+        Faça login com seu e-mail institucional.
+      </p>
+
+      <!-- EMAIL -->
+      <form id="formLogin">
+  <label for="email">E-mail ou matrícula</label>
+  <input type="text" id="email" placeholder="Ex: gestor@senai.edu.br" />
+
+  <label for="senha">Senha</label>
+  <input type="password" id="senha" placeholder="••••••••••••" />
+
+  <button type="submit" class="btn">Entrar no portal</button>
+</form>
+
+<script src="/login/js/area-login-gestor.js"></script>
+
+</body>
+</html>

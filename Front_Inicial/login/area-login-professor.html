@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Área do Professor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/area-professor.css" />
+  </head>
+  <body>
+    <div class="card">
+      <!-- LEFT: ilustração e descrição -->
+      <div class="left">
+        <div class="illustration">
+          <!-- Teacher at whiteboard SVG -->
+          <svg
+            viewBox="0 0 200 220"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Whiteboard / screen -->
+            <rect
+              x="30"
+              y="30"
+              width="140"
+              height="95"
+              rx="6"
+              stroke="rgba(255,255,255,0.65)"
+              stroke-width="3"
+              fill="none"
+            />
+            <!-- Stand legs -->
+            <line
+              x1="100"
+              y1="125"
+              x2="100"
+              y2="150"
+              stroke="rgba(255,255,255,0.5)"
+              stroke-width="3"
+            />
+            <line
+              x1="75"
+              y1="150"
+              x2="125"
+              y2="150"
+              stroke="rgba(255,255,255,0.5)"
+              stroke-width="3"
+            />
+
+            <!-- Teacher body -->
+            <!-- head -->
+            <circle
+              cx="100"
+              cy="168"
+              r="14"
+              stroke="rgba(255,255,255,0.75)"
+              stroke-width="3"
+              fill="none"
+            />
+            <!-- torso -->
+            <path
+              d="M80 210 Q100 195 120 210"
+              stroke="rgba(255,255,255,0.65)"
+              stroke-width="3"
+              fill="none"
+            />
+            <!-- left arm pointing at board -->
+            <line
+              x1="83"
+              y1="196"
+              x2="55"
+              y2="108"
+              stroke="rgba(255,255,255,0.65)"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <!-- right arm down -->
+            <line
+              x1="117"
+              y1="196"
+              x2="130"
+              y2="205"
+              stroke="rgba(255,255,255,0.65)"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+
+            <!-- lines on board (content) -->
+            <line
+              x1="50"
+              y1="58"
+              x2="150"
+              y2="58"
+              stroke="rgba(255,255,255,0.35)"
+              stroke-width="2"
+              stroke-dasharray="6 4"
+            />
+            <line
+              x1="50"
+              y1="75"
+              x2="130"
+              y2="75"
+              stroke="rgba(255,255,255,0.35)"
+              stroke-width="2"
+              stroke-dasharray="6 4"
+            />
+            <line
+              x1="50"
+              y1="92"
+              x2="140"
+              y2="92"
+              stroke="rgba(255,255,255,0.35)"
+              stroke-width="2"
+              stroke-dasharray="6 4"
+            />
+          </svg>
+        </div>
+        <h1>Área do Professor</h1>
+        <p>
+          Acesse seu portal para analisar lista de chamadas, conferir faltas e
+          escrever avisos.
+        </p>
+      </div>
+
+      <!-- RIGHT: formulário de login e links -->
+      <div class="right">
+        <a href="/index.html" class="back-link">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Voltar ao início
+        </a>
+
+        <h2>Bem-vindo, Professor(a)!</h2>
+        <p class="subtitle">
+          Insira seus dados para entrar<br />ou <a href="#">cadastre-se.</a>
+        </p>
+
+        <form id="formLoginProfessor">
+
+      <label for="email">
+        E-mail ou matrícula
+      </label>
+
+      <input
+        type="text"
+        id="email"
+        placeholder="Ex: professor@senai.edu.br"
+      />
+
+      <label for="senha">
+        Senha
+      </label>
+
+      <input
+        type="password"
+        id="senha"
+        placeholder="••••••••••••"
+      />
+
+      <div class="row">
+        <label class="checkbox-label">
+          <input type="checkbox" />
+          Lembrar-me
+        </label>
+
+        <a href="#" class="forgot">
+          Esqueceu a senha?
+        </a>
+      </div>
+
+      <button
+        type="submit"
+        class="btn"
+        id="btnLogin"
+      >
+        Entrar no portal
+      </button>
+
+      <p class="help">
+        <strong>Problemas com o acesso?</strong>
+        <a href="#">
+          Fale com a secretaria.
+        </a>
+      </p>
+
+      <p
+        id="erro"
+        style="
+          color: red;
+          font-size: 0.85rem;
+          text-align: center;
+        "
+      ></p>
+
+    </form>
+          </div>
+    </div>
+    <script src="js/area-login-professor.js"></script>
+  </body>
+</html>

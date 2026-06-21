@@ -1,0 +1,162 @@
+.alunos-professor-lista {
+  width: 100%;
+  max-width: 1080px;
+  margin: 16px auto 0;
+}
+
+.alunos-table-card {
+  border-radius: 16px;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.alunos-table {
+  width: 100%;
+  min-width: 960px;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.alunos-table th,
+.alunos-table td {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: middle;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+.alunos-table th {
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--panel-2);
+  font-weight: 800;
+}
+
+.alunos-table td {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* =========================
+   ALUNO / RA
+========================= */
+
+.aluno-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 210px;
+}
+
+.aluno-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #aadff5, #7f5fd7);
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  flex: 0 0 42px;
+}
+
+.aluno-info strong {
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.aluno-info span {
+  display: block;
+  color: var(--muted);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================
+   FREQUÊNCIA
+========================= */
+
+.freq-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.freq-cell strong {
+  color: var(--green);
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  min-width: 48px;
+}
+
+.freq-cell.risco strong {
+  color: var(--pink);
+}
+
+.freq-cell.risco .freq-bar div {
+  background: var(--pink);
+}
+
+.freq-bar {
+  width: 95px;
+}
+
+/* =========================
+   STATUS / AÇÕES
+========================= */
+
+.aluno-status {
+  min-width: 95px;
+  height: 25px;
+}
+
+.aluno-acao-btn {
+  height: 38px;
+  min-width: 92px;
+  margin: 2px 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-width: 760px) {
+  .alunos-professor-lista {
+    max-width: 100%;
+    margin-top: 14px;
+  }
+
+  .alunos-table th,
+  .alunos-table td {
+    padding: 15px 16px;
+  }
+
+  .aluno-info {
+    min-width: 190px;
+  }
+
+  .freq-bar {
+    width: 80px;
+  }
+
+  .aluno-acao-btn {
+    min-width: 86px;
+  }
+}

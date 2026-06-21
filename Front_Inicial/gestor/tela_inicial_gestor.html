@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor - EyeCount</title>
+  <link rel="stylesheet" href="/gestor/css/tela-inicial-gestor.css">
+  <link rel="stylesheet" href="/gestor/css/dashboard.css">
+  <link rel="stylesheet" href="/gestor/css/aluno-gestor.css">
+  <link rel="stylesheet" href="/gestor/css/turmas.css">
+  <link rel="stylesheet" href="/gestor/css/ocorrencia-gestor.css">
+  <link rel="stylesheet" href="/gestor/css/disciplinas.css">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+  <aside class="sidebar">
+    <h2>BEM-VINDO DE VOLTA!</h2>
+    <div class="perfil">
+      <div class="avatar"></div>
+
+      <div>
+        <strong id="nomeUsuario"></strong>
+        <p>Gestor(a) - Setor de Apoio</p>
+      </div>
+    </div>
+
+    <nav>
+      <a id="menuDashboard" class="ativo">🏠 <span>Home</span></a>
+      <a id="menuTurmas">🏫 <span>Turmas</span></a>
+      <a id="menuAlunos">👤 <span>Usuarios</span></a>
+      <a id="menuDisciplinas">📘 <span>Disciplinas</span></a>
+      <a id="menuOcorrencias">📖 <span>Ocorrências</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="config-wrapper">
+        <button id="btnConfig" class="sidebar-icon-btn" type="button">
+          ⚙️
+        </button>
+
+        <div id="menuConfig" class="config-menu">
+          <button type="button" id="btnPerfil">👤 Perfil</button>
+          <button type="button" id="btnConfiguracoes">⚙️ Configurações</button>
+          <button type="button" id="btnLogout">🚪 Logout</button>
+        </div>
+      </div>
+
+      <button id="btnTema" class="sidebar-icon-btn tema-btn" type="button">
+        🌙
+      </button>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topo">
+
+      <div>
+        <h1>GERENCIAMENTO INSTITUCIONAL</h1>
+        <p>Aqui está o resumo das suas turmas.</p>
+      </div>
+
+      <div class="acoes-topo">
+
+        <button class="notificacao">🔔</button>
+
+        <div class="search search-global">
+          <input
+            type="text"
+            id="buscaGlobalGestor"
+            placeholder="Buscar aluno, professor, turma..."
+          >
+          🔍
+
+          <div id="resultadoBuscaGlobal" class="resultado-busca-global"></div>
+        </div>
+
+      </div>
+
+    </header>
+
+    <div id="conteudoPrincipal"></div>
+  </main>
+</div>
+
+<script type="module" src="js/tela_inicial_gestor.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
+}
+
+.stat-card {
+  height: 116px;
+  padding: 16px 22px;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  column-gap: 14px;
+  align-items: center;
+  position: relative;
+}
+
+.stat-card__icon {
+  font-size: 32px;
+  color: var(--primary);
+}
+
+.stat-card__label {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.stat-card__value {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  margin-top: 10px;
+  line-height: 1;
+}
+
+.stat-card__badge {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  font-size: 11px;
+  color: var(--success);
+  background: rgba(46, 204, 113, 0.12);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.soft-btn {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.primary-btn {
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 0 18px;
+  font-weight: 800;
+}
+
+.outline-btn {
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary-strong);
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 0 18px;
+  font-weight: 800;
+}

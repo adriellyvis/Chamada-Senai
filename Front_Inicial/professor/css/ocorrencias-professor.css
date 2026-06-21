@@ -1,0 +1,305 @@
+.ocorrencias-lista {
+  width: 100%;
+  max-width: 980px;
+  margin: 18px auto 0;
+}
+
+.ocorrencia-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 24px 26px 26px;
+  margin-bottom: 22px;
+  min-height: 164px;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+.ocorrencia-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 18px 0 0 18px;
+  background: var(--green);
+}
+
+.ocorrencia-card.alta::before {
+  background: var(--pink);
+}
+
+.ocorrencia-card.media::before {
+  background: var(--orange);
+}
+
+.ocorrencia-card.baixa::before {
+  background: var(--green);
+}
+
+/* =========================
+   TOPO DO CARD
+========================= */
+
+.ocorrencia-card-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ocorrencia-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.ocorrencia-label.destaque {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ocorrencia-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--purple-soft);
+  color: var(--purple);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex: 0 0 auto;
+}
+
+.ocorrencia-card h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.ocorrencia-meta-inline {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ocorrencia-descricao {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0 0 18px 60px;
+}
+
+.ocorrencia-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* =========================
+   AÇÕES / STATUS
+========================= */
+
+.ocorrencia-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-left: 60px;
+}
+
+.ocorrencia-status,
+.ocorrencia-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ocorrencia-status.em-analise,
+.ocorrencia-status.em_analise {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.ocorrencia-status.cancelada {
+  background: #ffe8ef;
+  color: var(--pink);
+}
+
+.ocorrencia-status.resolvida {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ocorrencia-status.pendente {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.ocorrencia-label.alta {
+  background: #ffe8ef;
+  color: var(--pink);
+}
+
+.ocorrencia-label.media {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.ocorrencia-label.baixa {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.ocorrencia-btn.editar {
+  background: var(--green);
+  color: #fff;
+  border: 0;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-detalhes-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 13, 22, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.modal-detalhes-card {
+  width: min(920px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.28);
+  padding: 24px;
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.modal-detalhes-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.modal-detalhes-header h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.modal-detalhes-header p {
+  color: var(--muted);
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.modal-detalhes-header button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+.form-ocorrencia {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.form-ocorrencia label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-ocorrencia textarea,
+.form-ocorrencia .full,
+.form-full {
+  grid-column: 1 / -1;
+}
+
+.form-ocorrencia button[type="submit"],
+.form-ocorrencia-acoes {
+  grid-column: 1 / -1;
+}
+
+.form-ocorrencia input,
+.form-ocorrencia select,
+.form-ocorrencia textarea {
+  height: auto;
+  padding: 11px 12px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-width: 760px) {
+  .ocorrencias-lista {
+    max-width: 100%;
+  }
+
+  .ocorrencia-card-topo {
+    flex-direction: column;
+  }
+
+  .ocorrencia-descricao,
+  .ocorrencia-acoes {
+    margin-left: 0;
+  }
+
+  .ocorrencia-acoes {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .form-ocorrencia {
+    grid-template-columns: 1fr;
+  }
+}

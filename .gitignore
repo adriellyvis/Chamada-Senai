@@ -1,0 +1,43 @@
+# Java / Maven
+target/
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# Configurações locais
+.env
+*.env
+application-local.properties
+application-dev.properties
+**/application-local.properties
+**/application-dev.properties
+
+# Front-end / Node
+node_modules/
+dist/
+build/
+
+# Python / Biometria
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Backups ou dumps locais de banco
+*backup*.sql
+*dump*.sql
+*local*.sql
+
+# Dados biométricos locais
+Front_Inicial/dados_biometricos/
