@@ -8,18 +8,17 @@ export async function abrirAlunosProfessor(turmaId = "") {
 
   conteudo.innerHTML = `
     <section class="page-shell">
-      ${montarTopo("GERENCIAMENTO DE ALUNOS", "Aqui está o resumo dos seus alunos.", "Procurar aluno...")}
+      ${montarTopo("GERENCIAMENTO DE ALUNOS", "Aqui está o resumo dos seus alunos.", "Buscar alunos e turmas...")}
 
-      <div class="content-area section-center">
+      <div class="content-area section-center alunos-page-content">
         <div class="stats-grid">
           ${cardStat("ALUNOS LISTADOS", "statAlunosListados", "0", "Matriculados ativos", "users-round", "blue")}
           ${cardStat("MÉDIA DE FREQUÊNCIA", "statMediaAlunos", "0%", "Excelente", "circle-check", "green")}
           ${cardStat("FREQUÊNCIA CRÍTICA", "statCriticosAlunos", "0", "Abaixo de 75%", "triangle-alert", "orange")}
           ${cardStat("BIOMETRIA ATIVA", "statBiometriaAlunos", "0", "cadastros", "fingerprint", "purple")}
         </div>
-      </div>
 
-        <div class="filters-row">
+        <div class="filters-row filtros-alunos-professor">
           <span class="filter-label">⌁ Filtro:</span>
           <select id="filtroTurmaAlunos" class="select-pill"><option value="">Todas as Turmas</option></select>
           <select id="filtroRendimentoAlunos" class="select-pill">
@@ -42,6 +41,7 @@ export async function abrirAlunosProfessor(turmaId = "") {
   await carregarAlunosProfessor(turmaId);
   configurarBuscaAlunos();
   configurarFiltroRendimento();
+  aplicarBuscaPendenteAluno();
 }
 
 function montarTopo(titulo, subtitulo, placeholder) {
@@ -53,10 +53,10 @@ function montarTopo(titulo, subtitulo, placeholder) {
       </div>
       <div class="topbar-actions">
         <button class="bell-btn" type="button">🔔</button>
-        <label class="search-pill">
-          <input type="text" placeholder="${placeholder}" />
-          <span>⌕</span>
-        </label>
+        <div class="search-pill busca-global-professor">
+          <input class="busca-global-professor-input" type="search" placeholder="Buscar alunos e turmas..." autocomplete="off" />
+          <span aria-hidden="true">⌕</span>
+        </div>
       </div>
     </header>
   `;
@@ -186,8 +186,22 @@ function renderizarAlunosProfessor(alunos) {
                   </span>
                 </td>
                 <td>
-                  <button class="aluno-acao-btn" data-aluno-id="${dados.id}" data-aluno-nome="${dados.nome}">Ver Perfil</button>
-                  <button class="aluno-acao-btn" data-aluno-id="${dados.id}" data-aluno-nome="${dados.nome}">Ocorrência</button>
+                  <div class="aluno-acoes-wrap">
+                    <button
+                      class="aluno-acao-btn perfil"
+                      type="button"
+                      data-acao="perfil"
+                      data-aluno-id="${dados.id}"
+                      data-aluno-nome="${dados.nome}"
+                    >Ver Perfil</button>
+                    <button
+                      class="aluno-acao-btn ocorrencia"
+                      type="button"
+                      data-acao="ocorrencia"
+                      data-aluno-id="${dados.id}"
+                      data-aluno-nome="${dados.nome}"
+                    >Ocorrência</button>
+                  </div>
                 </td>
               </tr>
             `;
@@ -233,6 +247,20 @@ function configurarFiltroRendimento() {
   document.getElementById("filtroRendimentoAlunos")?.addEventListener("change", aplicarFiltrosVisuais);
 }
 
+function aplicarBuscaPendenteAluno() {
+  const nomePendente = sessionStorage.getItem("professorAlunoBuscaPendente");
+  if (!nomePendente) return;
+
+  sessionStorage.removeItem("professorAlunoBuscaPendente");
+
+  const input = document.getElementById("buscaAlunoProfessor");
+  if (!input) return;
+
+  input.value = nomePendente;
+  aplicarFiltrosVisuais();
+  input.focus();
+}
+
 function aplicarFiltrosVisuais() {
   const termo = document.getElementById("buscaAlunoProfessor")?.value.toLowerCase().trim() ?? "";
   const rendimento = document.getElementById("filtroRendimentoAlunos")?.value ?? "";
@@ -251,12 +279,198 @@ function configurarAcoesAlunos() {
     botao.addEventListener("click", () => {
       const alunoId = botao.dataset.alunoId;
       const alunoNome = botao.dataset.alunoNome;
-      localStorage.setItem("ocorrenciaAlunoId", alunoId);
-      localStorage.setItem("ocorrenciaAlunoNome", alunoNome);
-      localStorage.setItem("abrirModalOcorrencia", "true");
-      document.querySelector('[data-page="ocorrencias"]')?.click();
+      const acao = botao.dataset.acao;
+
+      if (acao === "perfil") {
+        abrirPerfilAluno(alunoId);
+        return;
+      }
+
+      if (acao === "ocorrencia") {
+        abrirOcorrenciaAluno(alunoId, alunoNome);
+      }
     });
   });
+}
+
+function abrirPerfilAluno(alunoId) {
+  const aluno = alunosCache
+    .map(normalizarAlunoProfessor)
+    .find(item => String(item.id) === String(alunoId));
+
+  if (!aluno) {
+    alert("Não foi possível localizar os dados desse aluno.");
+    return;
+  }
+
+  removerModalPerfilAluno();
+
+  const classeFrequencia = definirClasseFrequencia(aluno.frequencia);
+  const situacao = obterSituacaoFrequencia(aluno.frequencia);
+  const iniciais = obterIniciais(aluno.nome);
+  const frequenciaSegura = Math.max(0, Math.min(aluno.frequencia, 100));
+
+  const modal = document.createElement("div");
+  modal.className = "perfil-aluno-overlay";
+  modal.id = "perfilAlunoOverlay";
+
+  modal.innerHTML = `
+    <section class="perfil-aluno-modal" role="dialog" aria-modal="true" aria-labelledby="perfilAlunoTitulo">
+      <header class="perfil-aluno-header">
+        <div>
+          <span class="perfil-aluno-eyebrow">PERFIL DO ALUNO</span>
+          <h2 id="perfilAlunoTitulo">Informações acadêmicas</h2>
+          <p>Consulta dos dados disponíveis para o professor.</p>
+        </div>
+
+        <button class="perfil-aluno-fechar" id="btnFecharPerfilAluno" type="button" aria-label="Fechar perfil">
+          <i data-lucide="x"></i>
+        </button>
+      </header>
+
+      <div class="perfil-aluno-conteudo">
+        <section class="perfil-aluno-identidade">
+          <div class="perfil-aluno-avatar">${escapeHtml(iniciais)}</div>
+
+          <div class="perfil-aluno-nome">
+            <h3>${escapeHtml(aluno.nome)}</h3>
+            <p>RA: ${escapeHtml(aluno.matricula)} • ${escapeHtml(aluno.turma)}</p>
+          </div>
+
+          <span class="perfil-aluno-situacao ${classeFrequencia}">${escapeHtml(situacao)}</span>
+        </section>
+
+        <section class="perfil-aluno-indicadores">
+          ${montarIndicadorPerfil("Frequência", `${aluno.frequencia.toFixed(1)}%`, "calendar-check", classeFrequencia)}
+          ${montarIndicadorPerfil("Média acadêmica", aluno.mediaAcademica, "award", "regular")}
+          ${montarIndicadorPerfil(
+            "Biometria facial",
+            aluno.biometriaAtiva ? "Ativa" : "Não cadastrada",
+            "scan-face",
+            aluno.biometriaAtiva ? "regular" : "atencao"
+          )}
+        </section>
+
+        <section class="perfil-aluno-dados">
+          <div class="perfil-aluno-dado">
+            <span>E-mail</span>
+            <strong>${escapeHtml(aluno.email)}</strong>
+          </div>
+          <div class="perfil-aluno-dado">
+            <span>Matrícula</span>
+            <strong>${escapeHtml(aluno.matricula)}</strong>
+          </div>
+          <div class="perfil-aluno-dado">
+            <span>Turma</span>
+            <strong>${escapeHtml(aluno.turma)}</strong>
+          </div>
+          <div class="perfil-aluno-dado">
+            <span>Situação de frequência</span>
+            <strong>${escapeHtml(situacao)}</strong>
+          </div>
+        </section>
+
+        <section class="perfil-aluno-progresso ${classeFrequencia}">
+          <div class="perfil-aluno-progresso-topo">
+            <div>
+              <span>Frequência geral</span>
+              <strong>${aluno.frequencia.toFixed(1)}%</strong>
+            </div>
+            <p>${escapeHtml(obterOrientacaoFrequencia(aluno.frequencia))}</p>
+          </div>
+          <div class="perfil-aluno-barra" aria-label="Frequência de ${aluno.frequencia.toFixed(1)}%">
+            <div style="width: ${frequenciaSegura}%"></div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="perfil-aluno-footer">
+        <button class="perfil-aluno-btn secundario" id="btnCancelarPerfilAluno" type="button">Fechar</button>
+        <button class="perfil-aluno-btn primario" id="btnOcorrenciaPerfilAluno" type="button">
+          <i data-lucide="file-warning"></i>
+          Registrar ocorrência
+        </button>
+      </footer>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add("perfil-aluno-aberto");
+  atualizarIcones();
+
+  document.getElementById("btnFecharPerfilAluno")?.addEventListener("click", removerModalPerfilAluno);
+  document.getElementById("btnCancelarPerfilAluno")?.addEventListener("click", removerModalPerfilAluno);
+  document.getElementById("btnOcorrenciaPerfilAluno")?.addEventListener("click", () => {
+    removerModalPerfilAluno();
+    abrirOcorrenciaAluno(aluno.id, aluno.nome);
+  });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) removerModalPerfilAluno();
+  });
+
+  document.addEventListener("keydown", fecharPerfilAlunoComEscape);
+}
+
+function montarIndicadorPerfil(titulo, valor, icone, classe) {
+  return `
+    <article class="perfil-aluno-indicador ${classe}">
+      <div class="perfil-aluno-indicador-icone"><i data-lucide="${icone}"></i></div>
+      <div>
+        <span>${titulo}</span>
+        <strong>${escapeHtml(String(valor))}</strong>
+      </div>
+    </article>
+  `;
+}
+
+function abrirOcorrenciaAluno(alunoId, alunoNome) {
+  localStorage.setItem("ocorrenciaAlunoId", alunoId ?? "");
+  localStorage.setItem("ocorrenciaAlunoNome", alunoNome ?? "");
+  localStorage.setItem("abrirModalOcorrencia", "true");
+  document.querySelector('[data-page="ocorrencias"]')?.click();
+}
+
+function removerModalPerfilAluno() {
+  document.getElementById("perfilAlunoOverlay")?.remove();
+  document.body.classList.remove("perfil-aluno-aberto");
+  document.removeEventListener("keydown", fecharPerfilAlunoComEscape);
+}
+
+function fecharPerfilAlunoComEscape(event) {
+  if (event.key === "Escape") removerModalPerfilAluno();
+}
+
+function obterSituacaoFrequencia(frequencia) {
+  if (frequencia < 50) return "Risco alto";
+  if (frequencia < 75) return "Atenção necessária";
+  return "Frequência regular";
+}
+
+function obterOrientacaoFrequencia(frequencia) {
+  if (frequencia < 50) return "Acompanhamento prioritário recomendado.";
+  if (frequencia < 75) return "Aluno abaixo do mínimo de 75%.";
+  return "Aluno dentro do percentual esperado.";
+}
+
+function obterIniciais(nome) {
+  const partes = String(nome ?? "A")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (!partes.length) return "A";
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return `${partes[0][0]}${partes[partes.length - 1][0]}`.toUpperCase();
+}
+
+function escapeHtml(valor) {
+  return String(valor ?? "-")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function setTexto(id, valor) {

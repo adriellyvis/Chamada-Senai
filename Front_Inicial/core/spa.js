@@ -1,4 +1,4 @@
-export function marcarMenuAtivo(elemento) {
+export function marcarMenuAtivo(elemento = null) {
 
   document
     .querySelectorAll("nav a")
@@ -6,7 +6,9 @@ export function marcarMenuAtivo(elemento) {
       item.classList.remove("ativo");
     });
 
-  elemento.classList.add("ativo");
+  if (elemento) {
+    elemento.classList.add("ativo");
+  }
 }
 
 export function getConteudoPrincipal() {

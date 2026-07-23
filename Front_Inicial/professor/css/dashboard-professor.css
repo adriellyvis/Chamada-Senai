@@ -1,9 +1,11 @@
 .dashboard-final {
   width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding-top: 24px;
   padding-bottom: 24px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .dashboard-final,
@@ -19,35 +21,42 @@
 
 .stats-grid-home {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 22px;
   margin-bottom: 32px;
 }
 
 .stat-card-home {
-  height: 150px;
-  padding: 24px 28px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
+  min-height: 150px;
+  height: auto;
+  padding: 26px 30px;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon value";
+  column-gap: 18px;
+  align-items: start;
+}
+
+.stat-card-home .stat-row {
+  grid-area: value;
 }
 
 .stat-card-home h3 {
-  font-family: Arial, Helvetica, sans-serif;
+  grid-area: title;
+  max-width: none;
+  margin: 0 0 12px;
+  white-space: nowrap;
   font-size: 13px;
-  letter-spacing: 0.06em;
-  margin-bottom: 22px;
-  color: var(--muted);
-  max-width: 190px;
-  text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .stat-card-home .stat-number {
   display: block;
   font-family: Arial, sans-serif;
-  font-size: 48px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -56,9 +65,10 @@
 }
 
 .stat-number-wrap {
-  display: inline-flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .stat-number-wrap .stat-number {
@@ -94,12 +104,12 @@
 }
 
 .stat-card-home .stat-icon {
-  position: static;
+  grid-area: icon;
   width: 58px;
   height: 58px;
-  border-radius: 22px;
-  font-size: 26px;
+  flex-shrink: 0;
 }
+
 
 .stat-card-home.blue .stat-icon {
   background: var(--blue-soft);
@@ -116,6 +126,11 @@
   color: var(--purple);
 }
 
+.stat-card-home.green .stat-icon {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
 .stat-card-home {
   position: relative;
   overflow: hidden;
@@ -123,16 +138,16 @@
 
 
 .stat-card-home .stat-number {
-  margin-bottom: 0;
+  font-size: 34px;
+  line-height: 1;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .stat-card-home .stat-caption {
-  position: static;
-  transform: none;
-  margin: 0;
-  width: fit-content;
-  max-width: 100%;
-  line-height: 1;
+  font-size: 13px;
+  padding: 6px 10px;
+  white-space: nowrap;
 }
 
 .stat-card-home .stat-caption.muted {
@@ -399,7 +414,15 @@
 .activity-list-home {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
+  margin-top: 24px;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-right: 6px;
+  margin-bottom: 16px;
 }
 
 .atividade-linha-home {
@@ -489,15 +512,27 @@
   font-size: 18px;
   font-weight: 800;
   color: var(--text);
-  margin-bottom: 7px;
+  margin-bottom: 5px;
+}
+
+.atividade-identificacao {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .atividade-texto small {
   display: block;
   font-family: Arial, sans-serif;
-  font-size: 14px;
-  color: var(--muted);
-  font-style: italic;
+  font-size: 12px;
+  color: var(--muted-2);
+  font-style: normal;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -514,6 +549,9 @@
   margin-top: auto;
   width: 100%;
   height: 60px;
+  min-height: 60px;
+  flex-shrink: 0;
+
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
@@ -551,6 +589,10 @@
 ========================= */
 
 @media (max-width: 1280px) {
+  .stats-grid-home {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .dashboard-final {
     max-width: 1080px;
   }
@@ -643,5 +685,395 @@
   .atividade-avatar {
     width: 48px;
     height: 48px;
+  }
+}
+
+/* =========================================================
+   MODAL — RELATÓRIO COMPLETO DO PROFESSOR
+========================================================= */
+/* =====================================================
+   MODAL — RELATÓRIO COMPLETO DO PROFESSOR
+   Adicione este conteúdo ao final do CSS do dashboard.
+===================================================== */
+
+body.modal-aberto {
+  overflow: hidden;
+}
+
+.relatorio-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(7px);
+}
+
+.relatorio-modal {
+  width: min(1120px, 100%);
+  max-height: min(830px, calc(100vh - 56px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+  color: var(--text);
+}
+
+.relatorio-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 30px 34px 25px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.relatorio-modal-kicker {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+}
+
+.relatorio-modal-header h2 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.relatorio-modal-header p {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.relatorio-modal-fechar {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.relatorio-modal-fechar:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.relatorio-modal-body {
+  padding: 26px 34px 34px;
+  overflow-y: auto;
+}
+
+.relatorio-lista {
+  display: grid;
+  gap: 18px;
+}
+
+.relatorio-chamada-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background: var(--panel-2);
+}
+
+.relatorio-chamada-topo {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 19px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.relatorio-chamada-identificacao {
+  min-width: 0;
+}
+
+.relatorio-chamada-identificacao strong,
+.relatorio-chamada-identificacao span,
+.relatorio-chamada-identificacao small {
+  display: block;
+}
+
+.relatorio-chamada-identificacao strong {
+  margin-bottom: 5px;
+  font-size: 19px;
+  color: var(--text);
+}
+
+.relatorio-chamada-identificacao span {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.relatorio-chamada-identificacao small {
+  margin-top: 7px;
+  color: var(--muted-2);
+  font-size: 12px;
+}
+
+.relatorio-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.relatorio-status.encerrada {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.relatorio-status.em-andamento {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.relatorio-status.agendada {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.relatorio-status.cancelada {
+  background: #ffe8ef;
+  color: var(--pink);
+}
+
+.relatorio-metricas {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(105px, 1fr));
+  gap: 12px;
+  padding-top: 19px;
+}
+
+.relatorio-metrica {
+  min-height: 96px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-areas:
+    "icone rotulo"
+    "icone valor";
+  column-gap: 9px;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.relatorio-metrica svg {
+  grid-area: icone;
+  width: 23px;
+  height: 23px;
+  color: var(--blue);
+}
+
+.relatorio-metrica span {
+  grid-area: rotulo;
+  align-self: end;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.relatorio-metrica strong {
+  grid-area: valor;
+  align-self: start;
+  color: var(--text);
+  font-size: 23px;
+  line-height: 1;
+}
+
+.relatorio-vazio {
+  padding: 50px 20px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  background: var(--panel-2);
+}
+
+.relatorio-vazio strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.relatorio-vazio p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .relatorio-metricas {
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .relatorio-modal-overlay {
+    padding: 12px;
+  }
+
+  .relatorio-modal {
+    max-height: calc(100vh - 24px);
+    border-radius: 18px;
+  }
+
+  .relatorio-modal-header,
+  .relatorio-modal-body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .relatorio-chamada-topo {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .relatorio-chamada-topo .atividade-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .relatorio-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .relatorio-metricas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* Estados de carregamento e erro do relatório */
+.relatorio-carregando {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 42px 20px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  background: var(--panel-2);
+}
+
+.relatorio-carregando strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.relatorio-carregando p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.relatorio-spinner {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 6px;
+  border: 4px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: relatorio-girar 0.8s linear infinite;
+}
+
+.relatorio-erro-detalhes {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.relatorio-erro-detalhes small {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+@keyframes relatorio-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   AJUSTE DE ENQUADRAMENTO DO MODAL DE RELATÓRIO
+   Mantém o modal inteiro visível e a rolagem apenas no conteúdo.
+========================================================= */
+.relatorio-modal-overlay {
+  padding: clamp(18px, 3vh, 32px);
+  overflow-y: auto;
+}
+
+.relatorio-modal {
+  width: min(1080px, calc(100vw - 48px));
+  max-height: min(790px, calc(100vh - 48px));
+  max-height: min(790px, calc(100dvh - 48px));
+  min-height: 0;
+  margin: auto;
+}
+
+.relatorio-modal-body {
+  min-height: 0;
+  scrollbar-gutter: stable;
+}
+
+@media (max-height: 760px) {
+  .relatorio-modal-overlay {
+    padding: 14px;
+  }
+
+  .relatorio-modal {
+    max-height: calc(100vh - 28px);
+    max-height: calc(100dvh - 28px);
+  }
+
+  .relatorio-modal-header {
+    padding-top: 20px;
+    padding-bottom: 18px;
+  }
+
+  .relatorio-modal-body {
+    padding-top: 18px;
+    padding-bottom: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .relatorio-modal {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
   }
 }

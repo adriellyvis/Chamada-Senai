@@ -7,14 +7,14 @@ export async function abrirOcorrenciasProfessor() {
 
   conteudo.innerHTML = `
     <section class="page-shell">
-      ${montarTopo("GERENCIAMENTO DE OCORRÊNCIAS", "Aqui está o resumo das suas ocorrências.", "Procurar ocorrência...")}
+      ${montarTopo("GERENCIAMENTO DE OCORRÊNCIAS", "Aqui está o resumo das suas ocorrências.", "Buscar alunos e turmas...")}
 
-      <div class="content-area section-center">
+      <div class="content-area section-center ocorrencias-page-content">
         <div class="stats-grid">
-          ${cardStat("TOTAL REGISTRADO", "statOcTotal", "0", "Histórico de ocorrências", "▤", "blue")}
-          ${cardStat("PENDÊNCIAS", "statOcPendentes", "0", "Aguardando ação", "!", "orange")}
-          ${cardStat("CASOS RESOLVIDOS", "statOcResolvidas", "0", "de sucesso", "○", "green")}
-          ${cardStat("ELOGIOS / DESTAQUES", "statOcDestaques", "0", "Reconhecimentos", "♙", "purple")}
+          ${cardStat("TOTAL REGISTRADO", "statOcTotal", "0", "Histórico de ocorrências", "clipboard-list", "blue")}
+          ${cardStat("PENDÊNCIAS", "statOcPendentes", "0", "Aguardando ação", "clock-3", "orange")}
+          ${cardStat("CASOS RESOLVIDOS", "statOcResolvidas", "0", "de sucesso", "circle-check", "green")}
+          ${cardStat("ELOGIOS / DESTAQUES", "statOcDestaques", "0", "Reconhecimentos", "trophy", "purple")}
         </div>
 
         <div class="filters-row">
@@ -47,6 +47,7 @@ export async function abrirOcorrenciasProfessor() {
   document.getElementById("filtroGravidadeOcorrencia")?.addEventListener("change", aplicarFiltrosOcorrencias);
 
   await carregarOcorrenciasProfessor();
+  atualizarIcones();
 
   const deveAbrirModal = localStorage.getItem("abrirModalOcorrencia");
   if (deveAbrirModal === "true") {
@@ -64,10 +65,10 @@ function montarTopo(titulo, subtitulo, placeholder) {
       </div>
       <div class="topbar-actions">
         <button class="bell-btn" type="button">🔔</button>
-        <label class="search-pill">
-          <input type="text" placeholder="${placeholder}" />
-          <span>⌕</span>
-        </label>
+        <div class="search-pill busca-global-professor">
+          <input class="busca-global-professor-input" type="search" placeholder="Buscar alunos e turmas..." autocomplete="off" />
+          <span aria-hidden="true">⌕</span>
+        </div>
       </div>
     </header>
   `;
@@ -76,7 +77,9 @@ function montarTopo(titulo, subtitulo, placeholder) {
 function cardStat(titulo, id, valor, caption, icone, cor) {
   return `
     <article class="stat-card ${cor}">
-      <div class="stat-icon">${icone}</div>
+      <div class="stat-icon">
+        <i data-lucide="${icone}"></i>
+      </div>
       <h3>${titulo}</h3>
       <div class="stat-row">
         <strong class="stat-number" id="${id}">${valor}</strong>
@@ -153,6 +156,7 @@ function renderizarOcorrenciasProfessor(ocorrencias) {
   }).join("");
 
   configurarAcoesOcorrencias();
+  atualizarIcones();
 }
 
 function atualizarCardsOcorrencias(ocorrencias) {
@@ -483,6 +487,15 @@ function aplicarFiltrosOcorrencias() {
   });
 
   renderizarOcorrenciasProfessor(filtradas);
+
+  const lista = document.getElementById("listaOcorrenciasProfessor");
+  if (lista && !filtradas.length && (status || gravidade)) {
+    lista.innerHTML = `
+      <p class="empty-state">
+        Nenhuma ocorrência encontrada para os filtros informados.
+      </p>
+    `;
+  }
 }
 
 function configurarAcoesOcorrencias() {
@@ -603,4 +616,10 @@ function limitarTexto(texto, limite = 120) {
 
 function podeEditarOcorrencia(ocorrencia) {
   return String(ocorrencia.status ?? "").toUpperCase() === "PENDENTE";
+}
+
+function atualizarIcones() {
+  if (window.lucide?.createIcons) {
+    window.lucide.createIcons();
+  }
 }

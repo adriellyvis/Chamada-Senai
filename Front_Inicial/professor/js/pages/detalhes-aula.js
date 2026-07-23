@@ -1,3 +1,6 @@
+const API_HOST = window.location.hostname || "localhost";
+const API_URL = `http://${API_HOST}:8080`;
+
 const detalhesBody = document.getElementById("detalhesBody");
 const btnVoltar = document.getElementById("btnVoltar");
 
@@ -23,7 +26,7 @@ window.addEventListener("DOMContentLoaded", carregarDetalhes);
 
 async function carregarDetalhes() {
   try {
-    const response = await fetch(`http://localhost:8080/professor/aula/${aulaDetalheId}/detalhes`, {
+    const response = await fetch(`${API_URL}/professor/aula/${aulaDetalheId}/detalhes`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

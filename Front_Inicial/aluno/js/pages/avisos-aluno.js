@@ -1,4 +1,14 @@
+import {
+  obterAvisosComEstado,
+  marcarAvisoComoLido,
+  marcarTodosAvisosComoLidos
+} from "../data/avisos-aluno-data.js";
+
 export function abrirAvisosAluno(container) {
+  const avisos = obterAvisosComEstado();
+  const naoLidos = avisos.filter(aviso => !aviso.lido).length;
+  const importantes = avisos.filter(aviso => aviso.prioridade === "importante").length;
+
   container.innerHTML = `
     <div class="avisos-page">
       <section class="avisos-layout">
@@ -10,8 +20,8 @@ export function abrirAvisosAluno(container) {
               <p>Acompanhe mensagens da secretaria, coordenação e professores.</p>
             </div>
 
-            <button class="primary-btn" id="btnMarcarLidos">
-              Marcar todos como lidos
+            <button class="primary-btn" id="btnMarcarLidos" ${naoLidos === 0 ? "disabled" : ""}>
+              ${naoLidos === 0 ? "Todos estão lidos" : "Marcar todos como lidos"}
             </button>
           </div>
 
@@ -24,55 +34,7 @@ export function abrirAvisosAluno(container) {
           </div>
 
           <div class="avisos-list" id="avisosList">
-            ${avisoCard({
-              tipo: "secretaria",
-              tag: "Secretaria",
-              data: "27 ABR",
-              titulo: "Renovação de matrícula",
-              texto: "A renovação de matrícula estará disponível até sexta-feira. Procure a secretaria em caso de dúvidas.",
-              prioridade: "normal",
-              lido: false
-            })}
-
-            ${avisoCard({
-              tipo: "coordenacao",
-              tag: "Coordenação",
-              data: "25 ABR",
-              titulo: "Palestra de Inteligência Artificial",
-              texto: "Hoje às 19h haverá palestra no auditório principal sobre IA aplicada à educação e tecnologia.",
-              prioridade: "normal",
-              lido: false
-            })}
-
-            ${avisoCard({
-              tipo: "frequencia",
-              tag: "Frequência",
-              data: "24 ABR",
-              titulo: "Atenção à frequência",
-              texto: "Sua frequência está regular, mas acompanhe seus registros para evitar inconsistências nas chamadas.",
-              prioridade: "importante",
-              lido: false
-            })}
-
-            ${avisoCard({
-              tipo: "professor",
-              tag: "Professor",
-              data: "23 ABR",
-              titulo: "Entrega da atividade de PDM",
-              texto: "A atividade prática deverá ser entregue até sexta-feira às 23h59 pela plataforma indicada em aula.",
-              prioridade: "normal",
-              lido: true
-            })}
-
-            ${avisoCard({
-              tipo: "coordenacao",
-              tag: "Coordenação",
-              data: "22 ABR",
-              titulo: "Validação biométrica facial",
-              texto: "O módulo de chamada facial será usado para confirmar presenças durante chamadas abertas pelo professor.",
-              prioridade: "importante",
-              lido: true
-            })}
+            ${avisos.map(avisoCard).join("")}
           </div>
         </article>
 
@@ -83,17 +45,17 @@ export function abrirAvisosAluno(container) {
             <div class="avisos-resumo-list">
               <div>
                 <span>Não lidos</span>
-                <strong id="qtdNaoLidos">3</strong>
+                <strong id="qtdNaoLidos">${naoLidos}</strong>
               </div>
 
               <div>
                 <span>Importantes</span>
-                <strong>2</strong>
+                <strong>${importantes}</strong>
               </div>
 
               <div>
-                <span>Esta semana</span>
-                <strong>5</strong>
+                <span>Total</span>
+                <strong>${avisos.length}</strong>
               </div>
             </div>
           </article>
@@ -138,99 +100,124 @@ export function abrirAvisosAluno(container) {
     </div>
   `;
 
-  configurarAvisos();
+  configurarAvisos(container);
+  aplicarAvisoPendente();
 }
 
-function avisoCard({ tipo, tag, data, titulo, texto, prioridade, lido }) {
+function avisoCard(aviso) {
   return `
-    <article 
-      class="aviso-card ${lido ? "is-read" : ""} ${prioridade === "importante" ? "is-important" : ""}" 
-      data-tipo="${tipo}"
+    <article
+      class="aviso-card ${aviso.lido ? "is-read" : ""} ${aviso.prioridade === "importante" ? "is-important" : ""}"
+      data-aviso-id="${escaparHtml(aviso.id)}"
+      data-tipo="${escaparHtml(aviso.tipo)}"
+      tabindex="0"
     >
       <div class="aviso-marker"></div>
 
       <div class="aviso-content">
         <div class="aviso-top">
-          <span class="aviso-tag">${data} • ${tag}</span>
-          ${lido ? `<span class="aviso-read">Lido</span>` : `<span class="aviso-new">Novo</span>`}
+          <span class="aviso-tag">${escaparHtml(aviso.data)} • ${escaparHtml(aviso.tag)}</span>
+          ${aviso.lido ? `<span class="aviso-read">Lido</span>` : `<span class="aviso-new">Novo</span>`}
         </div>
 
-        <h3>${titulo}</h3>
-        <p>${texto}</p>
+        <h3>${escaparHtml(aviso.titulo)}</h3>
+        <p>${escaparHtml(aviso.texto)}</p>
       </div>
     </article>
   `;
 }
 
-function configurarAvisos() {
+function configurarAvisos(container) {
   configurarFiltrosAvisos();
-  configurarMarcarLidos();
+  configurarMarcarLidos(container);
   configurarAtalhoChamada();
+  configurarLeituraIndividual(container);
 }
 
 function configurarFiltrosAvisos() {
   const filtros = document.querySelectorAll(".aviso-filter");
   const cards = document.querySelectorAll(".aviso-card");
 
-  filtros.forEach((filtro) => {
+  filtros.forEach(filtro => {
     filtro.addEventListener("click", () => {
       const tipoSelecionado = filtro.dataset.filter;
 
-      filtros.forEach((item) => item.classList.remove("is-active"));
+      filtros.forEach(item => item.classList.remove("is-active"));
       filtro.classList.add("is-active");
 
-      cards.forEach((card) => {
+      cards.forEach(card => {
         const tipoCard = card.dataset.tipo;
-
-        if (tipoSelecionado === "todos" || tipoCard === tipoSelecionado) {
-          card.style.display = "grid";
-        } else {
-          card.style.display = "none";
-        }
+        card.style.display = tipoSelecionado === "todos" || tipoCard === tipoSelecionado
+          ? "grid"
+          : "none";
       });
     });
   });
 }
 
-function configurarMarcarLidos() {
+function configurarMarcarLidos(container) {
   const btn = document.getElementById("btnMarcarLidos");
-  const qtdNaoLidos = document.getElementById("qtdNaoLidos");
-
   if (!btn) return;
 
   btn.addEventListener("click", () => {
-    const cardsNaoLidos = document.querySelectorAll(".aviso-card:not(.is-read)");
+    marcarTodosAvisosComoLidos();
+    abrirAvisosAluno(container);
+  });
+}
 
-    cardsNaoLidos.forEach((card) => {
-      card.classList.add("is-read");
+function configurarLeituraIndividual(container) {
+  document.querySelectorAll(".aviso-card").forEach(card => {
+    const abrir = () => {
+      const id = card.dataset.avisoId;
+      if (!id || card.classList.contains("is-read")) return;
+      marcarAvisoComoLido(id);
+      abrirAvisosAluno(container);
+      sessionStorage.setItem("alunoAvisoBuscaPendente", id);
+      aplicarAvisoPendente();
+    };
 
-      const badgeNovo = card.querySelector(".aviso-new");
-
-      if (badgeNovo) {
-        badgeNovo.textContent = "Lido";
-        badgeNovo.className = "aviso-read";
+    card.addEventListener("click", abrir);
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        abrir();
       }
     });
-
-    if (qtdNaoLidos) {
-      qtdNaoLidos.textContent = "0";
-    }
-
-    btn.textContent = "Todos foram marcados";
-    btn.disabled = true;
   });
+}
+
+function aplicarAvisoPendente() {
+  const id = sessionStorage.getItem("alunoAvisoBuscaPendente");
+  if (!id) return;
+
+  sessionStorage.removeItem("alunoAvisoBuscaPendente");
+  const card = document.querySelector(`[data-aviso-id="${cssEscape(id)}"]`);
+  if (!card) return;
+
+  card.classList.add("aviso-busca-destaque");
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => card.classList.remove("aviso-busca-destaque"), 3500);
 }
 
 function configurarAtalhoChamada() {
   const btn = document.getElementById("btnIrChamadaAvisos");
-
   if (!btn) return;
 
   btn.addEventListener("click", () => {
-    const botaoChamada = document.querySelector('.sidebar__item[data-page="chamada"]');
-
-    if (botaoChamada) {
-      botaoChamada.click();
-    }
+    document.querySelector('.sidebar__item[data-page="chamada"]')?.click();
   });
+}
+
+function cssEscape(valor) {
+  if (window.CSS?.escape) return CSS.escape(String(valor));
+  return String(valor).replace(/["\\]/g, "\\$&");
+}
+
+function escaparHtml(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

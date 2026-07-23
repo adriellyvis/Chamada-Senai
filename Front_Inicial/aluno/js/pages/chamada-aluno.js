@@ -7,6 +7,7 @@ import {
 
 import {
   cadastrarFacePython,
+  consultarFacePython,
   verificarFacePython,
   verificarServidorBiometria
 } from "../../../biometria/biometria-api.js";
@@ -22,17 +23,17 @@ import {
 export function abrirChamadaAluno(container) {
   container.innerHTML = `
     <div class="chamada-page">
-      <section class="chamada-layout">
+      <section class="chamada-layout chamada-layout--compacta">
         <article class="card chamada-camera-card">
           <div class="chamada-header">
             <div>
-              <span class="page-tag">CHAMADA ABERTA</span>
+              <span class="page-tag">CHAMADA FACIAL</span>
               <h2>Validação Biométrica Facial</h2>
               <p>Posicione seu rosto no centro da câmera para confirmar sua presença.</p>
             </div>
 
-            <span class="chamada-status chamada-status--open" id="statusChamada">
-              Aguardando aluno
+            <span class="chamada-status chamada-status--loading" id="statusChamada">
+              Verificando chamada
             </span>
           </div>
 
@@ -87,11 +88,11 @@ export function abrirChamadaAluno(container) {
           </div>
 
           <div class="chamada-actions">
-            <button class="primary-btn" id="btnIniciarBiometria">
+            <button class="primary-btn" id="btnIniciarBiometria" disabled>
               Iniciar reconhecimento
             </button>
 
-            <button class="outline-btn" id="btnCadastrarFace">
+            <button class="outline-btn" id="btnCadastrarFace" disabled>
               Cadastrar meu rosto
             </button>
 
@@ -99,17 +100,17 @@ export function abrirChamadaAluno(container) {
               Confirmar presença
             </button>
 
-            <button class="outline-btn" id="btnPararBiometria">
+            <button class="outline-btn" id="btnPararBiometria" disabled>
               Parar câmera
             </button>
           </div>
 
           <div class="biometria-feedback" id="biometriaFeedback">
-            Aguardando início da leitura facial.
+            Verificando servidor de biometria.
           </div>
         </article>
 
-        <aside class="chamada-side">
+        <aside class="chamada-side chamada-side--simples">
           <article class="card aula-card">
             <h3>Chamada em andamento</h3>
 
@@ -122,7 +123,7 @@ export function abrirChamadaAluno(container) {
             <div class="aula-info-list">
               <div>
                 <span>Horário</span>
-                <strong>10h00 - 14h00</strong>
+                <strong>Carregando...</strong>
               </div>
 
               <div>
@@ -137,42 +138,8 @@ export function abrirChamadaAluno(container) {
 
               <div>
                 <span>Status</span>
-                <strong class="status-open-text">Aberta</strong>
+                <strong class="status-open-text">Verificando</strong>
               </div>
-            </div>
-          </article>
-
-          <article class="card fluxo-card">
-            <h3>Fluxo da presença</h3>
-
-            <div class="fluxo-list">
-              <div class="fluxo-item is-done">
-                <span>1</span>
-                <p>Professor abriu a chamada</p>
-              </div>
-
-              <div class="fluxo-item is-active" id="fluxoAluno">
-                <span>2</span>
-                <p>Aluno faz validação facial</p>
-              </div>
-
-              <div class="fluxo-item" id="fluxoSistema">
-                <span>3</span>
-                <p>Sistema reconhece o rosto</p>
-              </div>
-
-              <div class="fluxo-item" id="fluxoProfessor">
-                <span>4</span>
-                <p>Professor recebe confirmação</p>
-              </div>
-            </div>
-          </article>
-
-          <article class="card retorno-card">
-            <h3>Retorno para o professor</h3>
-
-            <div class="retorno-box" id="retornoProfessor">
-              Nenhuma confirmação enviada ainda.
             </div>
           </article>
         </aside>
@@ -191,8 +158,6 @@ function configurarBiometriaReal() {
 
   const feedback = document.getElementById("biometriaFeedback");
   const statusChamada = document.getElementById("statusChamada");
-  const retornoProfessor = document.getElementById("retornoProfessor");
-
   const cameraMensagem = document.getElementById("cameraMensagem");
   const cameraSubmensagem = document.getElementById("cameraSubmensagem");
   const cameraPreviewArea = document.getElementById("cameraPreviewArea");
@@ -201,216 +166,223 @@ function configurarBiometriaReal() {
   const videoBiometria = document.getElementById("videoBiometria");
   const canvasBiometria = document.getElementById("canvasBiometria");
 
-  const fluxoAluno = document.getElementById("fluxoAluno");
-  const fluxoSistema = document.getElementById("fluxoSistema");
-  const fluxoProfessor = document.getElementById("fluxoProfessor");
-
   let chamadaAberta = null;
   let rostoValidado = false;
+  let presencaConfirmada = false;
+  let faceCadastrada = false;
+  let chamadaAtiva = false;
+  let servidorAtivo = false;
+  let monitorChamada = null;
 
-  if (!btnIniciar || !btnCadastrarFace || !btnConfirmar || !btnParar || !feedback || !videoBiometria || !canvasBiometria ) {
+  if (!btnIniciar || !btnCadastrarFace || !btnConfirmar || !btnParar || !feedback || !videoBiometria || !canvasBiometria) {
     console.error("Elementos da biometria não encontrados.");
     return;
   }
-  
-  
-  async function carregarChamadaAberta() {
-        try {
-          const usuario = obterUsuarioLogado();
 
-          if (!usuario?.id) {
-            throw new Error("Usuário logado não encontrado.");
-          }
+  function atualizarFeedback(mensagem, tipo = "") {
+    feedback.textContent = mensagem;
+    feedback.className = `biometria-feedback${tipo ? ` biometria-feedback--${tipo}` : ""}`;
+  }
 
-          chamadaAberta = await buscarChamadaAbertaAluno(usuario.id);
+  function atualizarStatus(texto, tipo = "open") {
+    statusChamada.textContent = texto;
+    statusChamada.className = `chamada-status chamada-status--${tipo}`;
+  }
 
-          document.querySelector(".aula-resumo-mobile strong").textContent =
-            chamadaAberta.disciplina;
+  function atualizarAulaCard() {
+    const mobileTitulo = document.querySelector(".aula-resumo-mobile strong");
+    const mobileSubtitulo = document.querySelector(".aula-resumo-mobile span");
+    const destaqueTitulo = document.querySelector(".aula-destaque strong");
+    const destaqueProfessor = document.querySelector(".aula-destaque p");
+    const aulaInfo = document.querySelectorAll(".aula-info-list div strong");
 
-          document.querySelector(".aula-resumo-mobile span").textContent =
-            `${chamadaAberta.professor} • ${chamadaAberta.horaInicio} - ${chamadaAberta.horaFim}`;
-
-          document.querySelector(".aula-destaque strong").textContent =
-            chamadaAberta.disciplina;
-
-          document.querySelector(".aula-destaque p").textContent =
-            chamadaAberta.professor;
-
-          const aulaInfo = document.querySelectorAll(".aula-info-list div strong");
-
-          if (aulaInfo[0]) {
-            aulaInfo[0].textContent = `${chamadaAberta.horaInicio} - ${chamadaAberta.horaFim}`;
-          }
-
-          if (aulaInfo[1]) {
-            aulaInfo[1].textContent = chamadaAberta.turma;
-          }
-
-          if (aulaInfo[3]) {
-            aulaInfo[3].textContent = "Aberta";
-          }
-
-          statusChamada.textContent = "Chamada aberta";
-          statusChamada.className = "chamada-status chamada-status--open";
-
-          feedback.textContent = "Chamada aberta encontrada. Aguardando biometria.";
-          feedback.className = "biometria-feedback biometria-feedback--success";
-
-          btnIniciar.disabled = false;
-          btnCadastrarFace.disabled = false;
-          btnConfirmar.disabled = true;
-          btnParar.disabled = false;
-
-        } catch (erro) {
-          console.error("Erro ao buscar chamada aberta:", erro);
-
-          chamadaAberta = null;
-
-          feedback.textContent = erro.message || "Nenhuma chamada aberta encontrada.";
-          feedback.className = "biometria-feedback biometria-feedback--error";
-
-          statusChamada.textContent = "Sem chamada aberta";
-          statusChamada.className = "chamada-status chamada-status--error";
-
-          btnIniciar.disabled = true;
-          btnCadastrarFace.disabled = true;
-          btnConfirmar.disabled = true;
-          btnParar.disabled = true;
-        }
-      }
-
-  verificarServidorBiometria().then(resultado => {
-    if (!resultado.sucesso) {
-      feedback.textContent = "Servidor de biometria offline. Inicie o Python antes de usar.";
-      feedback.className = "biometria-feedback biometria-feedback--error";
-
-      btnIniciar.disabled = true;
-      btnCadastrarFace.disabled = true;
-      btnConfirmar.disabled = true;
-
-      btnIniciar.disabled = true;
-      btnCadastrarFace.disabled = true;
-      btnParar.disabled = true;
-
+    if (!chamadaAberta) {
+      if (mobileTitulo) mobileTitulo.textContent = "Nenhuma chamada aberta";
+      if (mobileSubtitulo) mobileSubtitulo.textContent = "Aguarde o professor iniciar uma chamada.";
+      if (destaqueTitulo) destaqueTitulo.textContent = "Sem chamada aberta";
+      if (destaqueProfessor) destaqueProfessor.textContent = "Aguardando professor";
+      if (aulaInfo[0]) aulaInfo[0].textContent = "--";
+      if (aulaInfo[1]) aulaInfo[1].textContent = "--";
+      if (aulaInfo[3]) aulaInfo[3].textContent = "Fechada";
       return;
     }
 
-    feedback.textContent = "Servidor de biometria ativo. Buscando chamada aberta...";
+    if (mobileTitulo) mobileTitulo.textContent = chamadaAberta.disciplina;
+    if (mobileSubtitulo) {
+      mobileSubtitulo.textContent = `${chamadaAberta.professor} • ${formatarHorarioAula(chamadaAberta.horaInicio, chamadaAberta.horaFim)}`;
+    }
 
-  btnIniciar.disabled = true;
-  btnCadastrarFace.disabled = true;
-  btnConfirmar.disabled = true;
-  btnParar.disabled = true;
-  });
+    if (destaqueTitulo) destaqueTitulo.textContent = chamadaAberta.disciplina;
+    if (destaqueProfessor) destaqueProfessor.textContent = chamadaAberta.professor;
+    if (aulaInfo[0]) aulaInfo[0].textContent = formatarHorarioAula(chamadaAberta.horaInicio, chamadaAberta.horaFim);
+    if (aulaInfo[1]) aulaInfo[1].textContent = chamadaAberta.turma;
+    if (aulaInfo[3]) aulaInfo[3].textContent = chamadaAtiva ? "Aberta" : "Encerrada";
+  }
 
-  btnCadastrarFace.addEventListener("click", async () => {
-  try {
+  function atualizarBotoes() {
+    const podeUsar = servidorAtivo && chamadaAtiva && !!chamadaAberta && !presencaConfirmada;
+
+    btnCadastrarFace.hidden = faceCadastrada;
+    btnCadastrarFace.disabled = !podeUsar || faceCadastrada;
+
+    btnIniciar.disabled = !podeUsar || !faceCadastrada;
+    btnConfirmar.disabled = !podeUsar || !rostoValidado;
+    btnParar.disabled = !podeUsar || !cameraEstaAtiva();
+
+    if (presencaConfirmada) {
+      btnIniciar.textContent = "Reconhecimento finalizado";
+      btnConfirmar.textContent = "Presença já confirmada";
+      btnParar.textContent = "Câmera encerrada";
+    } else {
+      btnIniciar.textContent = !faceCadastrada
+        ? "Aguardando cadastro facial"
+        : rostoValidado
+          ? "Reconhecimento concluído"
+          : "Iniciar reconhecimento";
+
+      btnConfirmar.textContent = "Confirmar presença";
+      btnParar.textContent = cameraEstaAtiva() ? "Parar câmera" : "Câmera fechada";
+    }
+  }
+
+  function bloquearChamadaEncerrada(mensagem = "Chamada encerrada. Não é possível registrar presença.") {
+    chamadaAtiva = false;
+    pararCameraBiometria(videoBiometria);
+
+    chamadaAberta = null;
+    rostoValidado = false;
+
+    cameraPreviewArea.classList.remove("is-scanning", "is-approved");
+    if (facePlaceholder) facePlaceholder.style.display = "";
+
+    cameraMensagem.textContent = "Chamada encerrada";
+    cameraSubmensagem.textContent = "A presença não pode mais ser confirmada nesta aula.";
+
+    atualizarStatus("Chamada encerrada", "error");
+    atualizarFeedback(mensagem, "error");
+    atualizarAulaCard();
+    atualizarBotoes();
+  }
+
+  async function garantirChamadaAindaAberta() {
     const usuario = obterUsuarioLogado();
 
     if (!usuario?.id) {
       throw new Error("Usuário logado não encontrado.");
     }
 
-    feedback.textContent = "Abrindo câmera para cadastro facial...";
-    feedback.className = "biometria-feedback biometria-feedback--loading";
-
-    if (!cameraEstaAtiva()) {
-      await iniciarCameraBiometria(videoBiometria);
-    }
-
-    if (facePlaceholder) {
-      facePlaceholder.style.display = "none";
-    }
-
-    cameraMensagem.textContent = "Cadastro facial em andamento";
-    cameraSubmensagem.textContent = "Olhe para a câmera e mantenha boa iluminação";
-    cameraPreviewArea.classList.add("is-scanning");
-
-    await aguardar(1200);
-    if (!chamadaAberta?.alunoId) {
-      throw new Error("Nenhuma chamada aberta carregada.");
-    }
-
-    const imagemBase64 = capturarImagemBiometria(
-      videoBiometria,
-      canvasBiometria
-    );
-
-    const resultado = await cadastrarFacePython({
-      alunoId: chamadaAberta.alunoId,
-      alunoNome: usuario.nome || "Aluno",
-      imagemBase64
-    });
-
-    console.log("Cadastro facial:", resultado);
-
-    feedback.textContent = "Rosto cadastrado com sucesso.";
-    feedback.className = "biometria-feedback biometria-feedback--success";
-
-    cameraMensagem.textContent = "Cadastro facial concluído";
-    cameraSubmensagem.textContent = "Agora você pode validar sua presença.";
-
-    cameraPreviewArea.classList.remove("is-scanning");
-    cameraPreviewArea.classList.add("is-approved");
-
-  } catch (erro) {
-    console.error("Erro ao cadastrar rosto:", erro);
-
-    feedback.textContent = erro.message || "Erro ao cadastrar rosto.";
-    feedback.className = "biometria-feedback biometria-feedback--error";
-
-    cameraMensagem.textContent = "Cadastro facial não concluído";
-    cameraSubmensagem.textContent = "Verifique a câmera e tente novamente.";
-
-    cameraPreviewArea.classList.remove("is-scanning");
-  }
-});
-
-  btnIniciar.addEventListener("click", async () => {
     try {
-      rostoValidado = false;
+      const chamadaAtualizada = await buscarChamadaAbertaAluno(usuario.id);
+      chamadaAberta = chamadaAtualizada;
+      chamadaAtiva = true;
+      atualizarAulaCard();
+      return chamadaAtualizada;
+    } catch (erro) {
+      bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
+      throw new Error("Não é possível registrar presença em aula encerrada.");
+    }
+  }
 
-      btnIniciar.disabled = true;
-      btnConfirmar.disabled = true;
+  async function atualizarStatusFace(usuario) {
+    faceCadastrada = false;
 
-      feedback.textContent = "Iniciando câmera...";
-      feedback.className = "biometria-feedback biometria-feedback--loading";
+    if (!chamadaAberta?.alunoId) {
+      atualizarBotoes();
+      return;
+    }
 
-      statusChamada.textContent = "Abrindo câmera";
-      statusChamada.className = "chamada-status chamada-status--loading";
+    try {
+      const resultado = await consultarFacePython({
+        alunoId: chamadaAberta.alunoId,
+        usuarioId: usuario.id,
+        pessoaId: chamadaAberta.alunoId,
+        perfil: "aluno"
+      });
 
-      cameraMensagem.textContent = "Abrindo câmera...";
-      cameraSubmensagem.textContent = "Permita o acesso à webcam no navegador";
-  
-      if (!chamadaAberta?.alunoId) {
-        throw new Error("Nenhuma chamada aberta carregada.");
+      faceCadastrada = Boolean(resultado?.cadastrada);
+
+      if (faceCadastrada) {
+        atualizarFeedback("Chamada aberta. Rosto cadastrado encontrado. Você já pode iniciar o reconhecimento.", "success");
+        cameraMensagem.textContent = "Pronto para reconhecimento";
+        cameraSubmensagem.textContent = "Clique em iniciar reconhecimento facial para validar sua presença.";
+      } else {
+        atualizarFeedback("Chamada aberta. Cadastre seu rosto para liberar o reconhecimento facial.", "loading");
+        cameraMensagem.textContent = "Cadastro facial necessário";
+        cameraSubmensagem.textContent = "Cadastre seu rosto uma vez para confirmar presença por biometria.";
+      }
+    } catch (erro) {
+      console.warn("Não foi possível consultar face cadastrada:", erro);
+      faceCadastrada = false;
+      atualizarFeedback("Não foi possível verificar seu cadastro facial. Tente cadastrar o rosto novamente.", "error");
+    }
+
+    atualizarBotoes();
+  }
+
+  async function carregarChamadaAberta(silencioso = false) {
+    try {
+      const usuario = obterUsuarioLogado();
+
+      if (!usuario?.id) {
+        throw new Error("Usuário logado não encontrado.");
       }
 
-      await iniciarCameraBiometria(videoBiometria);
+      chamadaAberta = await buscarChamadaAbertaAluno(usuario.id);
+      chamadaAtiva = true;
 
-      if (facePlaceholder) {
-        facePlaceholder.style.display = "none";
+      atualizarAulaCard();
+      atualizarStatus("Chamada aberta", "open");
+
+      if (!silencioso) {
+        atualizarFeedback("Chamada aberta encontrada. Verificando cadastro facial.", "loading");
       }
 
-      feedback.textContent = "Câmera iniciada. Posicione seu rosto no centro.";
-      cameraMensagem.textContent = "Rosto em análise";
-      cameraSubmensagem.textContent = "Mantenha o rosto centralizado e com boa iluminação";
+      await atualizarStatusFace(usuario);
+    } catch (erro) {
+      console.error("Erro ao buscar chamada aberta:", erro);
 
-      cameraPreviewArea.classList.add("is-scanning");
+      if (chamadaAtiva || chamadaAberta) {
+        bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
+        return;
+      }
 
-      statusChamada.textContent = "Validando rosto";
-      statusChamada.className = "chamada-status chamada-status--loading";
+      chamadaAberta = null;
+      chamadaAtiva = false;
+      atualizarAulaCard();
+      atualizarStatus("Sem chamada aberta", "error");
+      atualizarFeedback(erro.message || "Nenhuma chamada aberta encontrada.", "error");
+      atualizarBotoes();
+    }
+  }
 
-      fluxoAluno.classList.remove("is-active");
-      fluxoAluno.classList.add("is-done");
+  function iniciarMonitoramento() {
+    if (monitorChamada) clearInterval(monitorChamada);
 
-      fluxoSistema.classList.add("is-active");
+    monitorChamada = setInterval(() => {
+      if (!presencaConfirmada && chamadaAtiva) {
+        carregarChamadaAberta(true);
+      }
+    }, 5000);
+  }
 
-      await aguardar(1200);
+  verificarServidorBiometria().then(resultado => {
+    servidorAtivo = Boolean(resultado?.sucesso);
 
-      const imagemBase64 = capturarImagemBiometria(videoBiometria, canvasBiometria);
+    if (!servidorAtivo) {
+      atualizarFeedback("Servidor de biometria offline. Inicie o Python antes de usar.", "error");
+      atualizarStatus("Biometria offline", "error");
+      atualizarBotoes();
+      return;
+    }
 
-      feedback.textContent = "Enviando imagem para reconhecimento facial...";
+    atualizarFeedback("Servidor de biometria ativo. Buscando chamada aberta...", "loading");
+    carregarChamadaAberta();
+    iniciarMonitoramento();
+  });
+
+  btnCadastrarFace.addEventListener("click", async () => {
+    try {
+      await garantirChamadaAindaAberta();
 
       const usuario = obterUsuarioLogado();
 
@@ -418,8 +390,104 @@ function configurarBiometriaReal() {
         throw new Error("Usuário logado não encontrado.");
       }
 
+      atualizarFeedback("Abrindo câmera para cadastro facial...", "loading");
+
+      if (!cameraEstaAtiva()) {
+        await iniciarCameraBiometria(videoBiometria);
+      }
+
+      atualizarBotoes();
+
+      if (facePlaceholder) facePlaceholder.style.display = "none";
+
+      cameraMensagem.textContent = "Cadastro facial em andamento";
+      cameraSubmensagem.textContent = "Olhe para a câmera e mantenha boa iluminação";
+      cameraPreviewArea.classList.add("is-scanning");
+
+      await aguardar(1200);
+
+      const imagemBase64 = capturarImagemBiometria(videoBiometria, canvasBiometria);
+
+      const resultado = await cadastrarFacePython({
+        alunoId: chamadaAberta.alunoId,
+        usuarioId: usuario.id,
+        pessoaId: chamadaAberta.alunoId,
+        perfil: "aluno",
+        alunoNome: usuario.nome || "Aluno",
+        imagemBase64
+      });
+
+      console.log("Cadastro facial:", resultado);
+
+      faceCadastrada = true;
+      rostoValidado = false;
+
+      atualizarFeedback("Rosto cadastrado com sucesso. Agora inicie o reconhecimento facial.", "success");
+      cameraMensagem.textContent = "Cadastro facial concluído";
+      cameraSubmensagem.textContent = "Agora você pode validar sua presença.";
+
+      cameraPreviewArea.classList.remove("is-scanning");
+      cameraPreviewArea.classList.add("is-approved");
+      atualizarBotoes();
+    } catch (erro) {
+      console.error("Erro ao cadastrar rosto:", erro);
+      atualizarFeedback(erro.message || "Erro ao cadastrar rosto.", "error");
+      cameraMensagem.textContent = "Cadastro facial não concluído";
+      cameraSubmensagem.textContent = "Verifique a câmera e tente novamente.";
+      cameraPreviewArea.classList.remove("is-scanning");
+      atualizarBotoes();
+    }
+  });
+
+  btnIniciar.addEventListener("click", async () => {
+    try {
+      if (presencaConfirmada) {
+        atualizarFeedback("Sua presença já foi confirmada nesta chamada.", "success");
+        atualizarBotoes();
+        return;
+      }
+
+      await garantirChamadaAindaAberta();
+
+      if (!faceCadastrada) {
+        atualizarFeedback("Cadastre seu rosto antes de iniciar o reconhecimento facial.", "error");
+        atualizarBotoes();
+        return;
+      }
+
+      rostoValidado = false;
+      atualizarBotoes();
+
+      atualizarFeedback("Iniciando câmera...", "loading");
+      atualizarStatus("Abrindo câmera", "loading");
+      cameraMensagem.textContent = "Abrindo câmera...";
+      cameraSubmensagem.textContent = "Permita o acesso à webcam no navegador";
+
+      await iniciarCameraBiometria(videoBiometria);
+      atualizarBotoes();
+
+      if (facePlaceholder) facePlaceholder.style.display = "none";
+
+      atualizarFeedback("Câmera iniciada. Posicione seu rosto no centro.", "loading");
+      cameraMensagem.textContent = "Rosto em análise";
+      cameraSubmensagem.textContent = "Mantenha o rosto centralizado e com boa iluminação";
+      cameraPreviewArea.classList.add("is-scanning");
+      cameraPreviewArea.classList.remove("is-approved");
+      atualizarStatus("Validando rosto", "loading");
+
+      await aguardar(1200);
+      await garantirChamadaAindaAberta();
+
+      const imagemBase64 = capturarImagemBiometria(videoBiometria, canvasBiometria);
+      atualizarFeedback("Enviando imagem para reconhecimento facial...", "loading");
+
+      const usuario = obterUsuarioLogado();
+
       const resultado = await verificarFacePython({
         alunoId: chamadaAberta.alunoId,
+        usuarioId: usuario.id,
+        pessoaId: chamadaAberta.alunoId,
+        perfil: "aluno",
         imagemBase64
       });
 
@@ -427,203 +495,135 @@ function configurarBiometriaReal() {
 
       if (!resultado.reconhecido) {
         rostoValidado = false;
-
-        feedback.textContent = resultado.mensagem || `Rosto não corresponde ao aluno cadastrado. Confiança: ${resultado.confianca}`;
-        feedback.className = "biometria-feedback biometria-feedback--error";
-
-        statusChamada.textContent = "Aluno não reconhecido";
-        statusChamada.className = "chamada-status chamada-status--error";
-
+        atualizarFeedback(resultado.mensagem || `Rosto não corresponde ao aluno cadastrado. Confiança: ${resultado.confianca}`, "error");
+        atualizarStatus("Aluno não reconhecido", "error");
         cameraMensagem.textContent = "Aluno não reconhecido";
-        cameraSubmensagem.textContent = "Cadastre o rosto novamente ou tente com melhor iluminação";
-
-        cameraPreviewArea.classList.remove("is-scanning");
-        cameraPreviewArea.classList.remove("is-approved");
-
-        fluxoSistema.classList.remove("is-active");
-
-        btnIniciar.disabled = false;
+        cameraSubmensagem.textContent = "Tente novamente com melhor iluminação.";
+        cameraPreviewArea.classList.remove("is-scanning", "is-approved");
         btnIniciar.textContent = "Tentar novamente";
-
+        atualizarBotoes();
         return;
       }
 
       rostoValidado = true;
-
-      feedback.textContent = `Aluno reconhecido com sucesso. Confiança: ${resultado.confianca}`;
-      feedback.className = "biometria-feedback biometria-feedback--success";
-
-      statusChamada.textContent = "Aluno reconhecido";
-      statusChamada.className = "chamada-status chamada-status--success";
-
+      atualizarFeedback(`Aluno reconhecido com sucesso. Confiança: ${resultado.confianca}`, "success");
+      atualizarStatus("Aluno reconhecido", "success");
       cameraMensagem.textContent = "Aluno reconhecido com sucesso";
       cameraSubmensagem.textContent = "Validação pronta para confirmação";
-
       cameraPreviewArea.classList.remove("is-scanning");
       cameraPreviewArea.classList.add("is-approved");
-      btnCadastrarFace.disabled = false;
-      btnIniciar.disabled = false;
-
-      fluxoSistema.classList.remove("is-active");
-      fluxoSistema.classList.add("is-done");
-
-      btnConfirmar.disabled = false;
       btnIniciar.textContent = "Reconhecimento concluído";
-
+      atualizarBotoes();
     } catch (erro) {
       console.error("Erro na biometria:", erro);
-
       rostoValidado = false;
-
-      feedback.textContent = erro.message || "Erro ao validar biometria.";
-      feedback.className = "biometria-feedback biometria-feedback--error";
-
-      statusChamada.textContent = "Erro na validação";
-      statusChamada.className = "chamada-status chamada-status--error";
-
+      atualizarFeedback(erro.message || "Erro ao validar biometria.", "error");
+      atualizarStatus("Erro na validação", "error");
       cameraMensagem.textContent = "Erro ao validar rosto";
-      cameraSubmensagem.textContent = "Verifique se o servidor Python está rodando";
-
+      cameraSubmensagem.textContent = "Verifique se a chamada está aberta e se o servidor Python está rodando.";
       cameraPreviewArea.classList.remove("is-scanning");
-
-      fluxoSistema.classList.remove("is-active");
-
-      btnIniciar.disabled = false;
-      btnIniciar.textContent = "Tentar novamente";
-      btnCadastrarFace.disabled = false;
+      atualizarBotoes();
     }
   });
 
   btnConfirmar.addEventListener("click", async () => {
-  try {
-    if (!rostoValidado) {
-      feedback.textContent = "Valide seu rosto antes de confirmar presença.";
-      feedback.className = "biometria-feedback biometria-feedback--error";
+    try {
+      if (presencaConfirmada) {
+        atualizarFeedback("Sua presença já foi confirmada nesta chamada.", "success");
+        atualizarBotoes();
+        return;
+      }
+
+      if (!rostoValidado) {
+        atualizarFeedback("Valide seu rosto antes de confirmar presença.", "error");
+        atualizarBotoes();
+        return;
+      }
+
+      await garantirChamadaAindaAberta();
+
+      if (!chamadaAberta?.alunoId || !chamadaAberta?.aulaId) {
+        throw new Error("Nenhuma chamada aberta carregada.");
+      }
+
+      btnConfirmar.disabled = true;
+      atualizarFeedback("Registrando presença biométrica no banco...", "loading");
+
+      const presenca = await registrarPresencaBiometrica({
+        alunoId: chamadaAberta.alunoId,
+        aulaId: chamadaAberta.aulaId
+      });
+
+      presencaConfirmada = true;
+      rostoValidado = true;
+
+      atualizarFeedback("Presença biométrica registrada no banco.", "success");
+      atualizarStatus("Presença confirmada", "confirmed");
+
+      btnIniciar.textContent = "Reconhecimento finalizado";
+      btnConfirmar.textContent = "Presença já confirmada";
+      btnParar.textContent = "Câmera encerrada";
+
+      pararCameraBiometria(videoBiometria);
+      cameraPreviewArea.classList.remove("is-scanning");
+      cameraPreviewArea.classList.add("is-approved");
+      cameraMensagem.textContent = "Presença confirmada";
+      cameraSubmensagem.textContent = "Registro enviado para o professor.";
+
+      if (monitorChamada) clearInterval(monitorChamada);
+
+      console.log("Presença registrada no banco:", presenca);
+      atualizarBotoes();
+    } catch (erro) {
+      console.error("Erro ao confirmar presença biométrica:", erro);
+      atualizarFeedback(erro.message || "Erro ao registrar presença no banco.", "error");
+      atualizarBotoes();
+    }
+  });
+
+  btnParar.addEventListener("click", () => {
+    if (presencaConfirmada) {
+      atualizarFeedback("Presença já confirmada. Não é necessário reabrir a câmera.", "success");
+      atualizarBotoes();
       return;
     }
 
-    const usuario = obterUsuarioLogado();
-
-    if (!usuario?.id) {
-      throw new Error("Usuário logado não encontrado.");
-    }
-
-    if (!chamadaAberta?.alunoId || !chamadaAberta?.aulaId) {
-      throw new Error("Nenhuma chamada aberta carregada.");
-    }
-
-    btnConfirmar.disabled = true;
-    feedback.textContent = "Registrando presença biométrica no banco...";
-    feedback.className = "biometria-feedback biometria-feedback--loading";
-
-    const presenca = await registrarPresencaBiometrica({
-      alunoId: chamadaAberta.alunoId,
-      aulaId: chamadaAberta.aulaId
-    });
-
-    const registro = criarRegistroBiometricoTemporario(chamadaAberta);
-
-    feedback.textContent = "Presença biométrica registrada no banco.";
-    feedback.className = "biometria-feedback biometria-feedback--success";
-
-    statusChamada.textContent = "Presença confirmada";
-    statusChamada.className = "chamada-status chamada-status--confirmed";
-
-    retornoProfessor.innerHTML = `
-      <strong>${registro.alunoNome}</strong> confirmou presença por 
-      <b>biometria facial</b> às <b>${registro.horario}</b>
-      na disciplina <b>${registro.disciplina}</b>.
-    `;
-
-    fluxoSistema.classList.remove("is-active");
-    fluxoSistema.classList.add("is-done");
-
-    fluxoProfessor.classList.remove("is-active");
-    fluxoProfessor.classList.add("is-done");
-
-    btnConfirmar.textContent = "Presença confirmada";
-    btnIniciar.disabled = true;
-    btnCadastrarFace.disabled = true;
-    btnConfirmar.disabled = true;
-    btnParar.disabled = true;
-
-    pararCameraBiometria(videoBiometria);
-
-    console.log("Presença registrada no banco:", presenca);
-
-  } catch (erro) {
-    console.error("Erro ao confirmar presença biométrica:", erro);
-
-    btnConfirmar.disabled = false;
-    feedback.textContent = erro.message || "Erro ao registrar presença no banco.";
-    feedback.className = "biometria-feedback biometria-feedback--error";
-  }
-});
-
-    btnParar.addEventListener("click", () => {
     rostoValidado = false;
     pararCameraBiometria(videoBiometria);
+    cameraPreviewArea.classList.remove("is-scanning", "is-approved");
 
-    feedback.textContent = "Câmera encerrada.";
-    feedback.className = "biometria-feedback";
-
-    statusChamada.textContent = chamadaAberta
-      ? "Chamada aberta"
-      : "Sem chamada aberta";
-
-    statusChamada.className = chamadaAberta
-      ? "chamada-status chamada-status--open"
-      : "chamada-status chamada-status--error";
+    if (facePlaceholder) facePlaceholder.style.display = "";
 
     cameraMensagem.textContent = "Câmera encerrada";
-    cameraSubmensagem.textContent = "Clique em iniciar reconhecimento para abrir novamente";
+    cameraSubmensagem.textContent = faceCadastrada
+      ? "Clique em iniciar reconhecimento para abrir novamente."
+      : "Cadastre seu rosto para liberar o reconhecimento facial.";
 
-    cameraPreviewArea.classList.remove("is-scanning");
-    cameraPreviewArea.classList.remove("is-approved");
-
-    if (facePlaceholder) {
-      facePlaceholder.style.display = "";
-    }
-
-    btnIniciar.disabled = !chamadaAberta;
-    btnCadastrarFace.disabled = !chamadaAberta;
-    btnConfirmar.disabled = true;
-    btnParar.disabled = !chamadaAberta;
-
-    btnIniciar.textContent = "Iniciar reconhecimento";
+    atualizarFeedback("Câmera encerrada.");
+    atualizarStatus(chamadaAtiva ? "Chamada aberta" : "Sem chamada aberta", chamadaAtiva ? "open" : "error");
+    atualizarBotoes();
   });
-
-  btnIniciar.disabled = true;
-  btnCadastrarFace.disabled = true;
-  btnConfirmar.disabled = true;
-  btnParar.disabled = true;
-
-  carregarChamadaAberta();
 }
 
-function criarRegistroBiometricoTemporario(chamadaAberta = null) {
-  const usuario = obterUsuarioLogado();
+function formatarHorarioAula(horaInicio, horaFim) {
+  const inicio = limparHorario(horaInicio) || "Início não informado";
+  const fim = limparHorario(horaFim);
 
-  const agora = new Date();
+  if (!fim) {
+    return `${inicio} - Em andamento`;
+  }
 
-  const horario = agora.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return `${inicio} - ${fim}`;
+}
 
-  return {
-    alunoId: chamadaAberta?.alunoId || 0,
-    alunoNome: usuario?.nome || "Aluno",
-    aulaId: chamadaAberta?.aulaId || null,
-    disciplina: chamadaAberta?.disciplina || "Disciplina não informada",
-    professor: chamadaAberta?.professor || "Professor não informado",
-    turma: chamadaAberta?.turma || "Turma não informada",
-    horario,
-    metodo: "biometria_facial",
-    status: "presente",
-    enviadoAoProfessor: true,
-    dataRegistro: agora.toISOString()
-  };
+function limparHorario(valor) {
+  const texto = String(valor ?? "").trim();
+
+  if (!texto || texto.toLowerCase() === "null" || texto.toLowerCase() === "undefined") {
+    return "";
+  }
+
+  return texto;
 }
 
 function obterUsuarioLogado() {

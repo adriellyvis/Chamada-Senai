@@ -160,3 +160,564 @@
     min-width: 86px;
   }
 }
+/* =========================
+   AÇÕES DA TABELA
+========================= */
+
+.aluno-acoes-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 205px;
+}
+
+.aluno-acao-btn.perfil {
+  border-color: color-mix(in srgb, var(--blue) 38%, var(--line));
+  background: color-mix(in srgb, var(--blue) 8%, var(--panel));
+  color: var(--blue);
+}
+
+.aluno-acao-btn.perfil:hover {
+  background: color-mix(in srgb, var(--blue) 15%, var(--panel));
+  transform: translateY(-1px);
+}
+
+.aluno-acao-btn.ocorrencia:hover {
+  border-color: color-mix(in srgb, var(--orange) 42%, var(--line));
+  color: var(--orange);
+}
+
+/* =========================
+   MODAL PERFIL DO ALUNO
+========================= */
+
+body.perfil-aluno-aberto {
+  overflow: hidden;
+}
+
+.perfil-aluno-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(7px);
+  animation: perfilAlunoFade 0.18s ease-out;
+}
+
+.perfil-aluno-modal {
+  width: min(860px, 100%);
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28);
+  animation: perfilAlunoEntrada 0.2s ease-out;
+}
+
+.perfil-aluno-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 30px 22px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.perfil-aluno-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.perfil-aluno-header h2 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-family: "Syne", sans-serif;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+}
+
+.perfil-aluno-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.perfil-aluno-fechar {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.perfil-aluno-fechar:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  transform: rotate(3deg);
+}
+
+.perfil-aluno-fechar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.perfil-aluno-conteudo {
+  overflow-y: auto;
+  padding: 26px 30px;
+}
+
+.perfil-aluno-identidade {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--panel-2);
+}
+
+.perfil-aluno-avatar {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--blue) 25%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--blue) 11%, var(--panel));
+  color: var(--blue);
+  font-family: "Syne", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.perfil-aluno-nome h3 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-family: "Syne", sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.perfil-aluno-nome p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.perfil-aluno-situacao {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.perfil-aluno-situacao.regular,
+.perfil-aluno-indicador.regular .perfil-aluno-indicador-icone {
+  background: color-mix(in srgb, var(--green) 12%, var(--panel));
+  color: var(--green);
+}
+
+.perfil-aluno-situacao.atencao,
+.perfil-aluno-indicador.atencao .perfil-aluno-indicador-icone {
+  background: color-mix(in srgb, var(--orange) 13%, var(--panel));
+  color: var(--orange);
+}
+
+.perfil-aluno-situacao.risco,
+.perfil-aluno-indicador.risco .perfil-aluno-indicador-icone {
+  background: color-mix(in srgb, var(--pink) 12%, var(--panel));
+  color: var(--pink);
+}
+
+.perfil-aluno-indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.perfil-aluno-indicador {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 17px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.perfil-aluno-indicador-icone {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+}
+
+.perfil-aluno-indicador-icone svg {
+  width: 19px;
+  height: 19px;
+}
+
+.perfil-aluno-indicador span,
+.perfil-aluno-dado span,
+.perfil-aluno-progresso-topo span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.perfil-aluno-indicador strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-aluno-dados {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--line-soft);
+}
+
+.perfil-aluno-dado {
+  min-width: 0;
+  padding: 16px 18px;
+  background: var(--panel);
+}
+
+.perfil-aluno-dado strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-aluno-progresso {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--panel-2);
+}
+
+.perfil-aluno-progresso-topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.perfil-aluno-progresso-topo strong {
+  color: var(--text);
+  font-family: "Syne", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.perfil-aluno-progresso-topo p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.perfil-aluno-barra {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 14%, transparent);
+}
+
+.perfil-aluno-barra div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+  transition: width 0.35s ease;
+}
+
+.perfil-aluno-progresso.atencao .perfil-aluno-barra div {
+  background: var(--orange);
+}
+
+.perfil-aluno-progresso.risco .perfil-aluno-barra div {
+  background: var(--pink);
+}
+
+.perfil-aluno-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 30px 22px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.perfil-aluno-btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.perfil-aluno-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.perfil-aluno-btn.secundario {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.perfil-aluno-btn.primario {
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.perfil-aluno-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+@keyframes perfilAlunoFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes perfilAlunoEntrada {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 760px) {
+  .aluno-acoes-wrap {
+    min-width: 190px;
+  }
+
+  .perfil-aluno-overlay {
+    padding: 12px;
+  }
+
+  .perfil-aluno-modal {
+    max-height: calc(100vh - 24px);
+    border-radius: 19px;
+  }
+
+  .perfil-aluno-header,
+  .perfil-aluno-conteudo,
+  .perfil-aluno-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .perfil-aluno-identidade {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .perfil-aluno-situacao {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .perfil-aluno-indicadores,
+  .perfil-aluno-dados {
+    grid-template-columns: 1fr;
+  }
+
+  .perfil-aluno-progresso-topo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .perfil-aluno-progresso-topo p {
+    text-align: left;
+  }
+
+  .perfil-aluno-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   LAYOUT AMPLO — PÁGINA ALUNOS
+========================= */
+.alunos-page-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 28px 44px;
+}
+
+.alunos-page-content .stats-grid {
+  gap: 22px;
+  margin-bottom: 30px;
+}
+
+.alunos-page-content .stat-card {
+  height: 150px;
+  padding: 27px 26px;
+}
+
+.filtros-alunos-professor {
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto 24px;
+  border-radius: 14px;
+}
+
+.alunos-professor-lista {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.alunos-table-card {
+  width: 100%;
+  overflow: hidden;
+}
+
+.alunos-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.alunos-table th:nth-child(1),
+.alunos-table td:nth-child(1) {
+  width: 23%;
+}
+
+.alunos-table th:nth-child(2),
+.alunos-table td:nth-child(2) {
+  width: 11%;
+}
+
+.alunos-table th:nth-child(3),
+.alunos-table td:nth-child(3) {
+  width: 17%;
+}
+
+.alunos-table th:nth-child(4),
+.alunos-table td:nth-child(4) {
+  width: 14%;
+}
+
+.alunos-table th:nth-child(5),
+.alunos-table td:nth-child(5) {
+  width: 14%;
+}
+
+.alunos-table th:nth-child(6),
+.alunos-table td:nth-child(6) {
+  width: 21%;
+}
+
+.aluno-info,
+.aluno-acoes-wrap {
+  min-width: 0;
+}
+
+.aluno-info > div:last-child {
+  min-width: 0;
+}
+
+.aluno-info strong,
+.aluno-info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aluno-acoes-wrap {
+  width: 100%;
+}
+
+.aluno-acao-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 12px;
+}
+
+@media (max-width: 1160px) {
+  .alunos-table-card {
+    overflow-x: auto;
+  }
+
+  .alunos-table {
+    min-width: 960px;
+    table-layout: auto;
+  }
+
+  .aluno-info {
+    min-width: 210px;
+  }
+
+  .aluno-acoes-wrap {
+    min-width: 205px;
+  }
+}
+
+@media (max-width: 760px) {
+  .alunos-page-content {
+    padding: 20px;
+  }
+
+  .alunos-page-content .stat-card {
+    height: auto;
+    min-height: 136px;
+  }
+
+  .filtros-alunos-professor {
+    justify-content: stretch;
+  }
+}

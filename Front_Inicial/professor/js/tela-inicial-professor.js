@@ -1,4 +1,4 @@
-import { request } from "../../../core/api.js";
+import { request } from "../../core/api.js";
 
 
 async function carregarDashboardProfessor() {

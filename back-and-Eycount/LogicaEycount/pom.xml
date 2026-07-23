@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.eyecount</groupId>
+    <groupId>eyecount</groupId>
     <artifactId>LogicaEycount</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>LogicaEycount</name>

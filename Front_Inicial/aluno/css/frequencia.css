@@ -297,3 +297,79 @@
     justify-content: flex-start;
   }
 }
+.frequencia-loading,
+.frequencia-empty {
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.frequencia-header--simples {
+  justify-content: flex-start;
+}
+
+.status-warn {
+  color: #b88700;
+}
+
+.status-danger {
+  color: var(--danger);
+}
+
+/* Ajustes para filtros reais da tela Frequências */
+.frequencia-filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.frequencia-filtros label span {
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.frequencia-filtros select {
+  min-width: 170px;
+  height: 38px;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 12px;
+  outline: none;
+}
+
+.frequencia-filtros select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 117, 255, 0.12);
+}
+
+.risk-circle {
+  position: relative;
+  border-color: var(--primary-soft);
+  background:
+    radial-gradient(closest-side, var(--card-bg) 72%, transparent 73% 100%),
+    conic-gradient(var(--primary) calc(var(--progress, 0) * 1%), var(--primary-soft) 0);
+}
+
+@media (max-width: 1100px) {
+  .frequencia-filtros {
+    width: 100%;
+  }
+
+  .frequencia-filtros label,
+  .frequencia-filtros select {
+    flex: 1;
+    min-width: 150px;
+  }
+}

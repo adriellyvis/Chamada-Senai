@@ -513,3 +513,53 @@
   position: relative;
   z-index: 2;
 }
+.biometria-feedback--error {
+  background: rgba(255, 77, 79, 0.12);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.chamada-status--error {
+  background: rgba(255, 77, 79, 0.12);
+  color: var(--danger);
+}
+
+.chamada-layout--compacta {
+  grid-template-columns: minmax(700px, 1fr) 330px;
+  gap: 20px;
+}
+
+.chamada-side--simples {
+  gap: 0;
+}
+
+.chamada-camera-card {
+  padding: 22px;
+}
+
+.camera-preview-area {
+  height: clamp(330px, 44vh, 420px);
+}
+
+.chamada-actions {
+  flex-wrap: wrap;
+}
+
+.chamada-actions button[hidden] {
+  display: none;
+}
+
+.chamada-actions button {
+  min-width: 180px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1250px) {
+  .chamada-layout--compacta {
+    grid-template-columns: 1fr;
+  }
+
+  .chamada-side--simples {
+    display: block;
+  }
+}

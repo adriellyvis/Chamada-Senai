@@ -1,3 +1,6 @@
+const API_HOST = window.location.hostname || "localhost";
+const API_URL = `http://${API_HOST}:8080`;
+
 const form = document.getElementById("formLogin");
 const email = document.getElementById("email");
 const senha = document.getElementById("senha");
@@ -12,7 +15,7 @@ async function realizarLogin(event) {
 
   console.log("Enviando:", { email, senha });
 
-  const response = await fetch("http://localhost:8080/auth/login", {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

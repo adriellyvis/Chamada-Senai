@@ -1,0 +1,202 @@
+AVISO DESTA ATUALIZACAO
+--------------------------
+O pacote de atualizacao nao inclui .git nem README.md.
+O script APLICAR_NO_REPOSITORIO.ps1 preserva os dois.
+Antes do primeiro commit, confirme que "git diff -- README.md" nao mostra nada.
+
+EYCOUNT - COMANDOS PARA O TERMINAL DO VS CODE (POWERSHELL)
+============================================================
+
+IMPORTANTE
+---------
+O GitHub sera usado para guardar e transferir o codigo.
+Nao use GitHub Pages para executar este sistema enquanto o backend estiver apenas na rede local,
+porque o Pages usa HTTPS e o backend local usa HTTP.
+
+A pasta correta para abrir no VS Code e a pasta EyeCount, que contem a pasta .git.
+
+
+1. CONFERIR O GIT JA EXISTENTE
+------------------------------
+Abra o terminal do VS Code na raiz EyeCount e execute:
+
+git status
+git remote -v
+git branch
+
+O remote esperado e:
+https://github.com/adriellyvis/Chamada-Senai.git
+
+
+2. ENVIAR ESTA VERSAO ATUALIZADA PARA O GITHUB
+----------------------------------------------
+git status
+git add -A
+git status
+git commit -m "Atualiza EyeCount com frontend, backend, biometria e agendamento"
+git pull --rebase origin main
+git push origin main
+
+Quando o GitHub pedir autenticacao, entre pela janela do navegador ou use um token pessoal.
+A senha normal da conta nao funciona como senha do Git no terminal.
+
+
+3. BAIXAR EM OUTRO COMPUTADOR PELO GITHUB
+-----------------------------------------
+Escolha uma pasta, abra o terminal nela e execute:
+
+git clone https://github.com/adriellyvis/Chamada-Senai.git
+cd Chamada-Senai
+code .
+
+Caso a pasta ja exista:
+
+cd Chamada-Senai
+git pull origin main
+code .
+
+
+4. CONFERIR PROGRAMAS INSTALADOS
+--------------------------------
+git --version
+java -version
+mvn -version
+py --version
+mysql --version
+
+Necessarios:
+- Git
+- Java 17 ou superior
+- Maven
+- Python 3
+- MySQL 8
+- VS Code
+
+
+5. CRIAR O BANCO
+----------------
+Opcao A - MySQL no terminal:
+
+cmd /c "mysql -u root -p < database\00_INSTALAR_TUDO.sql"
+
+Digite a senha do MySQL quando solicitado.
+
+Opcao B - MySQL Workbench:
+- abra database\00_INSTALAR_TUDO.sql;
+- execute o arquivo completo.
+
+Para apenas conferir os dados depois:
+
+cmd /c "mysql -u root -p eyecount < database\03_selects_conferencia.sql"
+
+
+6. INICIAR O BACKEND
+--------------------
+Abra um terminal novo do VS Code na raiz e execute:
+
+$env:DB_URL="jdbc:mysql://localhost:3306/eyecount"
+$env:DB_USER="root"
+$env:DB_PASSWORD="<SUA_SENHA_DO_MYSQL>"
+$env:JWT_SECRET="<CHAVE_ALEATORIA_COM_PELO_MENOS_32_CARACTERES>"
+cd .\back-and-Eycount\LogicaEycount
+mvn spring-boot:run
+
+Ou use o atalho:
+
+powershell -ExecutionPolicy Bypass -File .\scripts\iniciar-backend.ps1
+
+O backend ficara em:
+http://localhost:8080
+
+
+7. INSTALAR E INICIAR A BIOMETRIA
+---------------------------------
+Abra outro terminal novo na raiz e execute:
+
+cd .\Front_Inicial\biometria-python
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python app.py
+
+Ou use o atalho:
+
+powershell -ExecutionPolicy Bypass -File .\scripts\iniciar-biometria.ps1
+
+A biometria ficara em:
+http://localhost:5000
+
+
+8. INICIAR O FRONTEND
+---------------------
+Abra outro terminal novo na raiz e execute:
+
+cd .\Front_Inicial
+py -m http.server 5500 --bind 0.0.0.0
+
+Ou use o atalho:
+
+powershell -ExecutionPolicy Bypass -File .\scripts\iniciar-frontend.ps1
+
+No computador servidor, abra:
+http://localhost:5500
+
+
+9. ACESSAR PELOS OUTROS COMPUTADORES DA MESMA REDE
+--------------------------------------------------
+No computador servidor, descubra o IPv4:
+
+ipconfig
+
+Procure "Endereco IPv4", por exemplo:
+192.168.0.15
+
+Nos outros computadores, abra no navegador:
+http://192.168.0.15:5500
+
+O frontend foi adaptado para usar automaticamente o mesmo IP nas portas:
+- backend: 8080
+- biometria: 5000
+
+Nao e necessario trocar localhost manualmente nos arquivos JavaScript.
+
+
+10. LIBERAR AS PORTAS NO FIREWALL DO WINDOWS
+--------------------------------------------
+Abra o PowerShell como administrador e execute:
+
+New-NetFirewallRule -DisplayName "EyeCount Frontend 5500" -Direction Inbound -Protocol TCP -LocalPort 5500 -Action Allow
+New-NetFirewallRule -DisplayName "EyeCount Backend 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
+New-NetFirewallRule -DisplayName "EyeCount Biometria 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow
+
+Nao exponha a porta 3306 do MySQL para os computadores clientes.
+Somente o backend precisa acessar o banco no computador servidor.
+
+
+11. ATUALIZAR O GITHUB DEPOIS DE NOVAS ALTERACOES
+-------------------------------------------------
+git status
+git add -A
+git commit -m "Descreva aqui o que foi alterado"
+git pull --rebase origin main
+git push origin main
+
+
+12. RECEBER ALTERACOES EM OUTRO COMPUTADOR
+------------------------------------------
+git status
+git pull origin main
+
+Se houver arquivos modificados nesse computador, salve antes:
+
+git add -A
+git commit -m "Salva alteracoes locais antes do pull"
+git pull --rebase origin main
+
+
+LOGIN DOS DADOS DE DEMONSTRACAO
+-------------------------------
+Gestor: ana.gestora@eyecount.com
+Professor: carlos.professor@eyecount.com
+Aluno: alice.santos@eyecount.com
+Senha: 123456

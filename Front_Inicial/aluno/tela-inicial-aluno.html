@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="./css/chamada.css">
   <link rel="stylesheet" href="./css/frequencia.css">
   <link rel="stylesheet" href="./css/avisos.css">
+  <link rel="stylesheet" href="./css/topbar-interacoes.css">
+  <link rel="stylesheet" href="/biometria/perfil-biometrico.css">
 </head>
 
 <body>
@@ -28,14 +30,14 @@
       <div class="sidebar__top">
         <h2 class="sidebar__title">BEM-VINDO DE VOLTA!</h2>
 
-        <div class="sidebar__profile">
+        <button class="sidebar__profile" id="btnAbrirPerfilAluno" type="button" title="Abrir perfil do aluno">
           <div class="sidebar__avatar" id="avatarAluno">A</div>
 
           <div class="sidebar__profile-text">
             <strong id="nomeAluno">Aluno</strong>
             <span>Portal do Aluno</span>
           </div>
-        </div>
+        </button>
 
         <nav class="sidebar__nav">
           <button class="sidebar__item is-active" data-page="dashboard">
@@ -89,18 +91,41 @@
         </div>
 
         <div class="topbar__actions">
-          <button class="notification-btn" title="Notificações">
-            🔔
-          </button>
+          <div class="notificacoes-aluno-wrapper">
+            <button
+              class="notification-btn"
+              id="btnNotificacoesAluno"
+              type="button"
+              title="Notificações"
+              aria-label="Abrir notificações"
+              aria-expanded="false"
+            >
+              🔔
+              <span class="notificacoes-aluno-badge" id="badgeNotificacoesAluno" hidden>0</span>
+            </button>
 
-          <div class="search-box">
-            <input type="text" placeholder="Procurar disciplina..." />
-            <span>⌕</span>
+            <div class="notificacoes-aluno-painel" id="painelNotificacoesAluno" hidden></div>
+          </div>
+
+          <div class="search-box busca-aluno-wrapper">
+            <input
+              id="buscaAlunoInput"
+              type="search"
+              placeholder="Pesquisar disciplinas e avisos..."
+              autocomplete="off"
+              aria-label="Pesquisar disciplinas e avisos"
+              aria-expanded="false"
+              aria-controls="buscaAlunoResultados"
+            />
+            <span aria-hidden="true">⌕</span>
+            <div class="busca-aluno-resultados" id="buscaAlunoResultados" hidden></div>
           </div>
         </div>
       </header>
 
       <section class="page page-dashboard is-active" id="page-dashboard"></section>
+
+      <section class="page page-perfil" id="page-perfil"></section>
 
       <section class="page page-frequencia" id="page-frequencia"></section>
 

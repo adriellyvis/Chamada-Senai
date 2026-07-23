@@ -17,6 +17,7 @@ body {
 }
 
 .perfil {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -24,6 +25,17 @@ body {
   border-radius: 15px;
   padding: 10px;
   margin-bottom: 55px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.perfil:hover {
+  border-color: #6d7cff;
+  background: rgba(198, 205, 253, 0.22);
+  transform: translateY(-1px);
 }
 
 .avatar {

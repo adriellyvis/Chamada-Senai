@@ -187,3 +187,35 @@ button {
     width: 100%;
   }
 }
+/* Ajuste geral: mantém a lateral fixa e reduz altura útil das páginas. */
+.sidebar {
+  height: 100vh;
+  min-height: 0;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  overflow: hidden;
+}
+
+.main {
+  min-height: 100vh;
+}
+
+.topbar {
+  min-height: 92px;
+  padding: 18px 36px;
+}
+
+.page {
+  padding: 16px 34px 22px;
+}
+
+@media (max-width: 1500px) {
+  .topbar__title h1 {
+    font-size: 28px;
+  }
+
+  .topbar__title p {
+    font-size: 14px;
+  }
+}

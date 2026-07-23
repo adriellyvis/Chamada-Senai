@@ -150,6 +150,7 @@ h6 {
 }
 
 .profile-wrap {
+  width: 100%;
   height: 64px;
   border: 1px solid #d9e2fb;
   border-radius: 14px;
@@ -159,6 +160,16 @@ h6 {
   padding: 9px 12px;
   background: var(--panel);
   box-shadow: 0 2px 0 rgba(30, 58, 138, 0.02);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.profile-wrap:hover {
+  border-color: var(--blue);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 [data-theme="dark"] .profile-wrap {
@@ -922,4 +933,198 @@ textarea {
 
 [data-theme="dark"] .theme-icon-dark {
   opacity: 1;
+}
+/* =========================
+   BUSCA GLOBAL — ALUNOS E TURMAS
+========================= */
+.search-pill.busca-global-professor {
+  position: relative;
+  z-index: 40;
+}
+
+.busca-global-professor-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.busca-global-professor-resultados {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 390px;
+  max-height: min(520px, calc(100vh - 130px));
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 22px 55px rgba(30, 42, 79, 0.2);
+  z-index: 1000;
+}
+
+.busca-global-professor-resultados[hidden] {
+  display: none;
+}
+
+.busca-global-professor-grupo + .busca-global-professor-grupo {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.busca-global-professor-grupo-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 9px 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.busca-global-professor-grupo-titulo strong {
+  min-width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.busca-global-professor-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 9px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.busca-global-professor-item:hover,
+.busca-global-professor-item:focus-visible {
+  outline: none;
+  background: var(--blue-soft);
+  transform: translateX(2px);
+}
+
+.busca-global-professor-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.busca-global-professor-avatar.aluno {
+  background: #eee7ff;
+  color: #7a3cf0;
+}
+
+.busca-global-professor-avatar.turma {
+  background: #e7f0ff;
+  color: var(--blue);
+}
+
+.busca-global-professor-avatar svg {
+  width: 19px;
+  height: 19px;
+}
+
+.busca-global-professor-item-texto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.busca-global-professor-item-texto strong,
+.busca-global-professor-item-texto small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.busca-global-professor-item-texto strong {
+  font-size: 14px;
+}
+
+.busca-global-professor-item-texto small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.busca-global-professor-seta {
+  color: var(--blue);
+  font-size: 22px !important;
+  line-height: 1;
+}
+
+.busca-global-professor-estado {
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.busca-global-professor-estado strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.busca-global-professor-estado span {
+  font-size: 11px;
+}
+
+.busca-global-professor-estado.carregando {
+  flex-direction: row;
+}
+
+.busca-global-professor-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: busca-global-professor-girar 0.7s linear infinite;
+}
+
+@keyframes busca-global-professor-girar {
+  to { transform: rotate(360deg); }
+}
+
+[data-theme="dark"] .busca-global-professor-resultados {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .busca-global-professor-avatar.aluno {
+  background: rgba(122, 60, 240, 0.2);
+}
+
+[data-theme="dark"] .busca-global-professor-avatar.turma {
+  background: rgba(48, 126, 245, 0.2);
+}
+
+@media (max-width: 760px) {
+  .busca-global-professor-resultados {
+    width: min(390px, calc(100vw - 40px));
+    right: 0;
+  }
 }

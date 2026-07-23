@@ -2,8 +2,18 @@ import { abrirDashboardAluno } from "./pages/dashboard-aluno.js";
 import { abrirFrequenciaAluno } from "./pages/frequencia-aluno.js";
 import { abrirChamadaAluno } from "./pages/chamada-aluno.js";
 import { abrirAvisosAluno } from "./pages/avisos-aluno.js";
+import { abrirPerfilAluno } from "./pages/perfil-aluno.js";
+import { configurarNotificacoesAluno, atualizarNotificacoesAluno } from "./components/notificacoes-aluno.js";
+import { configurarBuscaAluno } from "./components/busca-aluno.js";
 
 const paginas = {
+  perfil: {
+    id: "page-perfil",
+    titulo: "MEU PERFIL",
+    subtitulo: "Revise seus dados e prepare seu cadastro biométrico facial.",
+    abrir: abrirPerfilAluno
+  },
+
   dashboard: {
     id: "page-dashboard",
     titulo: "MEU DESEMPENHO",
@@ -33,13 +43,15 @@ const paginas = {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   carregarUsuario();
   configurarNavegacao();
   configurarTema();
   configurarMenuPerfil();
+  configurarNotificacoesAluno({ navegarPara });
+  configurarBuscaAluno({ navegarPara });
 
-  navegarPara("dashboard");
+  await navegarPara("dashboard");
 });
 
 function carregarUsuario() {
@@ -77,7 +89,7 @@ function configurarNavegacao() {
   });
 }
 
-function navegarPara(nomePagina) {
+async function navegarPara(nomePagina) {
   const config = paginas[nomePagina];
 
   if (!config) return;
@@ -96,7 +108,8 @@ function navegarPara(nomePagina) {
   document.getElementById("tituloPagina").textContent = config.titulo;
   document.getElementById("subtituloPagina").textContent = config.subtitulo;
 
-  config.abrir(paginaAtual);
+  await config.abrir(paginaAtual);
+  await atualizarNotificacoesAluno();
 }
 
 function configurarMenuPerfil() {
@@ -105,6 +118,13 @@ function configurarMenuPerfil() {
   const btnPerfil = document.getElementById("btnPerfil");
   const btnConfiguracoes = document.getElementById("btnConfiguracoes");
   const btnLogout = document.getElementById("btnLogout");
+  const btnAbrirPerfilAluno = document.getElementById("btnAbrirPerfilAluno");
+
+  if (btnAbrirPerfilAluno) {
+    btnAbrirPerfilAluno.addEventListener("click", () => {
+      navegarPara("perfil");
+    });
+  }
 
   if (!btnMenuPerfil || !menuDropdown) return;
 
@@ -121,7 +141,7 @@ function configurarMenuPerfil() {
 
   if (btnPerfil) {
     btnPerfil.addEventListener("click", () => {
-      alert("Área de perfil em construção.");
+      navegarPara("perfil");
       menuDropdown.classList.remove("is-open");
     });
   }

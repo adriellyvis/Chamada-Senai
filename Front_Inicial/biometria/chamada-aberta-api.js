@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:8080";
+const API_HOST = window.location.hostname || "localhost";
+const API_URL = `http://${API_HOST}:8080`;
 
 export async function buscarChamadaAbertaAluno(usuarioId) {
   if (!usuarioId) {

@@ -6,6 +6,12 @@ import { abrirAlunosProfessor } from "./pages/alunos-professor.js";
 import { abrirHistoricoProfessor } from "./pages/historico-professor.js";
 import { abrirChamadaProfessor } from "./pages/chamada-professor.js";
 import { abrirOcorrenciasProfessor } from "./pages/ocorrencias-professor.js";
+import { abrirPerfilProfessor } from "./pages/perfil-professor.js";
+import {
+  configurarNotificacoesProfessor,
+  atualizarIndicadorNotificacoes
+} from "./components/notificacoes-professor.js";
+import { configurarBuscaGlobalProfessor } from "./components/busca-global-professor.js";
 
 
 carregarTemaSalvo();
@@ -23,6 +29,7 @@ export function atualizarIcones() {
 configurarFooterSidebar();
 atualizarIcones();
 preencherDadosUsuario(usuario);
+configurarNotificacoesProfessor();
 
 function aplicarTemaSalvo() {
   const tema = localStorage.getItem("temaEyeCount") || "light";
@@ -50,6 +57,7 @@ document.getElementById("btnTheme")?.addEventListener("click", alternarTema);
 
 
 const rotas = {
+  perfil: abrirPerfilProfessor,
   dashboard: abrirDashboardProfessor,
   turmas: abrirTurmasProfessor,
   alunos: abrirAlunosProfessor,
@@ -58,27 +66,41 @@ const rotas = {
   ocorrencias: abrirOcorrenciasProfessor
 };
 
-function ativarMenu(itemAtivo) {
+function ativarMenu(itemAtivo = null) {
   document.querySelectorAll(".nav-item").forEach(item => {
     item.classList.remove("active");
   });
 
-  itemAtivo.classList.add("active");
+  if (itemAtivo) {
+    itemAtivo.classList.add("active");
+  }
+}
+
+async function navegarPara(pagina, itemAtivo = null) {
+  const abrirPagina = rotas[pagina];
+
+  if (!abrirPagina) return;
+
+  ativarMenu(itemAtivo);
+  await abrirPagina();
+  configurarBuscaGlobalProfessor({ navegarPara: navegarPelaBuscaGlobal });
+  await atualizarIndicadorNotificacoes();
+}
+
+async function navegarPelaBuscaGlobal(pagina) {
+  const itemMenu = document.querySelector(`[data-page="${pagina}"]`);
+  await navegarPara(pagina, itemMenu);
 }
 
 document.querySelectorAll("[data-page]").forEach(item => {
   item.addEventListener("click", async event => {
     event.preventDefault();
-
-    const pagina = item.dataset.page;
-    const abrirPagina = rotas[pagina];
-
-    if (!abrirPagina) return;
-
-    ativarMenu(item);
-
-    await abrirPagina();
+    await navegarPara(item.dataset.page, item);
   });
+});
+
+document.getElementById("btnAbrirPerfilProfessor")?.addEventListener("click", async () => {
+  await navegarPara("perfil");
 });
 
 document.getElementById("btnLogout")?.addEventListener("click", () => {
@@ -94,6 +116,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   await abrirDashboardProfessor();
+  configurarBuscaGlobalProfessor({ navegarPara: navegarPelaBuscaGlobal });
+  await atualizarIndicadorNotificacoes();
 });
 
 function configurarFooterSidebar() {
@@ -130,11 +154,11 @@ function configurarFooterSidebar() {
         }
 
         if (acao === "perfil") {
-          abrirPerfilProfessor?.();
+          await navegarPara("perfil");
         }
 
         if (acao === "configuracoes") {
-          abrirConfiguracoes?.();
+          alert("Configurações em construção.");
         }
 
         dropdown.classList.remove("aberto");

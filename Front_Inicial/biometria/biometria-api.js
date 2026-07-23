@@ -1,4 +1,5 @@
-const BIOMETRIA_PYTHON_URL = "http://localhost:5000";
+const API_HOST = window.location.hostname || "localhost";
+const BIOMETRIA_PYTHON_URL = `http://${API_HOST}:5000`;
 
 async function enviarParaBiometria(endpoint, corpo) {
   try {
@@ -10,10 +11,10 @@ async function enviarParaBiometria(endpoint, corpo) {
       body: JSON.stringify(corpo)
     });
 
-    const dados = await resposta.json();
+    const dados = await resposta.json().catch(() => null);
 
     if (!resposta.ok) {
-      throw new Error(dados.mensagem || "Erro no servidor de biometria.");
+      throw new Error(dados?.mensagem || "Erro no servidor de biometria.");
     }
 
     return dados;
@@ -21,6 +22,20 @@ async function enviarParaBiometria(endpoint, corpo) {
     console.error("Erro ao comunicar com Python:", erro);
     throw new Error(erro.message || "Servidor de biometria indisponível.");
   }
+}
+
+function montarPayloadPessoa({ alunoId, alunoNome, usuarioId, pessoaId, pessoaNome, perfil, imagemBase64 }) {
+  const idReferencia = alunoId ?? pessoaId ?? usuarioId;
+
+  return {
+    alunoId: alunoId ?? null,
+    alunoNome: alunoNome ?? pessoaNome ?? null,
+    usuarioId: usuarioId ?? null,
+    pessoaId: pessoaId ?? idReferencia ?? null,
+    pessoaNome: pessoaNome ?? alunoNome ?? "Usuário",
+    perfil: perfil ?? "aluno",
+    imagemBase64
+  };
 }
 
 export async function reconhecerFacePython(imagemBase64) {
@@ -33,26 +48,58 @@ export async function reconhecerFacePython(imagemBase64) {
   });
 }
 
-export async function cadastrarFacePython({ alunoId, alunoNome, imagemBase64 }) {
-  if (!alunoId || !imagemBase64) {
-    throw new Error("alunoId e imagemBase64 são obrigatórios.");
+export async function cadastrarFacePython({ alunoId, alunoNome, usuarioId, pessoaId, pessoaNome, perfil = "aluno", imagemBase64 }) {
+  const idReferencia = alunoId ?? pessoaId ?? usuarioId;
+
+  if (!idReferencia || !imagemBase64) {
+    throw new Error("Identificador da pessoa e imagemBase64 são obrigatórios.");
   }
 
-  return enviarParaBiometria("/cadastrar-face", {
-    alunoId,
-    alunoNome,
-    imagemBase64
-  });
+  return enviarParaBiometria(
+    "/cadastrar-face",
+    montarPayloadPessoa({
+      alunoId,
+      alunoNome,
+      usuarioId,
+      pessoaId,
+      pessoaNome,
+      perfil,
+      imagemBase64
+    })
+  );
 }
 
-export async function verificarFacePython({ alunoId, imagemBase64 }) {
-  if (!alunoId || !imagemBase64) {
-    throw new Error("alunoId e imagemBase64 são obrigatórios.");
+export async function verificarFacePython({ alunoId, usuarioId, pessoaId, perfil = "aluno", imagemBase64 }) {
+  const idReferencia = alunoId ?? pessoaId ?? usuarioId;
+
+  if (!idReferencia || !imagemBase64) {
+    throw new Error("Identificador da pessoa e imagemBase64 são obrigatórios.");
   }
 
-  return enviarParaBiometria("/verificar-face", {
-    alunoId,
-    imagemBase64
+  return enviarParaBiometria(
+    "/verificar-face",
+    montarPayloadPessoa({
+      alunoId,
+      usuarioId,
+      pessoaId,
+      perfil,
+      imagemBase64
+    })
+  );
+}
+
+export async function consultarFacePython({ alunoId, usuarioId, pessoaId, perfil = "aluno" }) {
+  const idReferencia = alunoId ?? pessoaId ?? usuarioId;
+
+  if (!idReferencia) {
+    throw new Error("Identificador da pessoa é obrigatório.");
+  }
+
+  return enviarParaBiometria("/face-cadastrada", {
+    alunoId: alunoId ?? null,
+    usuarioId: usuarioId ?? null,
+    pessoaId: pessoaId ?? idReferencia,
+    perfil
   });
 }
 

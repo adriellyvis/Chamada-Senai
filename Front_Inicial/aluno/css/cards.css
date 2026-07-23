@@ -36,7 +36,7 @@
 .stat-card__badge {
   position: absolute;
   right: 18px;
-  top: 14px;
+  top: 5px;
   font-size: 11px;
   color: var(--success);
   background: rgba(46, 204, 113, 0.12);

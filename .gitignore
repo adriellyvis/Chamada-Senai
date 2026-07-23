@@ -8,10 +8,10 @@ target/
 *.iws
 *.ipr
 
-# VS Code
+# VS Code local settings
 .vscode/
 
-# Configurações locais
+# Local configuration and secrets
 .env
 *.env
 application-local.properties
@@ -24,20 +24,21 @@ node_modules/
 dist/
 build/
 
-# Python / Biometria
+# Python / biometric server
 __pycache__/
 *.pyc
 .venv/
 venv/
 
-# Sistema operacional
+# Biometric images and local indexes must not go to GitHub
+Front_Inicial/dados_biometricos/
+Front_Inicial/biometria-python/dados_biometricos/
+
+# Operating system
 .DS_Store
 Thumbs.db
 
-# Backups ou dumps locais de banco
+# Local database backups
 *backup*.sql
 *dump*.sql
 *local*.sql
-
-# Dados biométricos locais
-Front_Inicial/dados_biometricos/

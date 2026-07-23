@@ -7,25 +7,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./css/professor-base.css" />
   <link rel="stylesheet" href="./css/dashboard-professor.css" />
+  <link rel="stylesheet" href="./css/notificacoes-professor.css" />
   <link rel="stylesheet" href="./css/turmas-professor.css" />
   <link rel="stylesheet" href="./css/alunos-professor.css" />
   <link rel="stylesheet" href="./css/ocorrencias-professor.css" />
   <link rel="stylesheet" href="./css/chamada-professor.css" />
   <link rel="stylesheet" href="./css/historico-professor.css" />
   <link rel="stylesheet" href="./css/detalhes-aula.css" />
+  <link rel="stylesheet" href="/biometria/perfil-biometrico.css" />
 </head>
 <body>
   <div class="layout-shell">
     <aside class="sidebar">
       <section class="sidebar-topo">
         <h2>BEM-VINDO DE VOLTA!</h2>
-        <div class="profile-wrap">
+        <button class="profile-wrap" id="btnAbrirPerfilProfessor" type="button" title="Abrir perfil do professor">
           <div class="avatar"></div>
           <div class="profile-info">
             <strong id="nomeUsuario" class="name"></strong>
             <span class="role">Professor(a)</span>
           </div>
-        </div>
+        </button>
       </section>
 
       <nav class="menu" aria-label="Menu principal">

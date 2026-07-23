@@ -1,6 +1,16 @@
 import { request } from "../../../core/api.js";
 import { marcarMenuAtivo, getConteudoPrincipal} from "../../../core/spa.js";
 import { abrirModal, fecharModal} from "../../../core/modal.js";
+import {
+  iniciarCameraBiometria,
+  capturarImagemBiometria,
+  pararCameraBiometria,
+  cameraEstaAtiva
+} from "../../../biometria/camera-biometria.js";
+import {
+  cadastrarFacePython,
+  verificarServidorBiometria
+} from "../../../biometria/biometria-api.js";
 
 let usuariosCache = [];
 
@@ -196,6 +206,15 @@ function renderizarUsuarios(usuarios) {
               Detalhes
             </button>
 
+            ${perfil !== "gestor" ? `
+              <button
+                class="btn-usuario detalhes"
+                data-face-usuario="${usuario.id}"
+              >
+                Face
+              </button>
+            ` : ""}
+
             <button
               class="btn-usuario status ${ativo ? "desativar" : "ativar"}"
               data-status-usuario="${usuario.id}"
@@ -334,6 +353,21 @@ function adicionarEventosTabela() {
         }
       );
     });
+
+  document
+    .querySelectorAll("[data-face-usuario]")
+    .forEach(botao => {
+      botao.addEventListener("click", () => {
+        const usuario = usuariosCache.find(item => item.id == botao.dataset.faceUsuario);
+
+        if (!usuario) {
+          alert("Usuário não encontrado.");
+          return;
+        }
+
+        abrirCadastroFaceGestor(usuario);
+      });
+    });
 }
 
 async function alterarStatusUsuario(id) {
@@ -444,6 +478,11 @@ async function abrirFormularioAluno() {
       </div>
 
     </div>
+
+    <label class="grupo-form" style="display:flex; gap:10px; align-items:center; flex-direction:row; font-weight:700;">
+      <input type="checkbox" id="cadastrarFaceAgora">
+      Cadastrar rosto logo após salvar
+    </label>
 
     <button type="submit">
       Cadastrar
@@ -590,7 +629,9 @@ if (perfilId === 2) {
     ).value;
 }
 
-    await request(
+    const cadastrarFaceAgora = document.getElementById("cadastrarFaceAgora")?.checked;
+
+    const usuarioCriadoResposta = await request(
       "/gestor/usuarios/completo",
       {
         method: "POST",
@@ -599,12 +640,25 @@ if (perfilId === 2) {
       }
     );
 
-    fecharModal();
-
     await carregarUsuarios();
 
+    const usuarioCriado = normalizarUsuarioCriado(
+      usuarioCriadoResposta,
+      body,
+      perfilId
+    );
+
+    if (cadastrarFaceAgora) {
+      abrirCadastroFaceGestor(usuarioCriado);
+      return;
+    }
+
+    fecharModal();
+
     alert(
-      "Aluno cadastrado com sucesso!"
+      perfilId === 1
+        ? "Aluno cadastrado com sucesso!"
+        : "Professor cadastrado com sucesso!"
     );
 
   } catch (error) {
@@ -895,4 +949,205 @@ async function abrirDetalhesUsuario(id) {
 
     alert("Erro ao carregar detalhes");
   }
+}
+function normalizarUsuarioCriado(resposta, body, perfilId) {
+  const perfil = perfilId === 1 ? "aluno" : "professor";
+  const usuarioEncontrado = usuariosCache.find(usuario =>
+    String(usuario.email ?? "").toLowerCase() === String(body.email ?? "").toLowerCase()
+  );
+
+  return {
+    ...(usuarioEncontrado || {}),
+    ...(resposta || {}),
+    nome: resposta?.nome ?? usuarioEncontrado?.nome ?? body.nome,
+    email: resposta?.email ?? usuarioEncontrado?.email ?? body.email,
+    perfil: resposta?.perfil ?? usuarioEncontrado?.perfil ?? perfil,
+    id: resposta?.id ?? resposta?.usuarioId ?? usuarioEncontrado?.id,
+    alunoId: resposta?.alunoId ?? usuarioEncontrado?.alunoId,
+    professorId: resposta?.professorId ?? usuarioEncontrado?.professorId
+  };
+}
+
+function abrirCadastroFaceGestor(usuario) {
+  const perfil = String(usuario?.perfil ?? "").toLowerCase();
+
+  if (perfil === "gestor") {
+    alert("O cadastro facial pelo gestor está liberado apenas para alunos e professores.");
+    return;
+  }
+
+  const nome = usuario?.nome || "Usuário";
+  const perfilLabel = perfil === "professor" ? "professor" : "aluno";
+
+  abrirModal({
+    titulo: `Cadastrar rosto - ${nome}`,
+    conteudo: `
+      <div class="perfil-bio-card">
+        <div class="perfil-card__header">
+          <div>
+            <span class="perfil-eyebrow">Biometria facial</span>
+            <h3>${nome}</h3>
+            <p>Capture o rosto do ${perfilLabel} para deixar o reconhecimento preparado antes da chamada.</p>
+          </div>
+        </div>
+
+        <div class="perfil-bio-stage" id="gestorFaceStage">
+          <video id="gestorFaceVideo" class="perfil-bio-video" autoplay playsinline muted></video>
+          <canvas id="gestorFaceCanvas" style="display:none;"></canvas>
+
+          <div class="perfil-bio-placeholder">
+            <div>
+              <div class="perfil-bio-face-icon"></div>
+              <strong>Câmera fechada</strong>
+              <span>Abra a câmera e mantenha apenas uma pessoa no enquadramento.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="perfil-bio-actions">
+          <button class="perfil-bio-btn secondary" id="btnGestorAbrirCamera" type="button">Abrir câmera</button>
+          <button class="perfil-bio-btn primary" id="btnGestorSalvarFace" type="button">Salvar rosto</button>
+          <button class="perfil-bio-btn danger" id="btnGestorPararCamera" type="button">Parar câmera</button>
+          <button class="perfil-bio-btn secondary" id="btnGestorFinalizarFace" type="button">Finalizar depois</button>
+        </div>
+
+        <div class="perfil-bio-feedback" id="gestorFaceFeedback">
+          Conferindo servidor de biometria.
+        </div>
+      </div>
+    `
+  });
+
+  configurarCadastroFaceGestor(usuario);
+}
+
+async function configurarCadastroFaceGestor(usuario) {
+  const video = document.getElementById("gestorFaceVideo");
+  const canvas = document.getElementById("gestorFaceCanvas");
+  const stage = document.getElementById("gestorFaceStage");
+  const feedback = document.getElementById("gestorFaceFeedback");
+  const btnAbrir = document.getElementById("btnGestorAbrirCamera");
+  const btnSalvar = document.getElementById("btnGestorSalvarFace");
+  const btnParar = document.getElementById("btnGestorPararCamera");
+  const btnFinalizar = document.getElementById("btnGestorFinalizarFace");
+
+  if (!video || !canvas || !stage || !feedback || !btnAbrir || !btnSalvar || !btnParar || !btnFinalizar) {
+    return;
+  }
+
+  btnAbrir.disabled = true;
+  btnSalvar.disabled = true;
+  btnParar.disabled = true;
+
+  try {
+    const servidor = await verificarServidorBiometria();
+
+    if (!servidor?.sucesso) {
+      throw new Error(servidor?.mensagem || "Servidor de biometria offline.");
+    }
+
+    feedback.textContent = "Servidor ativo. Abra a câmera para capturar a face.";
+    feedback.className = "perfil-bio-feedback success";
+
+    btnAbrir.disabled = false;
+    btnSalvar.disabled = false;
+    btnParar.disabled = false;
+  } catch (error) {
+    console.error(error);
+    feedback.textContent = error.message || "Servidor de biometria offline. Inicie o Python primeiro.";
+    feedback.className = "perfil-bio-feedback error";
+    return;
+  }
+
+  btnAbrir.addEventListener("click", async () => {
+    try {
+      feedback.textContent = "Abrindo câmera...";
+      feedback.className = "perfil-bio-feedback loading";
+
+      await iniciarCameraBiometria(video);
+      stage.classList.add("is-camera-on");
+      stage.classList.remove("is-approved");
+
+      feedback.textContent = "Câmera aberta. Centralize o rosto.";
+      feedback.className = "perfil-bio-feedback success";
+    } catch (error) {
+      console.error(error);
+      feedback.textContent = error.message || "Erro ao abrir câmera.";
+      feedback.className = "perfil-bio-feedback error";
+    }
+  });
+
+  btnSalvar.addEventListener("click", async () => {
+    try {
+      const perfil = String(usuario?.perfil ?? "aluno").toLowerCase();
+      const pessoaId = resolverPessoaIdGestor(usuario, perfil);
+
+      if (!pessoaId) {
+        throw new Error("Não foi possível identificar o usuário para salvar a face.");
+      }
+
+      if (!cameraEstaAtiva()) {
+        await iniciarCameraBiometria(video);
+      }
+
+      stage.classList.add("is-camera-on", "is-scanning");
+      stage.classList.remove("is-approved");
+
+      feedback.textContent = "Capturando e enviando rosto para o Python...";
+      feedback.className = "perfil-bio-feedback loading";
+
+      await aguardarCadastroFaceGestor(1100);
+
+      const imagemBase64 = capturarImagemBiometria(video, canvas);
+
+      const resultado = await cadastrarFacePython({
+        perfil,
+        pessoaId,
+        usuarioId: usuario.id,
+        alunoId: perfil === "aluno" ? (usuario.alunoId ?? usuario.idAluno ?? null) : null,
+        pessoaNome: usuario.nome || "Usuário",
+        imagemBase64
+      });
+
+      stage.classList.remove("is-scanning");
+      stage.classList.add("is-approved");
+
+      feedback.textContent = resultado?.mensagem || "Rosto cadastrado com sucesso.";
+      feedback.className = "perfil-bio-feedback success";
+    } catch (error) {
+      console.error(error);
+      stage.classList.remove("is-scanning");
+      feedback.textContent = error.message || "Erro ao cadastrar rosto.";
+      feedback.className = "perfil-bio-feedback error";
+    }
+  });
+
+  btnParar.addEventListener("click", () => {
+    pararCameraBiometria(video);
+    stage.classList.remove("is-camera-on", "is-scanning");
+    feedback.textContent = "Câmera encerrada.";
+    feedback.className = "perfil-bio-feedback";
+  });
+
+  btnFinalizar.addEventListener("click", async () => {
+    pararCameraBiometria(video);
+    fecharModal();
+    await carregarUsuarios();
+  });
+}
+
+function resolverPessoaIdGestor(usuario, perfil) {
+  if (perfil === "aluno") {
+    return usuario.alunoId ?? usuario.idAluno ?? usuario.pessoaId ?? usuario.id;
+  }
+
+  if (perfil === "professor") {
+    return usuario.professorId ?? usuario.idProfessor ?? usuario.pessoaId ?? usuario.id;
+  }
+
+  return usuario.pessoaId ?? usuario.id;
+}
+
+function aguardarCadastroFaceGestor(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
