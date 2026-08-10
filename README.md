@@ -1,4 +1,4 @@
-# PreZence | Sistematização de Chamada via Biometria com IA
+# PreZence | Sistematização de Chamada Inteligente em Instituições de Ensino
 
 <p align="center">
   <img width="250" src="https://github.com/user-attachments/assets/c57b4b35-a08e-40a7-b01b-adda092b8bda" alt="Logo ByoID" />
