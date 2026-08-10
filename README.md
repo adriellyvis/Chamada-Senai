@@ -11,7 +11,7 @@ O **PreZence** é um ecossistema de registro de presença projetado para otimiza
 
 ---
 
-## — Equipe **EyeCount**
+## — Equipe **ByID**
 
 | Membro | Função | Especialidade |
 | :--- | :--- | :--- |
