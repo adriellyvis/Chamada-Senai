@@ -290,18 +290,21 @@
   height: 100%;
   display: flex;
   gap: 14px;
+  padding-bottom: 34px;
+  box-sizing: border-box;
 }
 
 .chart-scale {
+  min-width: 35px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding-bottom: 0;
+
   color: var(--muted-2);
   font-family: Arial, sans-serif;
   font-size: 15px;
   font-weight: 700;
-  padding-bottom: 34px;
-  min-width: 35px;
 }
 
 .chart-area {
@@ -316,37 +319,57 @@
   border-top: 1px dashed var(--line-soft);
 }
 
+
 .chart-bars {
   position: absolute;
-  inset: 0 18px 0;
+  inset: 0 18px 0 18px;
+
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: space-around;
   gap: 24px;
-  padding-bottom: 34px;
 }
 
 .bar-group {
+  position: relative;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 13px;
   min-width: 110px;
 }
 
 .bars {
-  height: 100%;
+  position: absolute;
+  inset: 0;
+
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 12px;
 }
 
 .bar-wrapper {
   position: relative;
+  flex: 0 0 30px;
   width: 30px;
   min-height: 4px;
+}
+
+.bar-label {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: max-content;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
 }
 
 .bar {

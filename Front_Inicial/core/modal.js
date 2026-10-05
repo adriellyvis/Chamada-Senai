@@ -1,6 +1,7 @@
 export function abrirModal({
   titulo = "Modal",
-  conteudo = ""
+  conteudo = "",
+  classe = ""
 }) {
 
   let overlay =
@@ -37,6 +38,11 @@ export function abrirModal({
     document.body.appendChild(
       overlay
     );
+  }
+
+  const modal = overlay.querySelector(".modal");
+  if (modal) {
+    modal.className = `modal ${String(classe || "").trim()}`.trim();
   }
 
   document.getElementById(

@@ -9,19 +9,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0&display=swap"
     rel="stylesheet"
   >
 
+  <link rel="stylesheet" href="../core/icons.css">
+  <link rel="stylesheet" href="../core/configuracoes.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/sidebar.css">
   <link rel="stylesheet" href="./css/cards.css">
   <link rel="stylesheet" href="./css/dashboard.css">
   <link rel="stylesheet" href="./css/chamada.css">
   <link rel="stylesheet" href="./css/frequencia.css">
+  <link rel="stylesheet" href="./css/notas.css">
   <link rel="stylesheet" href="./css/avisos.css">
+  <link rel="stylesheet" href="./css/agenda.css">
   <link rel="stylesheet" href="./css/topbar-interacoes.css">
-  <link rel="stylesheet" href="/biometria/perfil-biometrico.css">
+  <link rel="stylesheet" href="../biometria/perfil-biometrico.css">
+  <link rel="stylesheet" href="../core/mobile-shell.css">
 </head>
 
 <body>
@@ -41,22 +46,32 @@
 
         <nav class="sidebar__nav">
           <button class="sidebar__item is-active" data-page="dashboard">
-            <span class="sidebar__icon">⌂</span>
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">home</span>
             <span>Home</span>
           </button>
 
+          <button class="sidebar__item" data-page="agenda">
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">calendar_month</span>
+            <span>Agenda</span>
+          </button>
+
           <button class="sidebar__item" data-page="frequencia">
-            <span class="sidebar__icon">●</span>
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">monitoring</span>
             <span>Frequências</span>
           </button>
 
+          <button class="sidebar__item" data-page="notas">
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">school</span>
+            <span>Notas</span>
+          </button>
+
           <button class="sidebar__item" data-page="chamada">
-            <span class="sidebar__icon">◉</span>
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">face</span>
             <span>Chamada</span>
           </button>
 
           <button class="sidebar__item" data-page="avisos">
-            <span class="sidebar__icon">◒</span>
+            <span class="sidebar__icon material-symbols-rounded" aria-hidden="true">campaign</span>
             <span>Avisos</span>
           </button>
         </nav>
@@ -64,21 +79,29 @@
 
       <div class="sidebar__footer">
         <div class="sidebar__menu-wrapper">
-          <button class="sidebar__round-btn" id="btnMenuPerfil" title="Abrir menu">
-            ⚙
+          <button class="sidebar__round-btn" id="btnMenuPerfil" title="Abrir menu" aria-label="Abrir menu de perfil">
+            <span class="material-symbols-rounded" aria-hidden="true">tune</span>
           </button>
 
           <div class="sidebar__menu-dropdown" id="menuPerfilDropdown">
-            <button class="sidebar__menu-item" id="btnPerfil">Perfil</button>
-            <button class="sidebar__menu-item" id="btnConfiguracoes">Configurações</button>
+            <button class="sidebar__menu-item" id="btnPerfil">
+              <span class="material-symbols-rounded" aria-hidden="true">person</span>
+              Perfil
+            </button>
+            <button class="sidebar__menu-item" id="btnConfiguracoes">
+              <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+              Configurações
+            </button>
             <button class="sidebar__menu-item sidebar__menu-item--danger" id="btnLogout">
+              <span class="material-symbols-rounded" aria-hidden="true">logout</span>
               Sair
             </button>
           </div>
         </div>
 
-        <button class="sidebar__theme-switch" id="btnTemaSwitch" title="Alternar tema">
-          <span></span>
+        <button class="sidebar__theme-switch" id="btnTemaSwitch" title="Alternar tema" aria-label="Alternar tema">
+          <span class="material-symbols-rounded theme-icon-light" aria-hidden="true">light_mode</span>
+          <span class="material-symbols-rounded theme-icon-dark" aria-hidden="true">dark_mode</span>
         </button>
       </div>
     </aside>
@@ -100,7 +123,7 @@
               aria-label="Abrir notificações"
               aria-expanded="false"
             >
-              🔔
+              <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
               <span class="notificacoes-aluno-badge" id="badgeNotificacoesAluno" hidden>0</span>
             </button>
 
@@ -117,7 +140,7 @@
               aria-expanded="false"
               aria-controls="buscaAlunoResultados"
             />
-            <span aria-hidden="true">⌕</span>
+            <span class="material-symbols-rounded" aria-hidden="true">search</span>
             <div class="busca-aluno-resultados" id="buscaAlunoResultados" hidden></div>
           </div>
         </div>
@@ -129,12 +152,19 @@
 
       <section class="page page-frequencia" id="page-frequencia"></section>
 
+      <section class="page page-notas" id="page-notas"></section>
+
       <section class="page page-chamada" id="page-chamada"></section>
 
       <section class="page page-avisos" id="page-avisos"></section>
+
+      <section class="page page-agenda" id="page-agenda"></section>
+
+      <section class="page page-configuracoes" id="page-configuracoes"></section>
     </main>
   </div>
 
   <script type="module" src="./js/main-aluno.js"></script>
+  <script type="module" src="../core/mobile-shell.js"></script>
 </body>
 </html>

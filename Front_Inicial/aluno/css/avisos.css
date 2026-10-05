@@ -287,3 +287,196 @@
     align-items: flex-start;
   }
 }
+
+/* =========================================================
+   AVISOS + OCORRÊNCIAS REAIS
+   ========================================================= */
+.comunicacao-tabs {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 18px;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.comunicacao-tab {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.comunicacao-tab .material-symbols-rounded { font-size: 20px; }
+.comunicacao-tab strong {
+  min-width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  font-size: 11px;
+}
+.comunicacao-tab.is-active { background: var(--primary); color: #fff; }
+
+.comunicacao-feedback {
+  margin-bottom: 16px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  font-weight: 750;
+}
+.comunicacao-feedback.sucesso { background: rgba(34,197,94,.12); color: #15803d; border: 1px solid rgba(34,197,94,.25); }
+.comunicacao-feedback.erro { background: rgba(239,68,68,.1); color: #b91c1c; border: 1px solid rgba(239,68,68,.22); }
+
+.aviso-status-wrap { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.aviso-important-badge {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, .13);
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 900;
+}
+.aviso-data-completa { display: block; margin-top: 11px; color: var(--text-soft); font-weight: 700; }
+
+.aviso-card.is-feedback .aviso-marker { background: #7c3aed; }
+.feedback-academico-box {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--card-border));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--primary-soft) 56%, var(--card-bg));
+}
+.feedback-academico-metricas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.feedback-academico-metricas > div {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+.feedback-academico-metricas span,
+.feedback-academico-melhoria span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.feedback-academico-metricas strong { font-size: 18px; }
+.feedback-academico-melhoria { margin-top: 12px; }
+.feedback-academico-melhoria p { margin: 0; }
+
+.ocorrencias-aluno-list { display: flex; flex-direction: column; gap: 14px; }
+.ocorrencia-filter {
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-weight: 800;
+  cursor: pointer;
+}
+.ocorrencia-filter:hover,
+.ocorrencia-filter.is-active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.ocorrencia-aluno-card {
+  position: relative;
+  padding: 18px 19px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: var(--card-bg);
+}
+.ocorrencia-aluno-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: #60a5fa;
+}
+.ocorrencia-aluno-card.gravidade-media::before { background: #f59e0b; }
+.ocorrencia-aluno-card.gravidade-alta::before { background: #ef4444; }
+.ocorrencia-aluno-topo { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.ocorrencia-aluno-topo h3 { margin-top: 8px; font-size: 18px; }
+.ocorrencia-aluno-card > p { margin-top: 11px; color: var(--text-muted); font-weight: 650; line-height: 1.5; }
+.ocorrencia-aluno-badges { display: flex; gap: 7px; flex-wrap: wrap; }
+.ocorrencia-aluno-tipo,
+.ocorrencia-aluno-gravidade,
+.ocorrencia-aluno-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+.ocorrencia-aluno-tipo { background: var(--primary-soft); color: var(--primary-strong); }
+.ocorrencia-aluno-gravidade.baixa { background: rgba(34,197,94,.1); color: #15803d; }
+.ocorrencia-aluno-gravidade.media { background: rgba(245,158,11,.12); color: #b45309; }
+.ocorrencia-aluno-gravidade.alta { background: rgba(239,68,68,.11); color: #b91c1c; }
+.ocorrencia-aluno-status.pendente { background: rgba(245,158,11,.12); color: #b45309; }
+.ocorrencia-aluno-status.em-analise { background: rgba(59,130,246,.11); color: #1d4ed8; }
+.ocorrencia-aluno-status.resolvida { background: rgba(34,197,94,.11); color: #15803d; }
+.ocorrencia-aluno-status.cancelada { background: rgba(107,114,128,.12); color: var(--text-muted); }
+.ocorrencia-aluno-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 14px; color: var(--text-soft); font-size: 13px; }
+.ocorrencia-resposta-gestor {
+  margin-top: 15px;
+  padding: 14px 15px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--card-border));
+}
+.ocorrencia-resposta-gestor span { color: var(--primary-strong); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.ocorrencia-resposta-gestor p { margin: 6px 0; color: var(--text); }
+.ocorrencia-resposta-gestor small { color: var(--text-soft); }
+
+.comunicacao-empty,
+.comunicacao-loading {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.comunicacao-empty .material-symbols-rounded { font-size: 40px; color: var(--primary); }
+.comunicacao-empty strong { color: var(--text); font-size: 17px; }
+.comunicacao-empty p { max-width: 480px; }
+.comunicacao-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--card-border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: comunicacaoSpin .8s linear infinite;
+}
+@keyframes comunicacaoSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 720px) {
+  .comunicacao-tabs { width: 100%; }
+  .comunicacao-tab { flex: 1; justify-content: center; }
+  .feedback-academico-metricas { grid-template-columns: 1fr; }
+  .ocorrencia-aluno-topo { flex-direction: column; }
+}

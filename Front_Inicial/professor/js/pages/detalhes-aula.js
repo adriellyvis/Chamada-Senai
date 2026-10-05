@@ -4,7 +4,7 @@ const API_URL = `http://${API_HOST}:8080`;
 const detalhesBody = document.getElementById("detalhesBody");
 const btnVoltar = document.getElementById("btnVoltar");
 
-const usuario = JSON.parse(localStorage.getItem("usuario"));
+const usuario = JSON.parse((sessionStorage.getItem("usuario") || localStorage.getItem("usuario")));
 const aulaDetalheId = localStorage.getItem("aulaDetalheId");
 
 if (!usuario) {
@@ -30,7 +30,7 @@ async function carregarDetalhes() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "usuario-id": usuario.id
+        "Authorization": `Bearer ${usuario.token}`
       }
     });
 

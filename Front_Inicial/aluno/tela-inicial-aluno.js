@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function obterUsuarioLogado() {
-  const usuarioSalvo = localStorage.getItem("usuario");
+  const usuarioSalvo = (sessionStorage.getItem("usuario") || localStorage.getItem("usuario"));
 
   if (!usuarioSalvo) {
     return null;
@@ -75,7 +75,8 @@ function carregarUsuario() {
   if (perfil && perfil !== "aluno") {
     alert("Acesso não permitido para este portal.");
     localStorage.removeItem("usuario");
-    window.location.href = "/login/area-login-aluno.html";
+    sessionStorage.removeItem("usuario");
+    window.location.href = "../login/area-login-aluno.html";
     return;
   }
 
@@ -266,7 +267,8 @@ function configurarMenuPerfil() {
       if (!confirmar) return;
 
       localStorage.removeItem("usuario");
-      window.location.href = "/login/area-login-aluno.html";
+      sessionStorage.removeItem("usuario");
+      window.location.href = "../login/area-login-aluno.html";
     });
   }
 }

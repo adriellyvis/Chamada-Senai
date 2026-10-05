@@ -1,5 +1,5 @@
 import { request } from "../../../core/api.js";
-import { obterAvisosComEstado, marcarAvisoComoLido } from "../data/avisos-aluno-data.js";
+import { carregarAvisosAluno, obterAvisosComEstado, marcarAvisoComoLido } from "../data/avisos-aluno-data.js";
 
 let navegarCallback = null;
 let configurada = false;
@@ -88,7 +88,7 @@ async function executarBusca(input, resultados) {
   resultados.innerHTML = montarCarregamento();
 
   try {
-    await carregarDisciplinas();
+    await Promise.all([carregarDisciplinas(), carregarAvisosAluno().catch(() => [])]);
 
     const disciplinas = disciplinasCache
       .map(item => ({ ...item, pontuacao: pontuar(termo, [item.nome, item.professor]) }))
@@ -176,9 +176,9 @@ function montarGrupoDisciplinas(disciplinas) {
       <div class="busca-aluno-grupo-titulo"><span>DISCIPLINAS</span><strong>${disciplinas.length}</strong></div>
       ${disciplinas.map(item => `
         <button type="button" data-busca-tipo="disciplina" data-valor="${escaparHtml(item.nome)}">
-          <span class="busca-aluno-icone disciplina">D</span>
+          <span class="busca-aluno-icone disciplina material-symbols-rounded" aria-hidden="true">menu_book</span>
           <span><strong>${escaparHtml(item.nome)}</strong><small>${escaparHtml(item.professor || "Abrir histórico de frequência")}</small></span>
-          <b>›</b>
+          <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
         </button>
       `).join("")}
     </section>
@@ -191,9 +191,9 @@ function montarGrupoAvisos(avisos) {
       <div class="busca-aluno-grupo-titulo"><span>AVISOS</span><strong>${avisos.length}</strong></div>
       ${avisos.map(item => `
         <button type="button" data-busca-tipo="aviso" data-valor="${escaparHtml(item.id)}">
-          <span class="busca-aluno-icone aviso">!</span>
+          <span class="busca-aluno-icone aviso material-symbols-rounded" aria-hidden="true">campaign</span>
           <span><strong>${escaparHtml(item.titulo)}</strong><small>${escaparHtml(`${item.tag} • ${item.data}`)}</small></span>
-          <b>›</b>
+          <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
         </button>
       `).join("")}
     </section>
@@ -214,7 +214,7 @@ async function selecionarResultado(item, input, resultados) {
   }
 
   if (tipo === "aviso") {
-    marcarAvisoComoLido(valor);
+    await marcarAvisoComoLido(valor).catch(() => {});
     sessionStorage.setItem("alunoAvisoBuscaPendente", valor);
     await navegar("avisos");
   }
@@ -256,7 +256,7 @@ async function navegar(pagina) {
 
 function obterUsuarioLogado() {
   try {
-    return JSON.parse(localStorage.getItem("usuario")) || null;
+    return JSON.parse((sessionStorage.getItem("usuario") || localStorage.getItem("usuario"))) || null;
   } catch {
     return null;
   }

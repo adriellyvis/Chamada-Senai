@@ -1,6 +1,10 @@
 import { request } from "../../../core/api.js";
+import { enviarFeedbackProfessor } from "../../../core/avisos-api.js";
+import { abrirFormularioOcorrencia } from "./ocorrencias-professor.js";
 
 let alunosCache = [];
+let vinculosProfessorCache = [];
+let mediasAcademicasCache = new Map();
 
 export async function abrirAlunosProfessor(turmaId = "") {
   const conteudo = document.getElementById("conteudoPrincipal");
@@ -52,7 +56,7 @@ function montarTopo(titulo, subtitulo, placeholder) {
         <p class="page-sub">${subtitulo}</p>
       </div>
       <div class="topbar-actions">
-        <button class="bell-btn" type="button">🔔</button>
+        <button class="bell-btn" type="button" aria-label="Notificações"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></button>
         <div class="search-pill busca-global-professor">
           <input class="busca-global-professor-input" type="search" placeholder="Buscar alunos e turmas..." autocomplete="off" />
           <span aria-hidden="true">⌕</span>
@@ -87,17 +91,28 @@ async function carregarTurmasFiltro(turmaIdSelecionada = "") {
 
   try {
     const turmas = await request("/professor/turmas");
+    vinculosProfessorCache = (Array.isArray(turmas) ? turmas : []).map(normalizarVinculoProfessor);
+
+    // /professor/turmas devolve um item por vínculo turma-disciplina.
+    // Para o filtro visual, mostramos cada turma somente uma vez.
+    const turmasUnicas = new Map();
+    vinculosProfessorCache.forEach(item => {
+      if (item.turmaId != null && !turmasUnicas.has(String(item.turmaId))) {
+        turmasUnicas.set(String(item.turmaId), item.turmaNome);
+      }
+    });
+
     select.innerHTML = `
       <option value="">Todas as Turmas</option>
-      ${(turmas || []).map(item => {
-        const id = item.turmaId ?? item.turma?.id ?? item.id ?? "";
-        const nome = item.nomeTurma ?? item.turma?.nome ?? item.nome ?? "Turma sem nome";
-        return `<option value="${id}" ${String(id) === String(turmaIdSelecionada) ? "selected" : ""}>${nome}</option>`;
-      }).join("")}
+      ${[...turmasUnicas.entries()].map(([id, nome]) =>
+        `<option value="${id}" ${String(id) === String(turmaIdSelecionada) ? "selected" : ""}>${nome}</option>`
+      ).join("")}
     `;
+
     select.addEventListener("change", async () => carregarAlunosProfessor(select.value));
   } catch (error) {
     console.error(error);
+    vinculosProfessorCache = [];
     select.innerHTML = `<option value="">Erro ao carregar turmas</option>`;
   }
 }
@@ -113,6 +128,11 @@ async function carregarAlunosProfessor(turmaId = "") {
     const endpoint = query.toString() ? `/professor/alunos?${query.toString()}` : "/professor/alunos";
     const alunos = await request(endpoint);
     alunosCache = alunos || [];
+
+    // A listagem de alunos não traz a média acadêmica calculada pelo back.
+    // Buscamos as notas das disciplinas do professor e montamos a média aqui.
+    await carregarMediasAcademicas(alunosCache, turmaId);
+
     atualizarCardsAlunos(alunosCache);
     renderizarAlunosProfessor(alunosCache);
   } catch (error) {
@@ -179,7 +199,13 @@ function renderizarAlunosProfessor(alunos) {
                     <div class="freq-bar"><div style="width:${Math.min(dados.frequencia, 100)}%"></div></div>
                   </div>
                 </td>
-                <td>🏅 ${dados.mediaAcademica}</td>
+                <td>
+                  <span class="media-academica-cell ${classeMediaAcademica(dados.mediaAcademica)}">
+                    <span aria-hidden="true">🏅</span>
+                    <strong>${dados.mediaAcademica != null ? dados.mediaAcademica : "—"}</strong>
+                    ${dados.mediaAcademica != null ? `<small>/ 10</small>` : ""}
+                  </span>
+                </td>
                 <td>
                   <span class="aluno-status ${dados.biometriaAtiva ? "regular" : "atencao"}">
                     ${dados.biometriaAtiva ? "Ativo" : "Cadastrar"}
@@ -194,6 +220,13 @@ function renderizarAlunosProfessor(alunos) {
                       data-aluno-id="${dados.id}"
                       data-aluno-nome="${dados.nome}"
                     >Ver Perfil</button>
+                    <button
+                      class="aluno-acao-btn feedback"
+                      type="button"
+                      data-acao="feedback"
+                      data-aluno-id="${dados.id}"
+                      data-aluno-nome="${dados.nome}"
+                    >Feedback</button>
                     <button
                       class="aluno-acao-btn ocorrencia"
                       type="button"
@@ -216,19 +249,124 @@ atualizarIcones();
 
 function normalizarAlunoProfessor(item) {
   const usuario = item.usuario && typeof item.usuario === "object" ? item.usuario : item;
-  const turma = item.turma && typeof item.turma === "object" ? item.turma : item;
+  const turmaObjeto = item.turma && typeof item.turma === "object" ? item.turma : null;
+  const turmaTexto = typeof item.turma === "string" ? item.turma : null;
   const frequencia = Number(item.frequencia ?? item.percentualFrequencia ?? item.mediaFrequencia ?? 0);
+  const alunoId = item.id ?? item.alunoId ?? "";
+  const mediaCalculada = mediasAcademicasCache.get(String(alunoId));
 
   return {
-    id: item.id ?? item.alunoId ?? "",
+    id: alunoId,
     nome: usuario.nome ?? item.nomeAluno ?? item.nome ?? "Aluno",
     email: usuario.email ?? item.email ?? "-",
     matricula: item.matricula ?? item.ra ?? item.registroAcademico ?? "-",
-    turma: turma.nome ?? item.nomeTurma ?? item.turma ?? "-",
+    turmaId: item.turmaId ?? turmaObjeto?.id ?? item.idTurma ?? null,
+    turma: turmaObjeto?.nome ?? item.nomeTurma ?? item.turmaNome ?? turmaTexto ?? "-",
     frequencia,
-    mediaAcademica: Number(item.mediaAcademica ?? item.media ?? item.notaMedia ?? 0).toFixed(1),
+    mediaAcademica: normalizarMediaAcademica(
+      mediaCalculada ?? item.mediaAcademica ?? item.media ?? item.notaMedia
+    ),
     biometriaAtiva: Boolean(item.biometriaAtiva ?? item.leitorBiometricoAtivo ?? item.embeddingFacial ?? item.digitalColetada)
   };
+}
+
+async function carregarMediasAcademicas(alunos, turmaId = "") {
+  mediasAcademicasCache = new Map();
+
+  try {
+    if (!vinculosProfessorCache.length) {
+      const respostaVinculos = await request("/professor/turmas");
+      vinculosProfessorCache = (Array.isArray(respostaVinculos) ? respostaVinculos : [])
+        .map(normalizarVinculoProfessor);
+    }
+
+    const idsAlunos = new Set(
+      (Array.isArray(alunos) ? alunos : [])
+        .map(item => String(item.id ?? item.alunoId ?? ""))
+        .filter(Boolean)
+    );
+
+    const vinculos = vinculosProfessorCache.filter(vinculo =>
+      vinculo.turmaDisciplinaId != null &&
+      (!turmaId || String(vinculo.turmaId) === String(turmaId))
+    );
+
+    if (!idsAlunos.size || !vinculos.length) return;
+
+    const resultados = await Promise.allSettled(
+      vinculos.map(vinculo => request(`/professor/notas/vinculo/${vinculo.turmaDisciplinaId}`))
+    );
+
+    // Para cada aluno guardamos a média de cada disciplina separadamente.
+    // Depois fazemos a média entre disciplinas, dando o mesmo peso a cada uma.
+    const mediasPorAluno = new Map();
+
+    resultados.forEach((resultado, indice) => {
+      if (resultado.status !== "fulfilled") {
+        console.warn(
+          `Não foi possível carregar notas do vínculo ${vinculos[indice]?.turmaDisciplinaId}:`,
+          resultado.reason
+        );
+        return;
+      }
+
+      const notas = Array.isArray(resultado.value) ? resultado.value : [];
+      const valoresPorAluno = new Map();
+
+      notas.forEach(nota => {
+        const alunoId = String(nota.alunoId ?? "");
+        if (!alunoId || !idsAlunos.has(alunoId)) return;
+
+        const notaNormalizada = normalizarNotaParaDez(nota);
+        if (!Number.isFinite(notaNormalizada)) return;
+
+        if (!valoresPorAluno.has(alunoId)) valoresPorAluno.set(alunoId, []);
+        valoresPorAluno.get(alunoId).push(notaNormalizada);
+      });
+
+      valoresPorAluno.forEach((valores, alunoId) => {
+        if (!valores.length) return;
+        const mediaDisciplina = valores.reduce((soma, valor) => soma + valor, 0) / valores.length;
+
+        if (!mediasPorAluno.has(alunoId)) mediasPorAluno.set(alunoId, []);
+        mediasPorAluno.get(alunoId).push(mediaDisciplina);
+      });
+    });
+
+    mediasPorAluno.forEach((mediasDisciplinas, alunoId) => {
+      if (!mediasDisciplinas.length) return;
+      const mediaGeral = mediasDisciplinas.reduce((soma, valor) => soma + valor, 0) / mediasDisciplinas.length;
+      mediasAcademicasCache.set(alunoId, mediaGeral);
+    });
+  } catch (error) {
+    // A falha nas notas não deve impedir a tela de alunos de abrir.
+    console.warn("Não foi possível calcular as médias acadêmicas dos alunos:", error);
+  }
+}
+
+function normalizarVinculoProfessor(item) {
+  const turma = item?.turma && typeof item.turma === "object" ? item.turma : {};
+  return {
+    turmaDisciplinaId: item?.turmaDisciplinaId ?? item?.vinculoId ?? item?.id ?? null,
+    turmaId: item?.turmaId ?? turma.id ?? null,
+    turmaNome: item?.nomeTurma ?? item?.turmaNome ?? turma.nome ?? item?.nome ?? "Turma"
+  };
+}
+
+function normalizarNotaParaDez(nota) {
+  const valor = Number(nota?.nota);
+  const maxima = Number(nota?.notaMaxima ?? 10);
+  if (!Number.isFinite(valor) || !Number.isFinite(maxima) || maxima <= 0) return NaN;
+  return (valor / maxima) * 10;
+}
+
+function classeMediaAcademica(mediaFormatada) {
+  if (mediaFormatada == null || mediaFormatada === "") return "sem-media";
+  const numero = Number(String(mediaFormatada).replace(",", "."));
+  if (!Number.isFinite(numero)) return "sem-media";
+  if (numero < 6) return "baixa";
+  if (numero < 7) return "media";
+  return "boa";
 }
 
 function definirClasseFrequencia(frequencia) {
@@ -283,6 +421,11 @@ function configurarAcoesAlunos() {
 
       if (acao === "perfil") {
         abrirPerfilAluno(alunoId);
+        return;
+      }
+
+      if (acao === "feedback") {
+        abrirFeedbackAluno(alunoId);
         return;
       }
 
@@ -342,7 +485,7 @@ function abrirPerfilAluno(alunoId) {
 
         <section class="perfil-aluno-indicadores">
           ${montarIndicadorPerfil("Frequência", `${aluno.frequencia.toFixed(1)}%`, "calendar-check", classeFrequencia)}
-          ${montarIndicadorPerfil("Média acadêmica", aluno.mediaAcademica, "award", "regular")}
+          ${montarIndicadorPerfil("Média acadêmica", aluno.mediaAcademica != null ? `${aluno.mediaAcademica} / 10` : "—", "award", "regular")}
           ${montarIndicadorPerfil(
             "Biometria facial",
             aluno.biometriaAtiva ? "Ativa" : "Não cadastrada",
@@ -386,6 +529,10 @@ function abrirPerfilAluno(alunoId) {
 
       <footer class="perfil-aluno-footer">
         <button class="perfil-aluno-btn secundario" id="btnCancelarPerfilAluno" type="button">Fechar</button>
+        <button class="perfil-aluno-btn feedback" id="btnFeedbackPerfilAluno" type="button">
+          <i data-lucide="message-square-heart"></i>
+          Enviar feedback
+        </button>
         <button class="perfil-aluno-btn primario" id="btnOcorrenciaPerfilAluno" type="button">
           <i data-lucide="file-warning"></i>
           Registrar ocorrência
@@ -400,6 +547,10 @@ function abrirPerfilAluno(alunoId) {
 
   document.getElementById("btnFecharPerfilAluno")?.addEventListener("click", removerModalPerfilAluno);
   document.getElementById("btnCancelarPerfilAluno")?.addEventListener("click", removerModalPerfilAluno);
+  document.getElementById("btnFeedbackPerfilAluno")?.addEventListener("click", () => {
+    removerModalPerfilAluno();
+    abrirFeedbackAluno(aluno.id);
+  });
   document.getElementById("btnOcorrenciaPerfilAluno")?.addEventListener("click", () => {
     removerModalPerfilAluno();
     abrirOcorrenciaAluno(aluno.id, aluno.nome);
@@ -424,11 +575,226 @@ function montarIndicadorPerfil(titulo, valor, icone, classe) {
   `;
 }
 
+
+function abrirFeedbackAluno(alunoId) {
+  const aluno = alunosCache
+    .map(normalizarAlunoProfessor)
+    .find(item => String(item.id) === String(alunoId));
+
+  if (!aluno) {
+    alert("Não foi possível localizar o aluno.");
+    return;
+  }
+
+  removerModalFeedbackAluno();
+
+  const modal = document.createElement("div");
+  modal.className = "feedback-aluno-overlay";
+  modal.id = "feedbackAlunoOverlay";
+
+  modal.innerHTML = `
+    <section class="feedback-aluno-modal" role="dialog" aria-modal="true" aria-labelledby="feedbackAlunoTitulo">
+      <header class="feedback-aluno-header">
+        <div>
+          <span>FEEDBACK ACADÊMICO</span>
+          <h2 id="feedbackAlunoTitulo">Enviar acompanhamento ao aluno</h2>
+          <p>A frequência é preenchida com o valor atual do sistema. A nota é informada pelo professor.</p>
+        </div>
+        <button id="btnFecharFeedbackAluno" type="button" aria-label="Fechar">
+          <i data-lucide="x"></i>
+        </button>
+      </header>
+
+      <form id="formFeedbackAluno" class="feedback-aluno-form">
+        <div class="feedback-aluno-destinatario">
+          <div class="feedback-aluno-avatar">${escapeHtml(obterIniciais(aluno.nome))}</div>
+          <div>
+            <strong>${escapeHtml(aluno.nome)}</strong>
+            <span>${escapeHtml(aluno.turma)} • RA ${escapeHtml(aluno.matricula)}</span>
+          </div>
+        </div>
+
+        <div class="feedback-aluno-grid">
+          <label>
+            Frequência atual
+            <div class="feedback-readonly ${definirClasseFrequencia(aluno.frequencia)}">
+              <strong>${aluno.frequencia.toFixed(1)}%</strong>
+              <span>${escapeHtml(obterSituacaoFrequencia(aluno.frequencia))}</span>
+            </div>
+          </label>
+
+          <label>
+            Nota / média informada
+            <input id="feedbackNotaAluno" type="number" min="0" step="0.1" placeholder="Ex.: 85 ou 8,5" />
+            <small>Use a escala adotada na sua turma.</small>
+          </label>
+        </div>
+
+        <label>
+          Título
+          <input id="feedbackTituloAluno" type="text" maxlength="150" value="Feedback acadêmico" required />
+        </label>
+
+        <label>
+          Comentário
+          <textarea id="feedbackMensagemAluno" rows="4" maxlength="1000" placeholder="Faça um resumo do desempenho atual..."></textarea>
+        </label>
+
+        <div class="feedback-melhoria-opcional">
+          <label class="feedback-melhoria-toggle" for="feedbackAdicionarMelhoria">
+            <input id="feedbackAdicionarMelhoria" type="checkbox" />
+            <span class="feedback-melhoria-check" aria-hidden="true"></span>
+            <span>
+              <strong>Adicionar orientação de melhoria</strong>
+              <small>Ative somente quando quiser deixar uma recomendação específica para o aluno.</small>
+            </span>
+          </label>
+
+          <div id="feedbackMelhoriaContainer" class="feedback-melhoria-container" hidden>
+            <label>
+              Orientação / sugestão de melhoria
+              <textarea id="feedbackMelhoriasAluno" rows="5" maxlength="1200" placeholder="Ex.: revisar o conteúdo da última unidade, participar mais das atividades práticas..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div id="feedbackAlunoStatus" class="feedback-aluno-status" hidden></div>
+
+        <footer class="feedback-aluno-acoes">
+          <button class="secundario" id="btnCancelarFeedbackAluno" type="button">Cancelar</button>
+          <button class="primario" id="btnEnviarFeedbackAluno" type="submit">
+            <i data-lucide="send"></i>
+            Enviar ao aluno
+          </button>
+        </footer>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add("feedback-aluno-aberto");
+  atualizarIcones();
+
+  document.getElementById("btnFecharFeedbackAluno")?.addEventListener("click", removerModalFeedbackAluno);
+  document.getElementById("btnCancelarFeedbackAluno")?.addEventListener("click", removerModalFeedbackAluno);
+  document.getElementById("formFeedbackAluno")?.addEventListener("submit", event => enviarFeedbackAluno(event, aluno));
+
+  const checkboxMelhoria = document.getElementById("feedbackAdicionarMelhoria");
+  const containerMelhoria = document.getElementById("feedbackMelhoriaContainer");
+  const campoMelhorias = document.getElementById("feedbackMelhoriasAluno");
+
+  checkboxMelhoria?.addEventListener("change", () => {
+    const ativo = checkboxMelhoria.checked;
+
+    if (containerMelhoria) {
+      containerMelhoria.hidden = !ativo;
+    }
+
+    if (ativo) {
+      window.setTimeout(() => campoMelhorias?.focus(), 0);
+    } else if (campoMelhorias) {
+      campoMelhorias.value = "";
+    }
+  });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) removerModalFeedbackAluno();
+  });
+}
+
+async function enviarFeedbackAluno(event, aluno) {
+  event.preventDefault();
+
+  const notaCampo = document.getElementById("feedbackNotaAluno")?.value.trim() ?? "";
+  const nota = notaCampo === "" ? null : Number(notaCampo);
+  const titulo = document.getElementById("feedbackTituloAluno")?.value.trim();
+  const mensagem = document.getElementById("feedbackMensagemAluno")?.value.trim() ?? "";
+  const adicionarMelhoria = document.getElementById("feedbackAdicionarMelhoria")?.checked ?? false;
+  const melhoriasCampo = document.getElementById("feedbackMelhoriasAluno")?.value.trim() ?? "";
+  const melhorias = adicionarMelhoria ? melhoriasCampo : null;
+  const botao = document.getElementById("btnEnviarFeedbackAluno");
+  const status = document.getElementById("feedbackAlunoStatus");
+
+  if (nota !== null && (!Number.isFinite(nota) || nota < 0)) {
+    mostrarStatusFeedback("Informe uma nota válida ou deixe o campo vazio.", "erro");
+    return;
+  }
+
+  if (!titulo) {
+    mostrarStatusFeedback("Informe um título para o feedback.", "erro");
+    return;
+  }
+
+  if (adicionarMelhoria && !melhoriasCampo) {
+    mostrarStatusFeedback("Escreva a orientação de melhoria ou desmarque a opção.", "erro");
+    document.getElementById("feedbackMelhoriasAluno")?.focus();
+    return;
+  }
+
+  const dados = {
+    alunoId: Number(aluno.id),
+    turmaId: aluno.turmaId ? Number(aluno.turmaId) : null,
+    turmaNome: aluno.turma,
+    titulo,
+    mensagem,
+    frequencia: Number(aluno.frequencia.toFixed(2)),
+    nota,
+    melhorias,
+    categoria: "FEEDBACK",
+    prioridade: aluno.frequencia < 75 ? "IMPORTANTE" : "NORMAL"
+  };
+
+  try {
+    if (botao) {
+      botao.disabled = true;
+      botao.innerHTML = '<span class="feedback-mini-spinner"></span> Enviando...';
+    }
+
+    await enviarFeedbackProfessor(dados);
+    mostrarStatusFeedback("Feedback enviado ao aluno com sucesso.", "sucesso");
+    window.setTimeout(removerModalFeedbackAluno, 1100);
+  } catch (error) {
+    console.error(error);
+    mostrarStatusFeedback(error.message || "Erro ao enviar feedback.", "erro");
+    if (botao) {
+      botao.disabled = false;
+      botao.innerHTML = '<i data-lucide="send"></i> Enviar ao aluno';
+      atualizarIcones();
+    }
+  }
+
+  function mostrarStatusFeedback(texto, tipo) {
+    if (!status) return;
+    status.hidden = false;
+    status.textContent = texto;
+    status.className = `feedback-aluno-status ${tipo}`;
+  }
+}
+
+function removerModalFeedbackAluno() {
+  document.getElementById("feedbackAlunoOverlay")?.remove();
+  document.body.classList.remove("feedback-aluno-aberto");
+}
+
+function normalizarMediaAcademica(valor) {
+  if (valor === null || valor === undefined || valor === "") return null;
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) return null;
+  return numero.toLocaleString("pt-BR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  });
+}
+
 function abrirOcorrenciaAluno(alunoId, alunoNome) {
-  localStorage.setItem("ocorrenciaAlunoId", alunoId ?? "");
-  localStorage.setItem("ocorrenciaAlunoNome", alunoNome ?? "");
-  localStorage.setItem("abrirModalOcorrencia", "true");
-  document.querySelector('[data-page="ocorrencias"]')?.click();
+  if (!alunoId) {
+    alert("Não foi possível identificar o aluno para registrar a ocorrência.");
+    return;
+  }
+
+  // Abre o formulário sobre a tela atual. O professor não perde o contexto
+  // da listagem de alunos ao registrar uma ocorrência.
+  abrirFormularioOcorrencia(null, alunoId);
 }
 
 function removerModalPerfilAluno() {

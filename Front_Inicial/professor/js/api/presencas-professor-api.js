@@ -1,14 +1,13 @@
 const API_HOST = window.location.hostname || "localhost";
 const API_URL = `http://${API_HOST}:8080`;
 
-function obterUsuarioId() {
-  const usuarioSalvo = localStorage.getItem("usuario");
+function obterUsuarioSessao() {
+  const usuarioSalvo = (sessionStorage.getItem("usuario") || localStorage.getItem("usuario"));
 
   if (!usuarioSalvo) return null;
 
   try {
-    const usuario = JSON.parse(usuarioSalvo);
-    return usuario.id;
+    return JSON.parse(usuarioSalvo);
   } catch {
     return null;
   }
@@ -19,17 +18,17 @@ export async function listarPresencasDaAula(aulaId) {
     throw new Error("Aula não informada.");
   }
 
-  const usuarioId = obterUsuarioId();
+  const usuario = obterUsuarioSessao();
 
-  if (!usuarioId) {
-    throw new Error("Usuário logado não encontrado.");
+  if (!usuario?.id || !usuario?.token) {
+    throw new Error("Sessão não encontrada. Entre novamente.");
   }
 
   const resposta = await fetch(`${API_URL}/professor/aulas/${aulaId}/presencas`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "usuario-id": usuarioId
+      "Authorization": `Bearer ${usuario.token}`
     }
   });
 

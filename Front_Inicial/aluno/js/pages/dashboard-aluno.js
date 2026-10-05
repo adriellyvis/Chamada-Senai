@@ -1,4 +1,5 @@
 import { request } from "../../../core/api.js";
+import { carregarAvisosAluno } from "../data/avisos-aluno-data.js";
 
 let dashboardAtual = null;
 
@@ -11,16 +12,22 @@ export async function abrirDashboardAluno(container) {
   });
 
   try {
-    const [dashboard, desempenhoDisciplinas] = usuario?.id
+    const [dashboard, desempenhoDisciplinas, agenda, historico, avisos] = usuario?.id
       ? await Promise.all([
           request(`/aluno/dashboard/${usuario.id}`),
-          carregarDesempenhoDisciplinas(usuario.id)
+          carregarDesempenhoDisciplinas(usuario.id),
+          carregarAgendaAluno(usuario.id),
+          carregarHistoricoAluno(usuario.id),
+          carregarAvisosAluno({ forcar: true }).catch(() => [])
         ])
-      : [montarDashboardFallback(), []];
+      : [montarDashboardFallback(), [], [], [], []];
 
     const dashboardNormalizado = normalizarDashboard({
       ...dashboard,
-      disciplinas: desempenhoDisciplinas
+      disciplinas: desempenhoDisciplinas,
+      agenda,
+      historico,
+      avisos: avisos.slice(0, 3)
     });
     dashboardAtual = dashboardNormalizado;
 
@@ -30,6 +37,7 @@ export async function abrirDashboardAluno(container) {
     });
 
     configurarControlesDashboard(dashboardNormalizado);
+    configurarAtalhosHome();
   } catch (erro) {
     console.error("Erro ao carregar dashboard do aluno:", erro);
 
@@ -47,6 +55,7 @@ export async function abrirDashboardAluno(container) {
     `;
 
     configurarControlesDashboard(fallback);
+    configurarAtalhosHome();
   }
 }
 
@@ -58,10 +67,10 @@ function montarDashboard({ carregando, dashboard }) {
       <section class="dashboard-layout dashboard-layout--modern">
         <div class="dashboard-main-column">
           <div class="dashboard-stats dashboard-stats--four">
-            ${cardStat("♙", "Sua média", formatarPercentual(dashboard.frequencia), textoRisco(dashboard.risco))}
-            ${cardStat("♙", "Faltas no mês", dashboard.faltasMes, "No mês atual")}
-            ${cardStat("▦", "Aulas assistidas", formatarAulasAssistidas(dashboard), "Total de aulas")}
-            ${cardStat("◎", "Frequência geral", formatarPercentual(dashboard.frequencia), situacaoCurta(dashboard.frequencia))}
+            ${cardStat("monitoring", "Sua média", formatarPercentual(dashboard.frequencia), textoRisco(dashboard.risco))}
+            ${cardStat("event_busy", "Faltas no mês", dashboard.faltasMes, "No mês atual")}
+            ${cardStat("menu_book", "Aulas assistidas", formatarAulasAssistidas(dashboard), "Total de aulas")}
+            ${cardStat("percent", "Frequência geral", formatarPercentual(dashboard.frequencia), situacaoCurta(dashboard.frequencia))}
           </div>
 
           <article class="card chart-card chart-card--modern" id="dashboardPainelDinamico">
@@ -103,64 +112,31 @@ function montarDashboard({ carregando, dashboard }) {
           <article class="card today-card today-card--modern">
             <div class="side-card-header">
               <h3>Horário de Hoje</h3>
-              <button type="button">Ver agenda completa</button>
+              <button id="btnVerAgendaCompleta" type="button">Ver agenda completa</button>
             </div>
 
-            <div class="timeline">
-              <div class="timeline-item is-current">
-                <span class="timeline-dot"></span>
-                <div>
-                  <strong>ACONTECENDO AGORA</strong>
-                  <h4>Projetos <span>(Wesley)</span></h4>
-                  <p>10h00 - 14h00 • Sala 01</p>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <span class="timeline-dot"></span>
-                <div>
-                  <strong>PRÓXIMA AULA</strong>
-                  <h4>PDM <span>(Paulo)</span></h4>
-                  <p>14h00 - 17h00 • Sala 02</p>
-                </div>
-              </div>
-            </div>
+            ${montarAgendaHoje(dashboard.agenda)}
           </article>
 
           <article class="card notice-card notice-card--modern">
             <div class="side-card-header">
-              <h3>📣 Mural de Avisos</h3>
-              <button type="button">Ver todos</button>
+              <h3 class="side-card-title"><span class="material-symbols-rounded" aria-hidden="true">campaign</span>Mural de Avisos</h3>
+              <button id="btnVerTodosAvisos" type="button">Ver todos</button>
             </div>
 
             <div class="notice-list-compact">
-              <div class="notice-item">
-                <strong>27 ABR • SECRETARIA</strong>
-                <p><b>Renovação de matrícula</b><br>A renovação estará disponível até sexta.</p>
-              </div>
-
-              <div class="notice-item">
-                <strong>25 ABR • COORDENAÇÃO</strong>
-                <p><b>Palestra de IA às 19h</b><br>Hoje no auditório principal.</p>
-              </div>
-
-              <div class="notice-item notice-item--warning">
-                <strong>24 ABR • FREQUÊNCIA</strong>
-                <p><b>Atenção à frequência</b><br>Acompanhe seus registros para evitar inconsistências.</p>
-              </div>
+              ${montarAvisosResumo(dashboard.avisos)}
             </div>
           </article>
 
           <article class="card biometric-list-card biometric-list-card--modern">
             <div class="side-card-header side-card-header--border">
-              <h3>◉ Últimos Registros Biométricos</h3>
-              <button type="button">Ver todos</button>
+              <h3 class="side-card-title"><span class="material-symbols-rounded" aria-hidden="true">face</span>Últimos Registros Biométricos</h3>
+              <button id="btnVerRegistrosBiometricos" type="button">Ver todos</button>
             </div>
 
             <div class="bio-records bio-records--list">
-              ${registroBioLinha("27 ABR • 10:02", "Projetos", "Wesley Pescoraro", "Presente", "green")}
-              ${registroBioLinha("27 ABR • 14:00", "PDM", "Paulo Netto", "Presente", "green")}
-              ${registroBioLinha("26 ABR • 08:12", "Banco de Dados", "Marcos Vinícius", "Atraso", "yellow")}
+              ${montarRegistrosBiometricos(dashboard.registrosBiometricos)}
             </div>
           </article>
         </aside>
@@ -326,7 +302,10 @@ function montarDashboardFallback() {
     presencasMes: 0,
     ocorrencias: 0,
     risco: "baixo",
-    disciplinas: []
+    disciplinas: [],
+    agenda: [],
+    avisos: [],
+    registrosBiometricos: []
   };
 }
 
@@ -353,7 +332,10 @@ function normalizarDashboard(dados = {}) {
     presencasMes: inteiroValido(dados.presencasMes, presencas),
     ocorrencias: inteiroValido(dados.ocorrencias, fallback.ocorrencias),
     risco: dados.risco ?? fallback.risco,
-    disciplinas: normalizarDisciplinas(dados.disciplinas ?? fallback.disciplinas)
+    disciplinas: normalizarDisciplinas(dados.disciplinas ?? fallback.disciplinas),
+    agenda: normalizarAgenda(dados.agenda ?? fallback.agenda),
+    avisos: Array.isArray(dados.avisos) ? dados.avisos : fallback.avisos,
+    registrosBiometricos: normalizarRegistrosBiometricos(dados.historico ?? [])
   };
 }
 
@@ -418,7 +400,7 @@ function calcularPercentuais({ presencas, faltas, atrasos, total, frequencia }) 
 function cardStat(icon, label, value, badge = "") {
   return `
     <article class="card stat-card">
-      <span class="stat-card__icon">${escaparHtml(icon)}</span>
+      <span class="stat-card__icon material-symbols-rounded" aria-hidden="true">${escaparHtml(icon)}</span>
 
       <div>
         <span class="stat-card__label">${escaparHtml(label)}</span>
@@ -500,7 +482,7 @@ function montarCardDisciplinas(dashboard) {
         ${linhas.length
           ? linhas.map((linha) => `
             <div class="disciplines-row">
-              <span class="discipline-name"><i>${escaparHtml(linha.icone)}</i>${escaparHtml(linha.nome)}</span>
+              <span class="discipline-name"><i class="material-symbols-rounded" aria-hidden="true">${escaparHtml(linha.icone)}</i>${escaparHtml(linha.nome)}</span>
               <span>${linha.presencas}<small>(${linha.presencasPct}%)</small></span>
               <span>${linha.faltas}<small class="danger">(${linha.faltasPct}%)</small></span>
               <span>${linha.atrasos}<small class="warn">(${linha.atrasosPct}%)</small></span>
@@ -518,6 +500,217 @@ function montarCardDisciplinas(dashboard) {
   `;
 }
 
+
+function configurarAtalhosHome() {
+  document.getElementById("btnVerAgendaCompleta")?.addEventListener("click", () => {
+    navegarParaPaginaAluno("agenda");
+  });
+
+  document.getElementById("btnVerTodosAvisos")?.addEventListener("click", () => {
+    navegarParaPaginaAluno("avisos");
+  });
+
+  document.getElementById("btnVerRegistrosBiometricos")?.addEventListener("click", () => {
+    sessionStorage.setItem("alunoRegistroFiltroPendente", "biometria");
+    navegarParaPaginaAluno("frequencia");
+  });
+}
+
+function navegarParaPaginaAluno(pagina) {
+  window.dispatchEvent(new CustomEvent("aluno:navegar", {
+    detail: { pagina }
+  }));
+}
+
+function montarAgendaHoje(agenda = []) {
+  const hoje = obterDiaSemanaAtual();
+  const horariosHoje = (Array.isArray(agenda) ? agenda : [])
+    .filter(item => item.diaSemana === hoje)
+    .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+
+  if (!horariosHoje.length) {
+    return `
+      <div class="home-empty-state">
+        <strong>Nenhuma aula cadastrada para hoje</strong>
+        <p>Consulte a agenda completa para visualizar os próximos horários.</p>
+      </div>
+    `;
+  }
+
+  const agora = new Date();
+  const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+  const atuaisOuProximos = horariosHoje.filter(item => minutosFim(item.horaFim) >= minutosAgora);
+  const exibidos = (atuaisOuProximos.length ? atuaisOuProximos : horariosHoje.slice(-2)).slice(0, 2);
+
+  return `
+    <div class="timeline">
+      ${exibidos.map(item => {
+        const inicio = minutosFim(item.horaInicio);
+        const fim = minutosFim(item.horaFim);
+        const acontecendo = minutosAgora >= inicio && minutosAgora < fim;
+        const encerrada = minutosAgora >= fim;
+        const rotulo = acontecendo
+          ? "ACONTECENDO AGORA"
+          : encerrada
+            ? "AULA ENCERRADA"
+            : "PRÓXIMA AULA";
+
+        return `
+          <div class="timeline-item ${acontecendo ? "is-current" : ""}">
+            <span class="timeline-dot"></span>
+            <div>
+              <strong>${rotulo}</strong>
+              <h4>${escaparHtml(item.sigla)} • ${escaparHtml(item.disciplina)} <span>(${escaparHtml(item.professor)})</span></h4>
+              <p>${formatarIntervaloHorario(item.horaInicio, item.horaFim)} • ${escaparHtml(item.sala || item.turma)}</p>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function montarAvisosResumo(avisos = []) {
+  const lista = Array.isArray(avisos) ? avisos.slice(0, 3) : [];
+
+  if (!lista.length) {
+    return `<div class="home-empty-state"><strong>Nenhum aviso disponível</strong></div>`;
+  }
+
+  return lista.map(aviso => `
+    <div class="notice-item ${aviso.prioridade === "importante" ? "notice-item--warning" : ""}">
+      <strong>${escaparHtml(aviso.data)} • ${escaparHtml(String(aviso.tag || "Aviso").toUpperCase())}</strong>
+      <p><b>${escaparHtml(aviso.titulo)}</b><br>${escaparHtml(aviso.texto)}</p>
+    </div>
+  `).join("");
+}
+
+function montarRegistrosBiometricos(registros = []) {
+  const lista = Array.isArray(registros) ? registros.slice(0, 3) : [];
+
+  if (!lista.length) {
+    return `
+      <div class="home-empty-state home-empty-state--compact">
+        <strong>Nenhum registro biométrico</strong>
+        <p>As validações faciais aparecerão aqui.</p>
+      </div>
+    `;
+  }
+
+  return lista.map(item => registroBioLinha(
+    `${item.data} • ${item.horario}`,
+    item.disciplina,
+    item.professor,
+    item.status,
+    item.cor
+  )).join("");
+}
+
+function normalizarAgenda(agenda = []) {
+  if (!Array.isArray(agenda)) return [];
+
+  return agenda.map(item => ({
+    id: item.id,
+    diaSemana: String(item.diaSemana || "").toUpperCase(),
+    horaInicio: formatarHoraApi(item.horaInicio),
+    horaFim: formatarHoraApi(item.horaFim),
+    disciplina: item.disciplina || "Disciplina não informada",
+    sigla: String(item.siglaDisciplina || item.sigla || "DISC").trim().toUpperCase(),
+    professor: item.professor || "Professor não informado",
+    turma: item.turma || "Turma não informada",
+    sala: String(item.sala || "").trim() || null
+  }));
+}
+
+function normalizarRegistrosBiometricos(historico = []) {
+  if (!Array.isArray(historico)) return [];
+
+  return historico
+    .filter(item => String(item.metodo || item.registro || "").toUpperCase().includes("BIOMETRIA"))
+    .map(item => {
+      const statusOriginal = String(item.status || "PRESENTE").toUpperCase();
+      const ausente = statusOriginal.includes("AUSENTE") || statusOriginal.includes("FALTA");
+      const atraso = statusOriginal.includes("ATRAS");
+
+      return {
+        dataOrdenacao: obterTimestampRegistro(item.dataAula || item.data, item.horarioRegistro || item.horario),
+        data: formatarDataCurta(item.dataAula || item.data),
+        horario: formatarHoraApi(item.horarioRegistro || item.horario),
+        disciplina: item.disciplina || "Disciplina não informada",
+        professor: item.professor || "Validação facial",
+        status: ausente ? "Falta" : atraso ? "Atraso" : "Presente",
+        cor: ausente ? "red" : atraso ? "yellow" : "green"
+      };
+    })
+    .sort((a, b) => b.dataOrdenacao - a.dataOrdenacao);
+}
+
+function obterDiaSemanaAtual() {
+  return ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"][new Date().getDay()];
+}
+
+function minutosFim(horario) {
+  const [hora, minuto] = String(horario || "00:00").split(":").map(Number);
+  return (Number.isFinite(hora) ? hora : 0) * 60 + (Number.isFinite(minuto) ? minuto : 0);
+}
+
+function formatarIntervaloHorario(inicio, fim) {
+  return `${formatarHoraApi(inicio)} - ${formatarHoraApi(fim)}`;
+}
+
+function formatarHoraApi(valor) {
+  if (!valor) return "--:--";
+
+  const texto = String(valor).trim();
+  const horaDataCompleta = texto.match(/[T\s](\d{2}:\d{2})(?::\d{2})?/);
+
+  if (horaDataCompleta) return horaDataCompleta[1];
+
+  const horaSimples = texto.match(/^(\d{2}:\d{2})(?::\d{2})?/);
+  return horaSimples ? horaSimples[1] : "--:--";
+}
+
+function formatarDataCurta(valor) {
+  if (!valor) return "--";
+  const texto = String(valor).slice(0, 10);
+  const partes = texto.split("-");
+  if (partes.length === 3) return `${partes[2]}/${partes[1]}`;
+  return texto;
+}
+
+function obterTimestampRegistro(data, horario) {
+  const horarioTexto = String(horario || "").trim();
+
+  if (horarioTexto) {
+    const dataHora = new Date(horarioTexto);
+    if (!Number.isNaN(dataHora.getTime())) return dataHora.getTime();
+  }
+
+  const dataTexto = String(data || "").slice(0, 10);
+  const timestamp = new Date(`${dataTexto}T00:00:00`).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+async function carregarAgendaAluno(usuarioId) {
+  try {
+    const dados = await request(`/aluno/agenda`);
+    return Array.isArray(dados) ? dados : [];
+  } catch (erro) {
+    console.warn("Não foi possível carregar a agenda do aluno:", erro);
+    return [];
+  }
+}
+
+async function carregarHistoricoAluno(usuarioId) {
+  try {
+    const dados = await request(`/aluno/presencas/${usuarioId}`);
+    return Array.isArray(dados) ? dados : [];
+  } catch (erro) {
+    console.warn("Não foi possível carregar os registros biométricos:", erro);
+    return [];
+  }
+}
+
 async function carregarDesempenhoDisciplinas(usuarioId) {
   try {
     const dados = await request(`/aluno/desempenho-disciplinas/${usuarioId}`);
@@ -531,7 +724,7 @@ async function carregarDesempenhoDisciplinas(usuarioId) {
 function normalizarDisciplinas(disciplinas = []) {
   if (!Array.isArray(disciplinas)) return [];
 
-  const icones = ["▣", "◇", "⬡", "✣", "✦", "◎"];
+  const icones = ["menu_book", "code", "database", "language", "terminal", "science"];
 
   return disciplinas.map((item, indice) => {
     const presencas = inteiroValido(item.presencas, 0);
@@ -577,7 +770,7 @@ function situacaoCurta(frequencia) {
 
 function obterUsuarioLogado() {
   try {
-    return JSON.parse(localStorage.getItem("usuario")) || null;
+    return JSON.parse((sessionStorage.getItem("usuario") || localStorage.getItem("usuario"))) || null;
   } catch (erro) {
     console.error("Erro ao ler usuário logado:", erro);
     return null;

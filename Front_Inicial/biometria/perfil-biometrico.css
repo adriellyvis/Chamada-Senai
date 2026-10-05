@@ -409,3 +409,146 @@ body.dark .perfil-mini-card,
     min-height: 270px;
   }
 }
+
+/* Cadastro facial guiado em cinco etapas */
+.perfil-bio-guide {
+  margin-top: 16px;
+  border: 1px solid var(--card-border, var(--line, #dfe5ef));
+  border-radius: 20px;
+  padding: 16px;
+  background: var(--primary-soft, var(--panel-2, #f0f3f8));
+}
+
+.perfil-bio-guide[hidden] {
+  display: none !important;
+}
+
+.perfil-bio-guide__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.perfil-bio-guide__header strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-main, var(--text, #111827));
+  font-size: 18px;
+}
+
+.perfil-bio-guide__contador {
+  display: block;
+  color: var(--primary, var(--blue, #4f7cff));
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.perfil-bio-guide__estado {
+  flex: 0 0 auto;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: rgba(79, 124, 255, 0.14);
+  border: 1px solid rgba(79, 124, 255, 0.24);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.perfil-bio-guide[data-estado="rejeitada"] .perfil-bio-guide__estado,
+.perfil-bio-guide[data-estado="erro"] .perfil-bio-guide__estado {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.24);
+}
+
+.perfil-bio-guide[data-estado="aceita"] .perfil-bio-guide__estado,
+.perfil-bio-guide[data-estado="concluida"] .perfil-bio-guide__estado {
+  color: #047857;
+  background: rgba(46, 204, 113, 0.14);
+  border-color: rgba(46, 204, 113, 0.28);
+}
+
+.perfil-bio-guide__instrucao {
+  margin: 12px 0 0;
+  color: var(--text-main, var(--text, #111827));
+  font-weight: 800;
+}
+
+.perfil-bio-guide__detalhe {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-muted, var(--muted, #747b8a));
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.perfil-bio-guide__progress {
+  height: 8px;
+  margin-top: 15px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(79, 124, 255, 0.12);
+}
+
+.perfil-bio-guide__progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #4f7cff, #22c55e);
+  transition: width 220ms ease;
+}
+
+.perfil-bio-guide__steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.perfil-bio-guide__steps span {
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--text-muted, var(--muted, #747b8a));
+  background: var(--card-bg, var(--panel, #ffffff));
+  border: 1px solid var(--card-border, var(--line, #dfe5ef));
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.perfil-bio-guide__steps span.is-current {
+  color: #1d4ed8;
+  border-color: rgba(79, 124, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(79, 124, 255, 0.18);
+}
+
+.perfil-bio-guide__steps span.is-done {
+  color: #047857;
+  background: rgba(46, 204, 113, 0.12);
+  border-color: rgba(46, 204, 113, 0.28);
+}
+
+.perfil-bio-guide__steps span.is-error {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+@media (max-width: 620px) {
+  .perfil-bio-guide__header {
+    flex-direction: column;
+  }
+
+  .perfil-bio-guide__estado {
+    align-self: flex-start;
+  }
+}

@@ -1,5 +1,6 @@
 import { marcarMenuAtivo, getConteudoPrincipal } from "../../../core/spa.js";
 import { request } from "../../../core/api.js";
+import { definirDadosNotificacoesGestor } from "../components/notificacoes-gestor.js";
 
 let frequenciaTurmasCache = [];
 
@@ -126,12 +127,12 @@ export async function abrirDashboard(elemento = null) {
 
         <section class="dashboard-acoes">
           <button id="btnAtalhoOcorrencias">
-            💬
+            <span class="material-symbols-rounded" aria-hidden="true">forum</span>
             <span>OCORRÊNCIAS</span>
           </button>
 
           <button id="btnAtalhoCadastrarAluno">
-            👤
+            <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
             <span>CADASTRAR USUÁRIO</span>
           </button>
         </section>
@@ -164,7 +165,7 @@ async function carregarDashboard() {
       barraFrequencia.style.width = `${data.frequenciaGlobal ?? 0}%`;
     }
 
-    renderizarAlertasNotificacao(data.alertasEvasao || []);
+    definirDadosNotificacoesGestor(data);
     renderizarAtividades(data.atividadesRecentes || []);
 
     frequenciaTurmasCache = data.frequenciaTurmas || [];
@@ -350,52 +351,66 @@ function renderizarGraficoTodos(dados) {
     return;
   }
 
+  const escala = calcularEscalaGrafico(
+    dados.flatMap(item => [
+      Number(item.presenca ?? 0),
+      Number(item.atrasos ?? 0),
+      Number(item.faltas ?? 0)
+    ])
+  );
+
+  const larguraMinima = Math.max(660, dados.length * 160);
+
   grafico.innerHTML = `
-    <div class="grafico-escala">
-      <span>100</span>
-      <span>80</span>
-      <span>60</span>
-      <span>40</span>
-      <span>20</span>
-      <span>0</span>
-    </div>
+    ${montarEscalaGrafico(escala.marcas)}
 
     <div class="grafico-area">
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
+      <div
+        class="grafico-plotagem"
+        style="--largura-grafico: ${larguraMinima}px"
+      >
+        ${montarLinhasGrafico()}
 
-      <div class="grafico-barras grafico-todos">
-        ${dados.map(item => `
-          <div class="grupo-barra">
-            <div class="barras">
-              <div
-                class="barra presencas"
-                style="height: ${Math.max(item.presenca, 4)}%"
-                title="Presença: ${item.presenca.toFixed(1)}%"
-              ></div>
+        <div class="grafico-barras grafico-todos">
+          ${dados.map(item => {
+            const labelCompleta = escaparHtmlGrafico(item.label ?? "Turma");
+            const labelCurta = escaparHtmlGrafico(
+              limitarTexto(item.label ?? "Turma", 18)
+            );
 
-              <div
-                class="barra atrasos"
-                style="height: ${Math.max(item.atrasos, 4)}%"
-                title="Atrasos: ${item.atrasos.toFixed(1)}"
-              ></div>
+            return `
+              <div class="grupo-barra">
+                <div class="barras">
+                  ${montarBarraGrafico({
+                    classe: "presencas",
+                    valor: Number(item.presenca ?? 0),
+                    maximo: escala.maximo,
+                    rotulo: "Presenças",
+                    sufixo: "%"
+                  })}
 
-              <div
-                class="barra faltas"
-                style="height: ${Math.max(item.faltas, 4)}%"
-                title="Faltas: ${item.faltas.toFixed(1)}"
-              ></div>
-            </div>
+                  ${montarBarraGrafico({
+                    classe: "atrasos",
+                    valor: Number(item.atrasos ?? 0),
+                    maximo: escala.maximo,
+                    rotulo: "Atrasos"
+                  })}
 
-            <strong title="${item.label}">
-              ${limitarTexto(item.label, 14)}
-            </strong>
-          </div>
-        `).join("")}
+                  ${montarBarraGrafico({
+                    classe: "faltas",
+                    valor: Number(item.faltas ?? 0),
+                    maximo: escala.maximo,
+                    rotulo: "Faltas"
+                  })}
+                </div>
+
+                <strong title="${labelCompleta}">
+                  ${labelCurta}
+                </strong>
+              </div>
+            `;
+          }).join("")}
+        </div>
       </div>
     </div>
   `;
@@ -435,50 +450,49 @@ function renderizarGraficoDesempenho(dados, indicador) {
     return;
   }
 
-  const maiorValor = Math.max(
-    ...dados.map(item => Number(item.valor ?? 0)),
-    1
-  );
+  const valores = dados.map(item => Number(item.valor ?? 0));
+  const escala = calcularEscalaGrafico(valores);
+  const larguraMinima = Math.max(660, dados.length * 150);
+  const sufixo = indicador === "presenca" ? "%" : "";
+  const rotulo = rotuloIndicador(indicador);
 
   grafico.innerHTML = `
-    <div class="grafico-escala">
-      <span>${formatarValorGrafico(maiorValor)}</span>
-      <span>${formatarValorGrafico(maiorValor * 0.8)}</span>
-      <span>${formatarValorGrafico(maiorValor * 0.6)}</span>
-      <span>${formatarValorGrafico(maiorValor * 0.4)}</span>
-      <span>${formatarValorGrafico(maiorValor * 0.2)}</span>
-      <span>0</span>
-    </div>
+    ${montarEscalaGrafico(escala.marcas)}
 
     <div class="grafico-area">
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
-      <div class="linha"></div>
+      <div
+        class="grafico-plotagem"
+        style="--largura-grafico: ${larguraMinima}px"
+      >
+        ${montarLinhasGrafico()}
 
-      <div class="grafico-barras desempenho-unico">
-        ${dados.map(item => {
-          const valor = Number(item.valor ?? 0);
-          const altura = maiorValor === 0 ? 0 : (valor / maiorValor) * 100;
+        <div class="grafico-barras desempenho-unico">
+          ${dados.map(item => {
+            const valor = Number(item.valor ?? 0);
+            const labelCompleta = escaparHtmlGrafico(item.label ?? "Item");
+            const labelCurta = escaparHtmlGrafico(
+              limitarTexto(item.label ?? "Item", 18)
+            );
 
-          return `
-            <div class="grupo-barra">
-              <div class="barras">
-                <div
-                  class="barra ${classeIndicador(indicador)}"
-                  style="height: ${Math.max(altura, 4)}%"
-                  title="${item.label}: ${formatarValorGrafico(valor)}"
-                ></div>
+            return `
+              <div class="grupo-barra">
+                <div class="barras">
+                  ${montarBarraGrafico({
+                    classe: classeIndicador(indicador),
+                    valor,
+                    maximo: escala.maximo,
+                    rotulo,
+                    sufixo
+                  })}
+                </div>
+
+                <strong title="${labelCompleta}">
+                  ${labelCurta}
+                </strong>
               </div>
-
-              <strong title="${item.label}">
-                ${limitarTexto(item.label, 14)}
-              </strong>
-            </div>
-          `;
-        }).join("")}
+            `;
+          }).join("")}
+        </div>
       </div>
     </div>
   `;
@@ -524,6 +538,142 @@ function atualizarIndicadoresDisponiveis() {
   if (turmaSelect) {
     turmaSelect.disabled = tipo !== "aluno";
   }
+}
+
+
+function calcularEscalaGrafico(valores) {
+  const valoresValidos = valores
+    .map(valor => Number(valor ?? 0))
+    .filter(valor => Number.isFinite(valor) && valor >= 0);
+
+  const maiorValor = Math.max(...valoresValidos, 0);
+
+  if (maiorValor === 0) {
+    return {
+      maximo: 100,
+      marcas: [100, 80, 60, 40, 20, 0]
+    };
+  }
+
+  const quantidadeIntervalos = 5;
+  const valorComFolga = maiorValor * 1.1;
+  const passoBruto = valorComFolga / quantidadeIntervalos;
+  const ordemGrandeza = 10 ** Math.floor(Math.log10(passoBruto));
+  const fracao = passoBruto / ordemGrandeza;
+
+  let fracaoAjustada;
+
+  if (fracao <= 1) {
+    fracaoAjustada = 1;
+  } else if (fracao <= 2) {
+    fracaoAjustada = 2;
+  } else if (fracao <= 2.5) {
+    fracaoAjustada = 2.5;
+  } else if (fracao <= 5) {
+    fracaoAjustada = 5;
+  } else {
+    fracaoAjustada = 10;
+  }
+
+  const passo = fracaoAjustada * ordemGrandeza;
+  const maximo = Math.ceil(valorComFolga / passo) * passo;
+  const marcas = Array.from(
+    { length: quantidadeIntervalos + 1 },
+    (_, indice) => maximo - passo * indice
+  );
+
+  return {
+    maximo,
+    marcas
+  };
+}
+
+function montarEscalaGrafico(marcas) {
+  const ultimoIndice = Math.max(marcas.length - 1, 1);
+
+  return `
+    <div class="grafico-escala" aria-hidden="true">
+      <div class="grafico-escala-valores">
+        ${marcas
+          .map((marca, indice) => `
+            <span style="top: ${(indice / ultimoIndice) * 100}%">
+              ${formatarValorGrafico(marca)}
+            </span>
+          `)
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function montarLinhasGrafico() {
+  return [0, 20, 40, 60, 80]
+    .map(posicao => `
+      <div
+        class="linha"
+        style="top: ${posicao}%"
+        aria-hidden="true"
+      ></div>
+    `)
+    .join("");
+}
+
+function montarBarraGrafico({
+  classe,
+  valor,
+  maximo,
+  rotulo,
+  sufixo = ""
+}) {
+  const numero = Number(valor ?? 0);
+  const alturaCalculada = maximo > 0
+    ? (numero / maximo) * 100
+    : 0;
+
+  const alturaVisual = numero > 0
+    ? Math.max(alturaCalculada, 1.5)
+    : 0;
+
+  const valorFormatado = `${formatarValorGrafico(numero)}${sufixo}`;
+  const textoTooltip = `${rotulo}: ${valorFormatado}`;
+  const textoSeguro = escaparHtmlGrafico(textoTooltip);
+
+  return `
+    <div
+      class="barra-wrapper"
+      style="height: ${alturaVisual}%"
+      tabindex="0"
+      aria-label="${textoSeguro}"
+      title="${textoSeguro}"
+    >
+      <div class="barra ${classe}"></div>
+      <span class="barra-tooltip" role="tooltip">
+        ${textoSeguro}
+      </span>
+    </div>
+  `;
+}
+
+function rotuloIndicador(indicador) {
+  const rotulos = {
+    presenca: "Presenças",
+    faltas: "Faltas",
+    atrasos: "Atrasos",
+    aulas: "Aulas",
+    turmas: "Turmas",
+    ocorrencias: "Ocorrências"
+  };
+
+  return rotulos[indicador] ?? "Valor";
+}
+
+function escaparHtmlGrafico(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function formatarValorGrafico(valor) {
@@ -590,93 +740,6 @@ function renderizarAtividades(atividades) {
       </div>
     </div>
   `).join("");
-}
-
-function renderizarAlertasNotificacao(alertas) {
-  const botaoNotificacao = document.querySelector(".notificacao");
-
-  if (!botaoNotificacao) return;
-
-  botaoNotificacao.innerHTML = `
-    🔔
-    ${
-      alertas.length
-        ? `<span class="notificacao-badge">${alertas.length}</span>`
-        : ""
-    }
-  `;
-
-  botaoNotificacao.onclick = event => {
-    event.stopPropagation();
-    abrirDropdownAlertas(alertas);
-  };
-}
-
-function abrirDropdownAlertas(alertas) {
-  document.querySelector(".alertas-dropdown")?.remove();
-
-  const dropdown = document.createElement("div");
-  dropdown.className = "alertas-dropdown";
-
-  if (!alertas.length) {
-    dropdown.innerHTML = `
-      <div class="alertas-dropdown-header">
-        <strong>Alertas de evasão</strong>
-      </div>
-
-      <p class="alerta-dropdown-vazio">
-        Nenhum aluno em risco no momento.
-      </p>
-    `;
-  } else {
-    dropdown.innerHTML = `
-      <div class="alertas-dropdown-header">
-        <strong>Alertas de evasão</strong>
-        <span>${alertas.length}</span>
-      </div>
-
-      ${alertas.map(alerta => {
-        const frequencia = Number(alerta.frequencia ?? 0);
-
-        return `
-          <div class="alerta-dropdown-item">
-            <div>
-              <strong>${alerta.nomeAluno ?? "Aluno"} em risco</strong>
-              <p>Frequência: ${frequencia.toFixed(1)}%</p>
-            </div>
-
-            <button type="button">Notificar</button>
-          </div>
-        `;
-      }).join("")}
-    `;
-  }
-
-  document.body.appendChild(dropdown);
-
-  const botao = document.querySelector(".notificacao");
-  const rect = botao.getBoundingClientRect();
-
-  dropdown.style.top = `${rect.bottom + 10}px`;
-  dropdown.style.right = `${window.innerWidth - rect.right}px`;
-
-  setTimeout(() => {
-    document.addEventListener("click", fecharDropdownAlertas);
-  }, 0);
-}
-
-function fecharDropdownAlertas(event) {
-  const dropdown = document.querySelector(".alertas-dropdown");
-  const botao = document.querySelector(".notificacao");
-
-  if (
-    dropdown &&
-    !dropdown.contains(event.target) &&
-    !botao.contains(event.target)
-  ) {
-    dropdown.remove();
-    document.removeEventListener("click", fecharDropdownAlertas);
-  }
 }
 
 function formatarDataAtividade(data) {

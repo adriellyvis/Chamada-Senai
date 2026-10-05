@@ -563,3 +563,232 @@
     display: block;
   }
 }
+
+/* Ajuste final da câmera biométrica: enquadramento mais aberto e área mais alta. */
+.camera-preview-area {
+  width: 100%;
+  height: auto;
+  min-height: 520px;
+  max-height: 680px;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  background: #080a0f;
+}
+
+.video-biometria {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  background: #080a0f;
+  transform: scaleX(-1);
+  transform-origin: center;
+  border-radius: 0;
+  z-index: 1;
+}
+
+.camera-preview-area .face-frame {
+  width: clamp(220px, 24vw, 280px);
+  height: clamp(285px, 32vw, 350px);
+  flex: 0 0 auto;
+}
+
+.camera-preview-area .scan-line,
+.camera-preview-area .face-frame {
+  position: relative;
+  z-index: 2;
+}
+
+.camera-preview-area .camera-message {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 3;
+  width: min(620px, calc(100% - 36px));
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(8, 10, 15, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  transform: translateX(-50%);
+}
+
+.camera-preview-area .camera-message strong,
+.camera-preview-area .camera-message span {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.camera-preview-area .camera-message span {
+  opacity: 0.88;
+}
+
+@media (max-width: 1250px) {
+  .camera-preview-area {
+    min-height: 480px;
+    max-height: 620px;
+  }
+}
+
+@media (max-width: 900px) {
+  .camera-preview-area {
+    height: clamp(420px, 64vh, 540px);
+    min-height: 420px;
+    max-height: 540px;
+    aspect-ratio: auto;
+  }
+
+  .camera-preview-area .face-frame {
+    width: 220px;
+    height: 285px;
+  }
+}
+
+@media (max-width: 600px) {
+  .chamada-camera-card {
+    padding: 16px;
+  }
+
+  .camera-preview-area {
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+
+  .camera-preview-area .face-frame {
+    width: 190px;
+    height: 250px;
+  }
+
+  .camera-preview-area .camera-message {
+    bottom: 12px;
+    width: calc(100% - 24px);
+    padding: 9px 12px;
+  }
+}
+
+/* =========================================================
+   CHAMADA FACIAL — CÂMERA EM DESTAQUE
+   Ajuste final para dar prioridade visual à biometria.
+   Mantém o painel da chamada compacto no desktop e empilha
+   normalmente em telas menores.
+   ========================================================= */
+@media (min-width: 1251px) {
+  .chamada-layout--compacta {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 18px;
+    width: 100%;
+    align-items: start;
+  }
+
+  .chamada-camera-card {
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .chamada-side--simples {
+    width: 280px;
+    max-width: 280px;
+    position: sticky;
+    top: 16px;
+  }
+
+  .chamada-side--simples .aula-card {
+    padding: 18px;
+  }
+
+  .chamada-side--simples .aula-destaque {
+    padding: 14px;
+  }
+
+  .chamada-side--simples .aula-destaque strong {
+    font-size: 21px;
+    line-height: 1.15;
+  }
+
+  .camera-preview-area {
+    width: 100%;
+    height: clamp(610px, 70vh, 820px);
+    min-height: 610px;
+    max-height: 820px;
+    aspect-ratio: auto;
+    background: #080a0f;
+  }
+
+  .video-biometria {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    background: #080a0f;
+  }
+
+  .camera-preview-area .face-frame {
+    width: clamp(300px, 28vw, 390px);
+    height: clamp(390px, 37vw, 500px);
+  }
+
+  .camera-preview-area .scan-line {
+    width: min(420px, 44%);
+  }
+
+  .camera-preview-area .camera-message {
+    bottom: 20px;
+    width: min(680px, calc(100% - 40px));
+    padding: 12px 18px;
+  }
+
+  .camera-preview-area .camera-message strong {
+    font-size: 18px;
+  }
+
+  .camera-preview-area .camera-message span {
+    font-size: 14px;
+  }
+}
+
+/* Aumenta a área útil também em notebooks/tablets sem sacrificar
+   o empilhamento do painel lateral. */
+@media (min-width: 901px) and (max-width: 1250px) {
+  .chamada-camera-card {
+    padding: 18px;
+  }
+
+  .camera-preview-area {
+    width: 100%;
+    height: clamp(540px, 67vh, 700px);
+    min-height: 540px;
+    max-height: 700px;
+    aspect-ratio: auto;
+  }
+
+  .video-biometria {
+    object-fit: cover;
+  }
+
+  .camera-preview-area .face-frame {
+    width: clamp(270px, 34vw, 340px);
+    height: clamp(350px, 44vw, 440px);
+  }
+}
+
+/* A linha de varredura acompanha a nova altura do preview. */
+@keyframes scanMove {
+  0% {
+    top: 20%;
+  }
+
+  50% {
+    top: 72%;
+  }
+
+  100% {
+    top: 20%;
+  }
+}

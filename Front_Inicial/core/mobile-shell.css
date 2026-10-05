@@ -1,0 +1,1162 @@
+/* =========================================================
+   EyeCount — camada responsiva compartilhada
+   Aplicada por último para padronizar aluno, professor e gestor.
+   ========================================================= */
+
+.mobile-menu-toggle,
+.mobile-sidebar-close,
+.mobile-sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  body.mobile-sidebar-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .mobile-menu-toggle {
+    position: fixed;
+    top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+    z-index: 10030;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--card-border, #dbe1ea);
+    border-radius: 14px;
+    background: var(--card-bg, #ffffff);
+    color: var(--text-main, #111827);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-menu-toggle .material-symbols-rounded {
+    font-size: 25px;
+  }
+
+  .mobile-sidebar-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10010;
+    display: block;
+    background: rgba(2, 6, 23, 0.58);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    backdrop-filter: blur(3px);
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+  }
+
+  body.mobile-sidebar-open .mobile-sidebar-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Sobrescreve as três implementações de sidebar. */
+  body .sidebar {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 10020 !important;
+    width: min(86vw, 320px) !important;
+    max-width: 320px !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    transform: translateX(-105%);
+    box-shadow: 18px 0 46px rgba(2, 6, 23, 0.28);
+    transition: transform 0.24s ease;
+  }
+
+  body.mobile-sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Gestor: menu superior compacto, em vez de drawer lateral. */
+  body.gestor-mobile .sidebar {
+    inset: 0 0 auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: min(86dvh, 620px);
+    min-height: 0 !important;
+    padding: 68px 16px 16px;
+    overflow-y: auto !important;
+    transform: translateY(-105%);
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 18px 42px rgba(2, 6, 23, 0.24);
+  }
+
+  body.gestor-mobile.mobile-sidebar-open .sidebar {
+    transform: translateY(0);
+  }
+
+  body.gestor-mobile .sidebar h2 {
+    margin: 0 52px 14px 0;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+  }
+
+  body.gestor-mobile .perfil {
+    margin-bottom: 16px;
+  }
+
+  body.gestor-mobile .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.gestor-mobile .sidebar nav a {
+    min-height: 58px;
+    height: auto;
+    gap: 9px;
+    padding: 10px 12px;
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
+  body.gestor-mobile .sidebar nav a:last-child {
+    grid-column: 1 / -1;
+  }
+
+  body.gestor-mobile .sidebar-footer {
+    margin-top: 16px;
+    padding: 14px 4px 0;
+  }
+
+  body .main {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    height: auto !important;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  .app-shell,
+  .layout-shell,
+  .container {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Reserva espaço para o botão de menu nos cabeçalhos. */
+  .topbar,
+  .topo,
+  .page-topbar {
+    min-height: 82px !important;
+    height: auto !important;
+    padding-left: 72px !important;
+  }
+
+  .topbar,
+  .topo {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar__title h1,
+  .topo h1,
+  .page-title {
+    overflow-wrap: anywhere;
+  }
+
+  .page,
+  #conteudoPrincipal,
+  .content-area,
+  .pagina-spa {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .page {
+    padding: 18px 16px 28px !important;
+  }
+
+  #conteudoPrincipal,
+  .content-area,
+  .pagina-spa {
+    padding: 18px 16px 28px !important;
+  }
+
+  /* Evita zoom automático do iOS em formulários. */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  button,
+  [role="button"],
+  .nav-item,
+  .sidebar__item,
+  .sidebar nav a {
+    min-height: 44px;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Tabelas continuam utilizáveis sem estourar a página. */
+  .table-wrapper,
+  .frequencia-table-wrapper,
+  .table-scroll,
+  .tabela-wrapper,
+  .historico-table-wrap,
+  .alunos-table-wrapper,
+  .disciplinas-table-wrapper,
+  .turmas-table-wrapper,
+  .chamada-table-wrapper,
+  .grafico-scroll,
+  .chart-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    max-width: none;
+  }
+
+  /* Filtros e ações empilham de forma previsível. */
+  .filters-row,
+  .frequencia-filtros,
+  .dashboard-controls,
+  .topbar-actions,
+  .acoes-topo,
+  .page-actions,
+  .toolbar,
+  .form-actions {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap !important;
+  }
+
+  .filters-row > *,
+  .frequencia-filtros > *,
+  .dashboard-controls > *,
+  .toolbar > * {
+    min-width: 0;
+  }
+
+  /* Modais e painéis laterais respeitam a viewport. */
+  [class*="modal"] [class*="content"],
+  [class*="modal"] [class*="dialog"],
+  .modal-content,
+  .modal-card,
+  .configuracoes-card {
+    width: min(94vw, 680px) !important;
+    max-width: min(94vw, 680px) !important;
+    max-height: 88dvh;
+    overflow-y: auto;
+  }
+
+  .resultado-busca-global,
+  .busca-aluno-resultados,
+  .notificacoes-aluno-painel,
+  .notificacoes-professor-painel,
+  .notifications-panel,
+  .notificacoes-painel {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: 76px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 92px) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .mobile-menu-toggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+
+  .topbar,
+  .topo,
+  .page-topbar {
+    padding: 64px 14px 14px !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .topbar__title h1,
+  .topo h1,
+  .page-title {
+    font-size: clamp(20px, 6vw, 25px) !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.12;
+  }
+
+  .topbar__title p,
+  .topo p,
+  .page-subtitle {
+    font-size: 13px !important;
+    line-height: 1.4;
+  }
+
+  .topbar__actions,
+  .acoes-topo,
+  .topbar-actions {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px !important;
+  }
+
+  .search-box,
+  .search,
+  .search-pill,
+  .search-global {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+
+  .page,
+  #conteudoPrincipal,
+  .content-area,
+  .pagina-spa {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .card,
+  [class$="-card"],
+  [class*=" card-"] {
+    max-width: 100%;
+  }
+
+  .configuracoes-grid,
+  .configuracoes-resumo,
+  .configuracoes-section-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.gestor-mobile .sidebar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  body.gestor-mobile .sidebar nav a {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .mobile-sidebar-overlay {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   Ajustes específicos por portal
+   ========================================================= */
+
+@media (max-width: 900px) {
+  /* Aluno */
+  .dashboard-layout,
+  .dashboard-right-column,
+  .dashboard-today-notice,
+  .frequencia-layout,
+  .avisos-layout,
+  .perfil-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-side-grid,
+  .frequencia-side,
+  .bio-records {
+    grid-template-columns: 1fr !important;
+  }
+
+  .chart-content {
+    height: auto !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 22px 16px !important;
+    gap: 18px !important;
+  }
+
+  .pie-chart {
+    width: min(62vw, 230px) !important;
+    height: min(62vw, 230px) !important;
+    margin: 28px 18px 42px !important;
+  }
+
+  .chart-legend {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px !important;
+    font-size: 13px !important;
+  }
+
+  .frequencia-table {
+    min-width: 790px;
+  }
+
+  .frequencia-filtros label,
+  .frequencia-filtros select,
+  .dashboard-controls label,
+  .dashboard-controls select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Professor */
+  .stats-grid,
+  .turmas-resumo-grid,
+  .alunos-resumo-grid,
+  .ocorrencias-resumo-grid,
+  .chamada-resumo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-grid,
+  .dashboard-main-grid,
+  .turmas-layout,
+  .turma-detalhe-layout,
+  .alunos-layout,
+  .ocorrencias-layout,
+  .perfil-professor-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .professor-table,
+  .alunos-table,
+  .historico-table,
+  .chamada-table {
+    min-width: 760px;
+  }
+
+  .grafico-container,
+  .chart-container,
+  .dashboard-chart-card {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Gestor */
+  .dashboard-grid,
+  .dashboard-layout,
+  .perfil-gestor-grid,
+  .perfil-gestor-layout,
+  .turmas-layout,
+  .ocorrencias-layout,
+  .disciplinas-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cards,
+  .cards-resumo,
+  .dashboard-cards,
+  .resumo-cards,
+  .stats-grid-gestor,
+  .ocorrencias-cards,
+  .alunos-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .topo {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .acoes-topo {
+    justify-content: stretch !important;
+  }
+
+  .gestor-table,
+  .tabela-usuarios,
+  .tabela-disciplinas,
+  .tabela-turmas,
+  .tabela-ocorrencias {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Aluno */
+  .dashboard-stats,
+  .chart-legend {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-stats .stat-card {
+    height: auto !important;
+    min-height: 104px;
+  }
+
+  .dashboard-filter-row,
+  .dashboard-controls {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .filter-btn,
+  .dashboard-controls select,
+  .dashboard-controls button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .agenda-mobile-class {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+  }
+
+  .frequencia-header,
+  .avisos-header,
+  .perfil-header {
+    gap: 14px !important;
+  }
+
+  /* Professor */
+  .stats-grid,
+  .turmas-resumo-grid,
+  .alunos-resumo-grid,
+  .ocorrencias-resumo-grid,
+  .chamada-resumo-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-topbar .topbar-actions,
+  .page-topbar .page-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .search-pill,
+  .select-pill,
+  .input-busca-aluno,
+  .btn-primary,
+  .btn-secondary {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Gestor */
+  .cards,
+  .cards-resumo,
+  .dashboard-cards,
+  .resumo-cards,
+  .stats-grid-gestor,
+  .ocorrencias-cards,
+  .alunos-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .topo .acoes-topo {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .pagina-spa h1,
+  #conteudoPrincipal h1 {
+    overflow-wrap: anywhere;
+  }
+}
+
+
+/* =========================================================
+   Ajuste mobile solicitado: apenas menu e notificações fixos
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .topbar,
+  .topo,
+  .page-topbar {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .topbar__actions,
+  .acoes-topo,
+  .topbar-actions {
+    position: relative;
+    display: block !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 46px;
+  }
+
+  .topbar__actions .search-box,
+  .topbar__actions .busca-aluno-wrapper,
+  .acoes-topo .search,
+  .acoes-topo .search-global,
+  .topbar-actions .search-pill {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .notificacoes-aluno-wrapper {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    z-index: 10030;
+    margin: 0 !important;
+  }
+
+  .notificacoes-aluno-wrapper .notification-btn,
+  .acoes-topo .notificacao {
+    width: 46px !important;
+    height: 46px !important;
+    display: grid !important;
+    place-items: center;
+    border: 1px solid var(--card-border, #dbe1ea) !important;
+    border-radius: 14px !important;
+    background: var(--card-bg, #ffffff) !important;
+    color: var(--text-main, #111827) !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16) !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .acoes-topo .notificacao {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    z-index: 10030;
+    margin: 0 !important;
+  }
+
+  .notificacoes-aluno-wrapper .notification-btn .material-symbols-rounded,
+  .acoes-topo .notificacao .material-symbols-rounded {
+    font-size: 24px;
+  }
+
+  .notificacoes-aluno-wrapper .notificacoes-aluno-badge,
+  .acoes-topo .notificacao-badge {
+    top: 6px !important;
+    right: 6px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar__actions,
+  .acoes-topo,
+  .topbar-actions {
+    min-height: 42px;
+  }
+
+  .notificacoes-aluno-wrapper .notification-btn,
+  .acoes-topo .notificacao {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 13px !important;
+  }
+}
+
+
+/* =========================================================
+   Refinos mobile: notificação do professor e ocorrências gestor
+   ========================================================= */
+
+@media (max-width: 900px) {
+  /* Professor: mesmo comportamento dos botões fixos dos outros portais. */
+  .topbar-actions .bell-btn {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    z-index: 10030;
+    width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    display: grid !important;
+    place-items: center;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--card-border, #dbe1ea) !important;
+    border-radius: 14px !important;
+    background: var(--panel, #ffffff) !important;
+    color: var(--text-main, #111827) !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16) !important;
+  }
+
+  .topbar-actions .bell-btn .material-symbols-rounded {
+    font-size: 24px;
+    font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+  }
+
+  .topbar-actions .bell-btn .notificacoes-professor-badge {
+    top: 5px !important;
+    right: 5px !important;
+  }
+
+  /* Gestor: filtros previsíveis e cards sem vazamento horizontal. */
+  .ocorrencias-filtros {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 10px !important;
+  }
+
+  .ocorrencias-filtros select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  #listaOcorrenciasGestor,
+  #listaOcorrenciasGestor .ocorrencias-grid {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #listaOcorrenciasGestor .ocorrencias-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card-topo {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card-topo > div {
+    min-width: 0;
+    flex: 1 1 150px;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card h2,
+  #listaOcorrenciasGestor .ocorrencia-descricao,
+  #listaOcorrenciasGestor .ocorrencia-meta span {
+    overflow-wrap: anywhere;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-acoes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-btn,
+  #listaOcorrenciasGestor .select-status-ocorrencia {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar-actions .bell-btn {
+    width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    border-radius: 13px !important;
+  }
+
+  .ocorrencias-filtros {
+    grid-template-columns: 1fr !important;
+    margin-top: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  #listaOcorrenciasGestor .ocorrencias-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card {
+    padding: 17px 16px;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-card-topo {
+    align-items: flex-start;
+  }
+
+  #listaOcorrenciasGestor .ocorrencia-status {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .ocorrencia-detalhes-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-finalizar-acoes {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .btn-cancelar-finalizacao,
+  .btn-confirmar-finalizacao {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+
+/* =========================================================
+   Refinos mobile: Turmas do gestor e Frequências do aluno
+   ========================================================= */
+
+@media (max-width: 700px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  strong,
+  small,
+  a,
+  button,
+  td,
+  th {
+    overflow-wrap: anywhere;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  /* Gestor > Turmas: tabela vira cartões legíveis. */
+  .pagina-spa .pagina-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .pagina-spa .pagina-header #btnCadastrarTurma {
+    width: 100% !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+  }
+
+  .pagina-spa .tabela-card {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .pagina-spa .tabela-card table,
+  .pagina-spa .tabela-card tbody {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .pagina-spa .tabela-card thead {
+    display: none !important;
+  }
+
+  .pagina-spa #tabelaTurmas {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 16px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07) !important;
+  }
+
+  body.dark .pagina-spa #tabelaTurmas .turma-linha {
+    background: #1a103d !important;
+    border-color: rgba(167, 139, 250, 0.22) !important;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26) !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha td {
+    display: grid !important;
+    grid-template-columns: minmax(92px, 0.42fr) minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 11px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #edf0f5 !important;
+    overflow-wrap: anywhere;
+  }
+
+  body.dark .pagina-spa #tabelaTurmas .turma-linha td {
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha td::before {
+    content: attr(data-label);
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  body.dark .pagina-spa #tabelaTurmas .turma-linha td::before {
+    color: #a78bfa;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-nome {
+    padding-top: 0 !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-nome strong {
+    color: #111827;
+    font-size: 18px;
+    line-height: 1.15;
+  }
+
+  body.dark .pagina-spa #tabelaTurmas .turma-linha .turma-nome strong {
+    color: #ffffff;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-acoes {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-acoes::before {
+    grid-column: 1 / -1;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-acoes button {
+    width: 100% !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+  }
+
+  .turma-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .turma-status.is-active {
+    background: rgba(34, 197, 94, 0.14);
+    color: #15803d;
+  }
+
+  .turma-status.is-inactive {
+    background: rgba(239, 68, 68, 0.14);
+    color: #b91c1c;
+  }
+
+  body.dark .turma-status.is-active {
+    color: #86efac;
+  }
+
+  body.dark .turma-status.is-inactive {
+    color: #fca5a5;
+  }
+
+  /* Aluno > Frequências: resumo compacto e histórico em cartões. */
+  .frequencia-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .frequencia-card {
+    min-height: 104px !important;
+    padding: 16px !important;
+  }
+
+  .frequencia-card strong {
+    font-size: 28px !important;
+  }
+
+  .frequencia-table-card,
+  .frequencia-risk-card,
+  .frequencia-bio-card {
+    padding: 16px !important;
+  }
+
+  .frequencia-header {
+    margin-bottom: 16px !important;
+  }
+
+  .frequencia-filtros {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .frequencia-filtros label,
+  .frequencia-filtros select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .frequencia-table-wrapper {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .frequencia-table,
+  .frequencia-table tbody {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .frequencia-table thead {
+    display: none !important;
+  }
+
+  .frequencia-table tbody {
+    display: grid !important;
+    gap: 12px !important;
+  }
+
+  .frequencia-table .frequencia-registro-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    padding: 15px !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 16px !important;
+    background: var(--card-bg) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  }
+
+  .frequencia-table .frequencia-registro-row:hover {
+    background: var(--card-bg) !important;
+  }
+
+  .frequencia-table .frequencia-registro-row td {
+    display: grid !important;
+    grid-template-columns: minmax(86px, 0.4fr) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    overflow-wrap: anywhere;
+  }
+
+  .frequencia-table .frequencia-registro-row td:last-child {
+    border-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .frequencia-table .frequencia-registro-row td:first-child {
+    padding-top: 0 !important;
+  }
+
+  .frequencia-table .frequencia-registro-row td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .frequencia-table .frequencia-empty-row {
+    display: block !important;
+  }
+
+  .frequencia-table .frequencia-empty-row td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .risk-circle {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .frequencia-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pagina-spa #tabelaTurmas .turma-linha .turma-acoes {
+    grid-template-columns: 1fr !important;
+  }
+}

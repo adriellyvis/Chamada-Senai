@@ -19,7 +19,7 @@ export async function abrirDisciplinas(elemento = null) {
           <p>Cadastre, liste e edite as disciplinas da instituição.</p>
         </div>
 
-        <button id="btnNovaDisciplina" class="btn-disciplina primario">
+        <button id="btnNovaDisciplina" class="btn-disciplina primario" type="button">
           + Nova disciplina
         </button>
       </div>
@@ -28,7 +28,8 @@ export async function abrirDisciplinas(elemento = null) {
         <input
           type="text"
           id="buscaDisciplina"
-          placeholder="Buscar disciplina..."
+          placeholder="Buscar por nome ou sigla..."
+          autocomplete="off"
         >
       </section>
 
@@ -37,6 +38,7 @@ export async function abrirDisciplinas(elemento = null) {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Sigla</th>
               <th>Nome</th>
               <th>Ações</th>
             </tr>
@@ -44,7 +46,7 @@ export async function abrirDisciplinas(elemento = null) {
 
           <tbody id="disciplinasBody">
             <tr>
-              <td colspan="3">Carregando disciplinas...</td>
+              <td colspan="4">Carregando disciplinas...</td>
             </tr>
           </tbody>
         </table>
@@ -69,7 +71,7 @@ async function carregarDisciplinas() {
     renderizarDisciplinas(disciplinasCache || []);
   } catch (error) {
     console.error(error);
-    alert("Erro ao carregar disciplinas");
+    alert(error.message || "Erro ao carregar disciplinas");
   }
 }
 
@@ -81,7 +83,7 @@ function renderizarDisciplinas(disciplinas) {
   if (!disciplinas.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="3">Nenhuma disciplina encontrada.</td>
+        <td colspan="4">Nenhuma disciplina encontrada.</td>
       </tr>
     `;
     return;
@@ -91,11 +93,17 @@ function renderizarDisciplinas(disciplinas) {
     <tr>
       <td>${disciplina.id}</td>
       <td>
-        <strong>${disciplina.nome}</strong>
+        <span class="disciplina-sigla">
+          ${escaparHtml(disciplina.sigla || "—")}
+        </span>
+      </td>
+      <td>
+        <strong>${escaparHtml(disciplina.nome || "")}</strong>
       </td>
       <td>
         <button
           class="btn-disciplina pequeno"
+          type="button"
           data-editar="${disciplina.id}"
         >
           Editar
@@ -115,9 +123,12 @@ function renderizarDisciplinas(disciplinas) {
 function filtrarDisciplinas(event) {
   const termo = event.target.value.toLowerCase().trim();
 
-  const filtradas = disciplinasCache.filter(disciplina =>
-    String(disciplina.nome ?? "").toLowerCase().includes(termo)
-  );
+  const filtradas = disciplinasCache.filter(disciplina => {
+    const nome = String(disciplina.nome ?? "").toLowerCase();
+    const sigla = String(disciplina.sigla ?? "").toLowerCase();
+
+    return nome.includes(termo) || sigla.includes(termo);
+  });
 
   renderizarDisciplinas(filtradas);
 }
@@ -128,7 +139,7 @@ function abrirModalNovaDisciplina() {
 }
 
 function abrirModalEditarDisciplina(id) {
-  const disciplina = disciplinasCache.find(item => item.id === id);
+  const disciplina = disciplinasCache.find(item => Number(item.id) === Number(id));
 
   if (!disciplina) {
     alert("Disciplina não encontrada");
@@ -146,10 +157,12 @@ function abrirModalDisciplina(disciplina = null) {
   modal.className = "modal-disciplina-backdrop";
 
   modal.innerHTML = `
-    <div class="modal-disciplina">
+    <div class="modal-disciplina" role="dialog" aria-modal="true" aria-labelledby="tituloModalDisciplina">
       <div class="modal-disciplina-header">
-        <h3>${disciplina ? "Editar disciplina" : "Nova disciplina"}</h3>
-        <button type="button" id="fecharModalDisciplina">×</button>
+        <h3 id="tituloModalDisciplina">
+          ${disciplina ? "Editar disciplina" : "Nova disciplina"}
+        </h3>
+        <button type="button" id="fecharModalDisciplina" aria-label="Fechar"><span class="material-symbols-rounded" aria-hidden="true">close</span></button>
       </div>
 
       <form id="formDisciplina">
@@ -158,10 +171,26 @@ function abrirModalDisciplina(disciplina = null) {
           <input
             type="text"
             id="nomeDisciplina"
-            value="${disciplina?.nome ?? ""}"
-            placeholder="Ex: Matemática"
+            maxlength="100"
+            value="${escaparAtributo(disciplina?.nome ?? "")}"
+            placeholder="Ex.: Banco de Dados"
+            autocomplete="off"
             required
           >
+        </label>
+
+        <label>
+          Sigla
+          <input
+            type="text"
+            id="siglaDisciplina"
+            maxlength="10"
+            value="${escaparAtributo(disciplina?.sigla ?? "")}"
+            placeholder="Ex.: BD"
+            autocomplete="off"
+            required
+          >
+          <small>Use até 10 caracteres. A sigla será salva em letras maiúsculas.</small>
         </label>
 
         <div class="modal-disciplina-acoes">
@@ -169,7 +198,7 @@ function abrirModalDisciplina(disciplina = null) {
             Cancelar
           </button>
 
-          <button type="submit" class="primario">
+          <button type="submit" class="primario" id="salvarDisciplina">
             Salvar
           </button>
         </div>
@@ -191,6 +220,18 @@ function abrirModalDisciplina(disciplina = null) {
     .getElementById("formDisciplina")
     ?.addEventListener("submit", salvarDisciplina);
 
+  document
+    .getElementById("siglaDisciplina")
+    ?.addEventListener("input", event => {
+      event.target.value = event.target.value.toUpperCase();
+    });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      fecharModalDisciplina();
+    }
+  });
+
   document.getElementById("nomeDisciplina")?.focus();
 }
 
@@ -203,9 +244,27 @@ async function salvarDisciplina(event) {
   event.preventDefault();
 
   const nome = document.getElementById("nomeDisciplina")?.value.trim();
+  const sigla = document
+    .getElementById("siglaDisciplina")
+    ?.value
+    .trim()
+    .toUpperCase();
 
   if (!nome) {
     alert("Informe o nome da disciplina");
+    document.getElementById("nomeDisciplina")?.focus();
+    return;
+  }
+
+  if (!sigla) {
+    alert("Informe a sigla da disciplina");
+    document.getElementById("siglaDisciplina")?.focus();
+    return;
+  }
+
+  if (sigla.length > 10) {
+    alert("A sigla deve possuir no máximo 10 caracteres");
+    document.getElementById("siglaDisciplina")?.focus();
     return;
   }
 
@@ -214,17 +273,41 @@ async function salvarDisciplina(event) {
     ? `/gestor/disciplinas/${disciplinaEditandoId}`
     : "/gestor/disciplinas";
 
+  const botaoSalvar = document.getElementById("salvarDisciplina");
+
   try {
+    if (botaoSalvar) {
+      botaoSalvar.disabled = true;
+      botaoSalvar.textContent = "Salvando...";
+    }
+
     await request(endpoint, {
       method: metodo,
-      body: JSON.stringify({ nome })
+      body: JSON.stringify({ nome, sigla })
     });
 
     fecharModalDisciplina();
     await carregarDisciplinas();
-
   } catch (error) {
     console.error(error);
     alert(error.message || "Erro ao salvar disciplina");
+  } finally {
+    if (botaoSalvar && document.body.contains(botaoSalvar)) {
+      botaoSalvar.disabled = false;
+      botaoSalvar.textContent = "Salvar";
+    }
   }
+}
+
+function escaparHtml(valor) {
+  return String(valor)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escaparAtributo(valor) {
+  return escaparHtml(valor);
 }

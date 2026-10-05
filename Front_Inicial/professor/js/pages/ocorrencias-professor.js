@@ -64,7 +64,7 @@ function montarTopo(titulo, subtitulo, placeholder) {
         <p class="page-sub">${subtitulo}</p>
       </div>
       <div class="topbar-actions">
-        <button class="bell-btn" type="button">🔔</button>
+        <button class="bell-btn" type="button" aria-label="Notificações"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></button>
         <div class="search-pill busca-global-professor">
           <input class="busca-global-professor-input" type="search" placeholder="Buscar alunos e turmas..." autocomplete="off" />
           <span aria-hidden="true">⌕</span>
@@ -199,11 +199,11 @@ function setTexto(id, valor) {
   if (elemento) elemento.textContent = valor;
 }
 
-function abrirFormularioOcorrencia(ocorrencia = null) {
-  renderizarModalOcorrencia(ocorrencia);
+export function abrirFormularioOcorrencia(ocorrencia = null, alunoIdSelecionado = null) {
+  renderizarModalOcorrencia(ocorrencia, alunoIdSelecionado);
 }
 
-function renderizarModalOcorrencia(ocorrencia = null) {
+function renderizarModalOcorrencia(ocorrencia = null, alunoIdSelecionado = null) {
   removerModalOcorrencia();
 
   const editando = Boolean(ocorrencia);
@@ -316,7 +316,7 @@ function renderizarModalOcorrencia(ocorrencia = null) {
     form.addEventListener("submit", salvarOcorrenciaProfessor);
   }
 
-  carregarAlunosModalOcorrencia(ocorrencia?.alunoId);
+  carregarAlunosModalOcorrencia(alunoIdSelecionado ?? ocorrencia?.alunoId);
 
   if (editando) {
     setTimeout(() => {
@@ -522,68 +522,112 @@ function configurarAcoesOcorrencias() {
 function abrirModalDetalhesOcorrencia(ocorrencia) {
   removerModalOcorrencia();
 
+  const statusClasse = normalizarClasse(ocorrencia.status);
+  const gravidadeClasse = normalizarClasse(ocorrencia.gravidade);
+
   const modal = document.createElement("div");
   modal.className = "modal-detalhes-overlay";
 
   modal.innerHTML = `
-    <div class="modal-detalhes-card">
-      <div class="modal-detalhes-header">
-        <div>
-          <h2>${ocorrencia.titulo ?? "Ocorrência"}</h2>
-          <p>Detalhes completos da ocorrência.</p>
+    <div class="modal-detalhes-card modal-ocorrencia-detalhes">
+      <div class="modal-detalhes-header ocorrencia-modal-header">
+        <div class="ocorrencia-modal-heading">
+          <div class="ocorrencia-modal-icon" aria-hidden="true">
+            <i data-lucide="file-text"></i>
+          </div>
+
+          <div>
+            <div class="ocorrencia-modal-kicker">Histórico da ocorrência</div>
+            <h2>${ocorrencia.titulo ?? "Ocorrência"}</h2>
+            <p>Informações registradas e acompanhamento completo.</p>
+          </div>
         </div>
 
-        <button id="btnFecharDetalhesOcorrencia">
-          ×
+        <button id="btnFecharDetalhesOcorrencia" type="button" aria-label="Fechar detalhes da ocorrência">
+          <i data-lucide="x"></i>
         </button>
       </div>
 
-      <div class="modal-detalhes-body">
+      <div class="modal-detalhes-body ocorrencia-modal-body">
         <div class="ocorrencia-detalhes-grid">
-          <div>
-            <span>Aluno</span>
+          <div class="ocorrencia-detalhe-item">
+            <span class="ocorrencia-detalhe-label">
+              <i data-lucide="user-round"></i>
+              Aluno
+            </span>
             <strong>${ocorrencia.alunoNome ?? "-"}</strong>
           </div>
 
-          <div>
-            <span>Tipo</span>
+          <div class="ocorrencia-detalhe-item">
+            <span class="ocorrencia-detalhe-label">
+              <i data-lucide="tag"></i>
+              Tipo
+            </span>
             <strong>${formatarTipo(ocorrencia.tipo)}</strong>
           </div>
 
-          <div>
-            <span>Gravidade</span>
-            <strong>${formatarGravidade(ocorrencia.gravidade)}</strong>
+          <div class="ocorrencia-detalhe-item">
+            <span class="ocorrencia-detalhe-label">
+              <i data-lucide="gauge"></i>
+              Gravidade
+            </span>
+            <strong>
+              <span class="ocorrencia-label ${gravidadeClasse}">
+                ${formatarGravidade(ocorrencia.gravidade)}
+              </span>
+            </strong>
           </div>
 
-          <div>
-            <span>Status</span>
-            <strong>${formatarStatusOcorrencia(ocorrencia.status)}</strong>
+          <div class="ocorrencia-detalhe-item">
+            <span class="ocorrencia-detalhe-label">
+              <i data-lucide="circle-check-big"></i>
+              Status
+            </span>
+            <strong>
+              <span class="ocorrencia-status ${statusClasse}">
+                ${formatarStatusOcorrencia(ocorrencia.status)}
+              </span>
+            </strong>
           </div>
 
-          <div>
-            <span>Data</span>
+          <div class="ocorrencia-detalhe-item ocorrencia-detalhe-data">
+            <span class="ocorrencia-detalhe-label">
+              <i data-lucide="calendar-days"></i>
+              Data do registro
+            </span>
             <strong>${formatarData(ocorrencia.dataOcorrencia)}</strong>
           </div>
         </div>
 
-        <div class="ocorrencia-descricao-completa">
-          <span>Descrição</span>
+        <section class="ocorrencia-descricao-completa ocorrencia-texto-box">
+          <div class="ocorrencia-box-titulo">
+            <span class="ocorrencia-box-icone" aria-hidden="true">
+              <i data-lucide="align-left"></i>
+            </span>
+            <span>Descrição</span>
+          </div>
           <p>${ocorrencia.descricao ?? "-"}</p>
-        </div>
+        </section>
 
         ${
           ocorrencia.respostaGestor
             ? `
-              <div class="ocorrencia-descricao-completa resposta-gestor-box">
-                <span>Resposta do gestor</span>
+              <section class="ocorrencia-descricao-completa resposta-gestor-box">
+                <div class="ocorrencia-box-titulo">
+                  <span class="ocorrencia-box-icone" aria-hidden="true">
+                    <i data-lucide="message-square-reply"></i>
+                  </span>
+                  <span>Resposta do gestor</span>
+                </div>
+
                 <p>${ocorrencia.respostaGestor}</p>
 
                 ${
                   ocorrencia.dataAtualizacao
-                    ? `<small>Atualizado em ${formatarData(ocorrencia.dataAtualizacao)}</small>`
+                    ? `<small><i data-lucide="clock-3"></i> Atualizado em ${formatarData(ocorrencia.dataAtualizacao)}</small>`
                     : ""
                 }
-              </div>
+              </section>
             `
             : ""
         }
@@ -592,6 +636,7 @@ function abrirModalDetalhesOcorrencia(ocorrencia) {
   `;
 
   document.body.appendChild(modal);
+  atualizarIcones();
 
   document
     .getElementById("btnFecharDetalhesOcorrencia")

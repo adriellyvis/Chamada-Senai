@@ -499,16 +499,10 @@ body.dark .dashboard-page .painel-card.alerta strong {
 .barra {
   width: 34px;
   min-height: 5px;
-
   border-radius: 5px 5px 0 0;
-
   transition: 0.2s ease;
 }
 
-.barra:hover {
-  transform: translateY(-4px);
-  filter: brightness(1.04);
-}
 
 .barra.presencas {
   background: #22c55e;
@@ -874,4 +868,311 @@ body.dark .dashboard-page .painel-card.alerta strong {
   gap: 7px;
 }
 
+/* =========================================================
+   GRÁFICO CLÁSSICO AGRUPADO
+   Eixos e linhas alinhados, barras retas e tooltip sem movimento.
+========================================================= */
+
+.dashboard-page {
+  --grafico-altura-plotagem: 320px;
+  --grafico-altura-rotulos: 48px;
+}
+
+.grafico-card {
+  min-height: 455px;
+  border-radius: 20px;
+}
+
+.grafico-topo {
+  margin-bottom: 18px;
+}
+
+.grafico-legenda-item.presencas span {
+  background: #2563eb;
+}
+
+.grafico-legenda-item.atrasos span {
+  background: #16a34a;
+}
+
+.grafico-legenda-item.faltas span {
+  background: #ef4444;
+}
+
+.grafico-frequencia {
+  min-height: calc(
+    var(--grafico-altura-plotagem) +
+    var(--grafico-altura-rotulos)
+  );
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0;
+}
+
+.grafico-escala {
+  height: var(--grafico-altura-plotagem);
+  min-width: 58px;
+  padding: 0 12px 0 0;
+  box-sizing: border-box;
+}
+
+.grafico-escala-valores {
+  position: relative;
+  height: 100%;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.grafico-escala-valores span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.grafico-area {
+  min-width: 0;
+  min-height: calc(
+    var(--grafico-altura-plotagem) +
+    var(--grafico-altura-rotulos)
+  );
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 0;
+  scrollbar-gutter: stable;
+}
+
+.grafico-plotagem {
+  position: relative;
+  width: max(100%, var(--largura-grafico, 660px));
+  height: var(--grafico-altura-plotagem);
+  margin-bottom: var(--grafico-altura-rotulos);
+  border-left: 2px solid #94a3b8;
+  border-bottom: 2px solid #94a3b8;
+  box-sizing: border-box;
+}
+
+.grafico-area .linha {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  height: 0;
+  border-top: 1px solid #cbd5e1;
+  pointer-events: none;
+}
+
+.grafico-barras {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  min-width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 30px;
+  padding: 0 28px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.grupo-barra {
+  position: relative;
+  height: 100%;
+  min-width: 120px;
+  max-width: 180px;
+  flex: 1 0 120px;
+  display: block;
+}
+
+.barras {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 7px;
+}
+
+.barra-wrapper {
+  position: relative;
+  width: 25px;
+  min-height: 0;
+  flex: 0 0 25px;
+  outline: none;
+  cursor: help;
+}
+
+.desempenho-unico .barra-wrapper {
+  width: 30px;
+  flex-basis: 30px;
+}
+
+.barra {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 1px 1px 0 0;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+  transition: opacity 0.12s ease;
+}
+
+.barra.presencas {
+  background: #2563eb;
+}
+
+.barra.atrasos {
+  background: #16a34a;
+}
+
+.barra.faltas {
+  background: #ef4444;
+}
+
+.barra.neutro {
+  background: #7c3aed;
+}
+
+.barra-wrapper:hover .barra,
+.barra-wrapper:focus .barra,
+.barra-wrapper:focus-visible .barra {
+  opacity: 0.82;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.barra-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  z-index: 15;
+  min-width: max-content;
+  max-width: 190px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease,
+    visibility 0.12s ease;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+}
+
+.barra-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #111827;
+}
+
+.barra-wrapper:hover .barra-tooltip,
+.barra-wrapper:focus .barra-tooltip,
+.barra-wrapper:focus-visible .barra-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.grupo-barra > strong {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  width: 150px;
+  margin: 0;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+}
+
+.grafico-area::-webkit-scrollbar {
+  height: 8px;
+}
+
+.grafico-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grafico-area::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+body.dark .dashboard-page .grafico-plotagem {
+  border-left-color: rgba(255, 255, 255, 0.4);
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+body.dark .dashboard-page .grafico-area .linha {
+  border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+body.dark .dashboard-page .grafico-escala-valores,
+body.dark .dashboard-page .grupo-barra > strong {
+  color: #ddd6fe;
+}
+
+body.dark .dashboard-page .barra-tooltip {
+  background: #f8fafc;
+  color: #111827;
+}
+
+body.dark .dashboard-page .barra-tooltip::after {
+  border-top-color: #f8fafc;
+}
+
+@media (max-width: 760px) {
+  .dashboard-page {
+    --grafico-altura-plotagem: 280px;
+    --grafico-altura-rotulos: 56px;
+  }
+
+  .grafico-frequencia {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .grafico-escala {
+    min-width: 48px;
+    padding-right: 9px;
+  }
+
+  .grafico-barras {
+    gap: 22px;
+    padding: 0 18px;
+  }
+
+  .grupo-barra {
+    min-width: 105px;
+    flex-basis: 105px;
+  }
+
+  .barra-wrapper {
+    width: 21px;
+    flex-basis: 21px;
+  }
+}
 

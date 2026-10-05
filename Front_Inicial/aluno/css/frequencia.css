@@ -373,3 +373,28 @@
     min-width: 150px;
   }
 }
+
+
+.frequencia-professor {
+  min-width: 190px;
+}
+
+.frequencia-professor-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.frequencia-professor .material-symbols-rounded {
+  flex: 0 0 auto;
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.frequencia-professor span:last-child {
+  line-height: 1.35;
+}
+
+.last-bio-box p {
+  line-height: 1.5;
+}

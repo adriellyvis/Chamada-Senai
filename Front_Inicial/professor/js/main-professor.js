@@ -1,69 +1,53 @@
 import { validarAutenticacao, preencherDadosUsuario } from "../../core/auth.js";
+import {
+  aplicarConfiguracoesInterface,
+  alternarTemaInterface,
+  deveConfirmarSaida,
+  obterConfiguracoes
+} from "../../core/configuracoes-ui.js";
 
 import { abrirDashboardProfessor } from "./pages/dashboard-professor.js";
 import { abrirTurmasProfessor } from "./pages/turmas-professor.js";
 import { abrirAlunosProfessor } from "./pages/alunos-professor.js";
+import { abrirNotasProfessor } from "./pages/notas-professor.js";
 import { abrirHistoricoProfessor } from "./pages/historico-professor.js";
 import { abrirChamadaProfessor } from "./pages/chamada-professor.js";
 import { abrirOcorrenciasProfessor } from "./pages/ocorrencias-professor.js";
 import { abrirPerfilProfessor } from "./pages/perfil-professor.js";
+import { abrirConfiguracoesProfessor } from "./pages/configuracoes-professor.js";
 import {
   configurarNotificacoesProfessor,
   atualizarIndicadorNotificacoes
 } from "./components/notificacoes-professor.js";
 import { configurarBuscaGlobalProfessor } from "./components/busca-global-professor.js";
 
-
-carregarTemaSalvo();
 const usuario = validarAutenticacao("professor");
 
 if (!usuario) {
   throw new Error("Usuário não autenticado");
 }
 
-export function atualizarIcones() {
-  if (window.lucide) {
-    lucide.createIcons();
-  }
-}
-configurarFooterSidebar();
-atualizarIcones();
+aplicarConfiguracoesInterface("professor");
 preencherDadosUsuario(usuario);
 configurarNotificacoesProfessor();
+configurarFooterSidebar();
 
-function aplicarTemaSalvo() {
-  const tema = localStorage.getItem("temaEyeCount") || "light";
-  document.documentElement.setAttribute("data-theme", tema);
-  const btn = document.getElementById("btnTheme");
-  if (btn) btn.innerHTML = tema === "dark" ? `<span class="theme-symbol">☀️</span><strong>Tema claro</strong><span class="footer-arrow">›</span>` : `<span class="theme-symbol">🌙</span><strong>Tema escuro</strong><span class="footer-arrow">›</span>`;
+export function atualizarIcones() {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 }
-
-function alternarTema() {
-  const temaAtual = document.documentElement.getAttribute("data-theme");
-  const novoTema = temaAtual === "dark" ? "light" : "dark";
-
-  document.documentElement.setAttribute("data-theme", novoTema);
-  localStorage.setItem("tema-eyecount", novoTema);
-}
-
-function carregarTemaSalvo() {
-  const temaSalvo = localStorage.getItem("tema-eyecount") || "light";
-  document.documentElement.setAttribute("data-theme", temaSalvo);
-}
-
-aplicarTemaSalvo();
-
-document.getElementById("btnTheme")?.addEventListener("click", alternarTema);
-
 
 const rotas = {
   perfil: abrirPerfilProfessor,
   dashboard: abrirDashboardProfessor,
   turmas: abrirTurmasProfessor,
   alunos: abrirAlunosProfessor,
+  notas: abrirNotasProfessor,
   historico: abrirHistoricoProfessor,
   chamada: abrirChamadaProfessor,
-  ocorrencias: abrirOcorrenciasProfessor
+  ocorrencias: abrirOcorrenciasProfessor,
+  configuracoes: abrirConfiguracoesProfessor
 };
 
 function ativarMenu(itemAtivo = null) {
@@ -71,20 +55,18 @@ function ativarMenu(itemAtivo = null) {
     item.classList.remove("active");
   });
 
-  if (itemAtivo) {
-    itemAtivo.classList.add("active");
-  }
+  itemAtivo?.classList.add("active");
 }
 
 async function navegarPara(pagina, itemAtivo = null) {
   const abrirPagina = rotas[pagina];
-
   if (!abrirPagina) return;
 
   ativarMenu(itemAtivo);
   await abrirPagina();
   configurarBuscaGlobalProfessor({ navegarPara: navegarPelaBuscaGlobal });
   await atualizarIndicadorNotificacoes();
+  atualizarIcones();
 }
 
 async function navegarPelaBuscaGlobal(pagina) {
@@ -103,21 +85,23 @@ document.getElementById("btnAbrirPerfilProfessor")?.addEventListener("click", as
   await navegarPara("perfil");
 });
 
-document.getElementById("btnLogout")?.addEventListener("click", () => {
-  localStorage.clear();
-  window.location.href = "../login/area-login-professor.html";
+document.getElementById("btnLogout")?.addEventListener("click", fazerLogout);
+
+window.addEventListener("professor:navegar", async event => {
+  const pagina = event?.detail?.pagina;
+  if (!pagina) return;
+  const itemMenu = document.querySelector(`[data-page="${pagina}"]`);
+  await navegarPara(pagina, itemMenu);
 });
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const dashboardItem = document.querySelector('[data-page="dashboard"]');
+  atualizarIcones();
 
-  if (dashboardItem) {
-    ativarMenu(dashboardItem);
-  }
+  const paginaInicial = obterConfiguracoes("professor").paginaInicial;
+  const paginaValida = rotas[paginaInicial] ? paginaInicial : "dashboard";
+  const itemMenu = document.querySelector(`[data-page="${paginaValida}"]`);
 
-  await abrirDashboardProfessor();
-  configurarBuscaGlobalProfessor({ navegarPara: navegarPelaBuscaGlobal });
-  await atualizarIndicadorNotificacoes();
+  await navegarPara(paginaValida, itemMenu);
 });
 
 function configurarFooterSidebar() {
@@ -125,53 +109,54 @@ function configurarFooterSidebar() {
   const btnMenu = document.getElementById("abrirMenuConfig");
   const dropdown = document.getElementById("menuConfigDropdown");
 
-  if (btnTema) {
-    btnTema.addEventListener("click", alternarTema);
-  }
+  btnTema?.addEventListener("click", () => {
+    alternarTemaInterface("professor");
+  });
 
-  if (btnMenu && dropdown) {
-    btnMenu.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle("aberto");
-    });
+  if (!btnMenu || !dropdown) return;
 
-    document.addEventListener("click", (e) => {
-      if (!dropdown.contains(e.target) && !btnMenu.contains(e.target)) {
-        dropdown.classList.remove("aberto");
+  btnMenu.addEventListener("click", event => {
+    event.stopPropagation();
+    dropdown.classList.toggle("aberto");
+  });
+
+  document.addEventListener("click", event => {
+    if (!dropdown.contains(event.target) && !btnMenu.contains(event.target)) {
+      dropdown.classList.remove("aberto");
+    }
+  });
+
+  dropdown.querySelectorAll("button[data-acao]").forEach(botao => {
+    botao.addEventListener("click", async () => {
+      const acao = botao.dataset.acao;
+
+      if (acao === "logout") {
+        fazerLogout();
+      } else if (acao === "perfil") {
+        await navegarPara("perfil");
+      } else if (acao === "configuracoes") {
+        await navegarPara("configuracoes");
       }
+
+      dropdown.classList.remove("aberto");
     });
-
-    dropdown.querySelectorAll("button[data-acao]").forEach(botao => {
-      botao.addEventListener("click", async () => {
-        const acao = botao.dataset.acao;
-
-        if (acao === "tema") {
-          alternarTema();
-        }
-
-        if (acao === "logout") {
-          fazerLogout();
-        }
-
-        if (acao === "perfil") {
-          await navegarPara("perfil");
-        }
-
-        if (acao === "configuracoes") {
-          alert("Configurações em construção.");
-        }
-
-        dropdown.classList.remove("aberto");
-      });
-    });
-  }
+  });
 }
 
 function fazerLogout() {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("usuarioLogado");
-  localStorage.removeItem("token");
-  localStorage.removeItem("tema-eyecount");
+  if (
+    deveConfirmarSaida("professor") &&
+    !window.confirm("Deseja sair do Portal do Professor?")
+  ) {
+    return;
+  }
 
-  window.location.href = "/login/area-login-professor.html";
+  localStorage.removeItem("usuario");
+  sessionStorage.removeItem("usuario");
+  localStorage.removeItem("usuarioLogado");
+  sessionStorage.removeItem("usuarioLogado");
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
+  sessionStorage.clear();
+  window.location.href = "../login/area-login-professor.html";
 }

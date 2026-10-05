@@ -1,6 +1,7 @@
 import {
   iniciarCameraBiometria,
   capturarImagemBiometria,
+  capturarAmostrasBiometria,
   pararCameraBiometria,
   cameraEstaAtiva
 } from "../../../biometria/camera-biometria.js";
@@ -11,9 +12,14 @@ import {
   verificarFacePython,
   verificarServidorBiometria
 } from "../../../biometria/biometria-api.js";
+import {
+  criarCadastroFacialGuiado,
+  prepararPainelCadastroFacialGuiado
+} from "../../../biometria/cadastro-facial-guiado.js";
 
 import {
-  registrarPresencaBiometrica
+  solicitarConfirmacaoPresencaBiometrica,
+  consultarStatusConfirmacaoBiometrica
 } from "../../../biometria/presenca-biometrica-api.js";
 
 import {
@@ -29,7 +35,7 @@ export function abrirChamadaAluno(container) {
             <div>
               <span class="page-tag">CHAMADA FACIAL</span>
               <h2>Validação Biométrica Facial</h2>
-              <p>Posicione seu rosto no centro da câmera para confirmar sua presença.</p>
+              <p>Clique em iniciar reconhecimento, olhe para a câmera e aguarde a comparação com seu cadastro.</p>
             </div>
 
             <span class="chamada-status chamada-status--loading" id="statusChamada">
@@ -87,6 +93,8 @@ export function abrirChamadaAluno(container) {
             </div>
           </div>
 
+          <div id="cadastroFaceGuia"></div>
+
           <div class="chamada-actions">
             <button class="primary-btn" id="btnIniciarBiometria" disabled>
               Iniciar reconhecimento
@@ -96,8 +104,8 @@ export function abrirChamadaAluno(container) {
               Cadastrar meu rosto
             </button>
 
-            <button class="outline-btn" id="btnConfirmarPresenca" disabled>
-              Confirmar presença
+            <button class="outline-btn" id="btnConfirmarPresenca" disabled hidden aria-hidden="true">
+              Envio automático
             </button>
 
             <button class="outline-btn" id="btnPararBiometria" disabled>
@@ -165,19 +173,50 @@ function configurarBiometriaReal() {
 
   const videoBiometria = document.getElementById("videoBiometria");
   const canvasBiometria = document.getElementById("canvasBiometria");
+  const guiaContainer = document.getElementById("cadastroFaceGuia");
 
   let chamadaAberta = null;
   let rostoValidado = false;
   let presencaConfirmada = false;
+  let solicitacaoEnviada = false;
+  let solicitacaoBiometrica = null;
   let faceCadastrada = false;
   let chamadaAtiva = false;
   let servidorAtivo = false;
   let monitorChamada = null;
+  let cadastroFacialProcessando = false;
 
   if (!btnIniciar || !btnCadastrarFace || !btnConfirmar || !btnParar || !feedback || !videoBiometria || !canvasBiometria) {
     console.error("Elementos da biometria não encontrados.");
     return;
   }
+
+
+  const painelGuia = prepararPainelCadastroFacialGuiado(guiaContainer);
+  const cadastroGuiado = criarCadastroFacialGuiado({
+    videoElement: videoBiometria,
+    canvasElement: canvasBiometria,
+    aoAtualizar(estadoGuia) {
+      painelGuia.atualizar(estadoGuia);
+      cadastroFacialProcessando = Boolean(estadoGuia.processando);
+      btnCadastrarFace.textContent = estadoGuia.textoBotao;
+
+      if (estadoGuia.tipo === "validando") {
+        cameraPreviewArea.classList.add("is-scanning");
+        atualizarFeedback(estadoGuia.mensagem, "loading");
+      } else if (estadoGuia.tipo === "rejeitada" || estadoGuia.tipo === "erro") {
+        cameraPreviewArea.classList.remove("is-scanning");
+        atualizarFeedback(estadoGuia.mensagem, "error");
+      } else if (estadoGuia.tipo === "aceita") {
+        cameraPreviewArea.classList.remove("is-scanning");
+        atualizarFeedback(estadoGuia.mensagem, "success");
+      } else if (estadoGuia.tipo === "pronta") {
+        atualizarFeedback(estadoGuia.mensagem, "loading");
+      }
+
+      atualizarBotoes();
+    }
+  });
 
   function atualizarFeedback(mensagem, tipo = "") {
     feedback.textContent = mensagem;
@@ -220,27 +259,46 @@ function configurarBiometriaReal() {
   }
 
   function atualizarBotoes() {
-    const podeUsar = servidorAtivo && chamadaAtiva && !!chamadaAberta && !presencaConfirmada;
+    const chamadaLiberada = chamadaAtiva && !!chamadaAberta;
+    const aguardandoProfessor = solicitacaoEnviada && !presencaConfirmada;
+    const reconhecimentoConcluido = rostoValidado && !aguardandoProfessor && !presencaConfirmada;
+    const podeUsar = servidorAtivo && chamadaLiberada && !presencaConfirmada && !aguardandoProfessor;
 
     btnCadastrarFace.hidden = faceCadastrada;
-    btnCadastrarFace.disabled = !podeUsar || faceCadastrada;
+    btnCadastrarFace.disabled = !podeUsar || faceCadastrada || reconhecimentoConcluido || cadastroFacialProcessando;
 
-    btnIniciar.disabled = !podeUsar || !faceCadastrada;
+    // O reconhecimento só pode começar depois que o backend confirmar
+    // que existe uma chamada aberta para a turma do aluno.
+    btnIniciar.disabled = !podeUsar || !faceCadastrada || reconhecimentoConcluido;
     btnConfirmar.disabled = !podeUsar || !rostoValidado;
-    btnParar.disabled = !podeUsar || !cameraEstaAtiva();
+    btnParar.disabled = !podeUsar || !cameraEstaAtiva() || reconhecimentoConcluido;
 
     if (presencaConfirmada) {
       btnIniciar.textContent = "Reconhecimento finalizado";
-      btnConfirmar.textContent = "Presença já confirmada";
+      btnConfirmar.textContent = "Presença confirmada pelo professor";
       btnParar.textContent = "Câmera encerrada";
+    } else if (aguardandoProfessor) {
+      btnIniciar.textContent = "Aguardando professor";
+      btnConfirmar.textContent = "Solicitação enviada";
+      btnParar.textContent = "Câmera encerrada";
+    } else if (!chamadaLiberada) {
+      btnIniciar.textContent = "Aguardando chamada abrir";
+      btnConfirmar.textContent = "Enviar para o professor";
+      btnParar.textContent = "Câmera fechada";
+    } else if (!servidorAtivo) {
+      btnIniciar.textContent = "Biometria indisponível";
+      btnConfirmar.textContent = "Enviar para o professor";
+      btnParar.textContent = "Câmera fechada";
+    } else if (reconhecimentoConcluido) {
+      btnIniciar.textContent = "Reconhecimento concluído";
+      btnConfirmar.textContent = "Enviar para o professor";
+      btnParar.textContent = "Aguardando envio";
     } else {
       btnIniciar.textContent = !faceCadastrada
         ? "Aguardando cadastro facial"
-        : rostoValidado
-          ? "Reconhecimento concluído"
-          : "Iniciar reconhecimento";
+        : "Iniciar reconhecimento";
 
-      btnConfirmar.textContent = "Confirmar presença";
+      btnConfirmar.textContent = "Enviar para o professor";
       btnParar.textContent = cameraEstaAtiva() ? "Parar câmera" : "Câmera fechada";
     }
   }
@@ -251,6 +309,8 @@ function configurarBiometriaReal() {
 
     chamadaAberta = null;
     rostoValidado = false;
+    solicitacaoEnviada = false;
+    solicitacaoBiometrica = null;
 
     cameraPreviewArea.classList.remove("is-scanning", "is-approved");
     if (facePlaceholder) facePlaceholder.style.display = "";
@@ -262,6 +322,10 @@ function configurarBiometriaReal() {
     atualizarFeedback(mensagem, "error");
     atualizarAulaCard();
     atualizarBotoes();
+  }
+
+  function erroIndicaChamadaEncerrada(erro) {
+    return [404, 410].includes(Number(erro?.status));
   }
 
   async function garantirChamadaAindaAberta() {
@@ -278,12 +342,28 @@ function configurarBiometriaReal() {
       atualizarAulaCard();
       return chamadaAtualizada;
     } catch (erro) {
-      bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
-      throw new Error("Não é possível registrar presença em aula encerrada.");
+      // Uma falha temporária de rede/servidor não pode desligar a webcam.
+      // Só encerramos a câmera quando o backend confirma que não existe mais
+      // chamada aberta (404/410).
+      if (erroIndicaChamadaEncerrada(erro)) {
+        bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
+        throw new Error("Não é possível registrar presença em aula encerrada.");
+      }
+
+      console.warn("Falha temporária ao validar chamada; câmera mantida ativa:", erro);
+      throw new Error(erro.message || "Não foi possível confirmar a chamada agora. Tente novamente.");
     }
   }
 
   async function atualizarStatusFace(usuario) {
+    // O monitor da chamada consulta o backend periodicamente. Quando o rosto
+    // já foi reconhecido, essa consulta não pode voltar a interface para o
+    // estado "Pronto para reconhecimento" antes da confirmação da presença.
+    if (rostoValidado || presencaConfirmada) {
+      atualizarBotoes();
+      return;
+    }
+
     faceCadastrada = false;
 
     if (!chamadaAberta?.alunoId) {
@@ -295,9 +375,16 @@ function configurarBiometriaReal() {
       const resultado = await consultarFacePython({
         alunoId: chamadaAberta.alunoId,
         usuarioId: usuario.id,
-        pessoaId: chamadaAberta.alunoId,
+        pessoaId: usuario.id,
         perfil: "aluno"
       });
+
+      // Evita uma condição de corrida caso o reconhecimento termine enquanto
+      // a consulta do cadastro facial ainda estiver aguardando resposta.
+      if (rostoValidado || presencaConfirmada) {
+        atualizarBotoes();
+        return;
+      }
 
       faceCadastrada = Boolean(resultado?.cadastrada);
 
@@ -311,12 +398,115 @@ function configurarBiometriaReal() {
         cameraSubmensagem.textContent = "Cadastre seu rosto uma vez para confirmar presença por biometria.";
       }
     } catch (erro) {
+      if (rostoValidado || presencaConfirmada) {
+        atualizarBotoes();
+        return;
+      }
+
       console.warn("Não foi possível consultar face cadastrada:", erro);
       faceCadastrada = false;
       atualizarFeedback("Não foi possível verificar seu cadastro facial. Tente cadastrar o rosto novamente.", "error");
     }
 
     atualizarBotoes();
+  }
+
+  function normalizarStatusSolicitacao(valor) {
+    const status = String(valor || "")
+      .trim()
+      .toUpperCase()
+      .replaceAll("-", "_");
+
+    if (["CONFIRMADA", "CONFIRMADO", "APROVADA", "APROVADO"].includes(status)) return "CONFIRMADA";
+    if (["RECUSADA", "RECUSADO", "REJEITADA", "REJEITADO"].includes(status)) return "RECUSADA";
+    if (["PENDENTE", "AGUARDANDO", "AGUARDANDO_CONFIRMACAO"].includes(status)) return "PENDENTE";
+
+    return status || null;
+  }
+
+  function aplicarStatusSolicitacao(resultado, silencioso = false) {
+    if (!resultado) return false;
+
+    const status = normalizarStatusSolicitacao(
+      resultado.status ?? resultado.situacao ?? resultado.estado
+    );
+
+    solicitacaoBiometrica = resultado;
+
+    if (status === "CONFIRMADA" || resultado.confirmada === true) {
+      solicitacaoEnviada = true;
+      presencaConfirmada = true;
+      rostoValidado = true;
+
+      pararCameraBiometria(videoBiometria);
+      cameraPreviewArea.classList.remove("is-scanning");
+      cameraPreviewArea.classList.add("is-approved");
+      cameraMensagem.textContent = "Presença confirmada";
+      cameraSubmensagem.textContent = "O professor confirmou sua validação biométrica.";
+      atualizarStatus("Confirmada pelo professor", "confirmed");
+      atualizarFeedback("Sua presença foi confirmada pelo professor.", "success");
+      if (monitorChamada) clearInterval(monitorChamada);
+      atualizarBotoes();
+      return true;
+    }
+
+    if (status === "RECUSADA" || resultado.recusada === true) {
+      solicitacaoEnviada = false;
+      presencaConfirmada = false;
+      rostoValidado = false;
+      solicitacaoBiometrica = resultado;
+
+      cameraPreviewArea.classList.remove("is-scanning", "is-approved");
+      cameraMensagem.textContent = "Validação não confirmada";
+      cameraSubmensagem.textContent = "O professor recusou a solicitação. Você pode tentar novamente.";
+      atualizarStatus("Recusada pelo professor", "error");
+      atualizarFeedback(
+        resultado.motivo || resultado.mensagem || "O professor não confirmou esta validação biométrica. Faça uma nova tentativa ou fale com ele.",
+        "error"
+      );
+      atualizarBotoes();
+
+      // RECUSADA não bloqueia a tela. O aluno deve poder reconhecer novamente
+      // sem precisar refazer o cadastro facial.
+      return false;
+    }
+
+    if (status === "PENDENTE" || resultado.pendente === true) {
+      solicitacaoEnviada = true;
+      presencaConfirmada = false;
+      rostoValidado = true;
+
+      pararCameraBiometria(videoBiometria);
+      cameraPreviewArea.classList.remove("is-scanning");
+      cameraPreviewArea.classList.add("is-approved");
+      cameraMensagem.textContent = "Aguardando professor";
+      cameraSubmensagem.textContent = "Sua biometria foi validada e está aguardando confirmação na chamada.";
+      atualizarStatus("Aguardando professor", "loading");
+      if (!silencioso) {
+        atualizarFeedback("Biometria enviada. Aguarde o professor confirmar sua presença.", "loading");
+      }
+      atualizarBotoes();
+      return true;
+    }
+
+    return false;
+  }
+
+  async function sincronizarSolicitacaoBiometrica(silencioso = true) {
+    if (!chamadaAberta?.aulaId) return false;
+
+    try {
+      const resultado = await consultarStatusConfirmacaoBiometrica({
+        aulaId: chamadaAberta.aulaId
+      });
+
+      return aplicarStatusSolicitacao(resultado, silencioso);
+    } catch (erro) {
+      if (!silencioso) {
+        console.warn("Não foi possível consultar a confirmação biométrica:", erro);
+      }
+      return false;
+    }
   }
 
   async function carregarChamadaAberta(silencioso = false) {
@@ -331,26 +521,63 @@ function configurarBiometriaReal() {
       chamadaAtiva = true;
 
       atualizarAulaCard();
-      atualizarStatus("Chamada aberta", "open");
 
-      if (!silencioso) {
-        atualizarFeedback("Chamada aberta encontrada. Verificando cadastro facial.", "loading");
-      }
+      // Primeiro restaura uma solicitação existente. Isso evita que o aluno
+      // repita a biometria depois de atualizar a página.
+      await sincronizarSolicitacaoBiometrica(true);
 
-      await atualizarStatusFace(usuario);
-    } catch (erro) {
-      console.error("Erro ao buscar chamada aberta:", erro);
-
-      if (chamadaAtiva || chamadaAberta) {
-        bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
+      // Apenas uma solicitação PENDENTE ou CONFIRMADA deve interromper o
+      // fluxo normal. Uma solicitação RECUSADA libera uma nova tentativa e,
+      // por isso, precisamos continuar abaixo para consultar novamente se a
+      // face do aluno já está cadastrada.
+      if (presencaConfirmada || solicitacaoEnviada) {
+        atualizarBotoes();
         return;
       }
 
-      chamadaAberta = null;
-      chamadaAtiva = false;
-      atualizarAulaCard();
-      atualizarStatus("Sem chamada aberta", "error");
-      atualizarFeedback(erro.message || "Nenhuma chamada aberta encontrada.", "error");
+      // Sem solicitação bloqueante (inclusive após RECUSADA), mantém o fluxo
+      // normal de cadastro e reconhecimento facial.
+      if (!rostoValidado) {
+        atualizarStatus("Chamada aberta", "open");
+
+        if (!silencioso) {
+          atualizarFeedback("Chamada aberta encontrada. Verificando cadastro facial.", "loading");
+        }
+
+        await atualizarStatusFace(usuario);
+      } else {
+        atualizarBotoes();
+      }
+    } catch (erro) {
+      if (!silencioso) {
+        console.error("Erro ao buscar chamada aberta:", erro);
+      }
+
+      if (erroIndicaChamadaEncerrada(erro)) {
+        if (chamadaAtiva || chamadaAberta) {
+          bloquearChamadaEncerrada(erro.message || "A chamada foi encerrada pelo professor.");
+          return;
+        }
+
+        chamadaAberta = null;
+        chamadaAtiva = false;
+        atualizarAulaCard();
+        atualizarStatus("Sem chamada aberta", "error");
+        if (!silencioso) {
+          atualizarFeedback(erro.message || "Nenhuma chamada aberta encontrada.", "error");
+        }
+        atualizarBotoes();
+        return;
+      }
+
+      // 500, queda de rede ou timeout não significam que a chamada acabou.
+      // Mantemos o estado e, principalmente, não desligamos a câmera.
+      if (!silencioso) {
+        atualizarFeedback(
+          erro.message || "Não foi possível atualizar a chamada agora. A câmera continuará aberta.",
+          "error"
+        );
+      }
       atualizarBotoes();
     }
   }
@@ -359,7 +586,11 @@ function configurarBiometriaReal() {
     if (monitorChamada) clearInterval(monitorChamada);
 
     monitorChamada = setInterval(() => {
-      if (!presencaConfirmada && chamadaAtiva) {
+      // Enquanto a webcam está em uso, não fazemos a atualização automática
+      // da chamada. Isso evita concorrência entre polling, cadastro e captura
+      // das amostras. As ações biométricas ainda validam a chamada antes de
+      // salvar/enviar qualquer resultado.
+      if (!presencaConfirmada && !cameraEstaAtiva()) {
         carregarChamadaAberta(true);
       }
     }, 5000);
@@ -390,9 +621,12 @@ function configurarBiometriaReal() {
         throw new Error("Usuário logado não encontrado.");
       }
 
-      atualizarFeedback("Abrindo câmera para cadastro facial...", "loading");
+      const cameraVinculada = Boolean(
+        videoBiometria.srcObject?.getVideoTracks?.().some(track => track.readyState === "live")
+      );
 
-      if (!cameraEstaAtiva()) {
+      if (!cameraEstaAtiva() || !cameraVinculada) {
+        atualizarFeedback("Abrindo câmera para cadastro facial...", "loading");
         await iniciarCameraBiometria(videoBiometria);
       }
 
@@ -400,25 +634,38 @@ function configurarBiometriaReal() {
 
       if (facePlaceholder) facePlaceholder.style.display = "none";
 
-      cameraMensagem.textContent = "Cadastro facial em andamento";
-      cameraSubmensagem.textContent = "Olhe para a câmera e mantenha boa iluminação";
-      cameraPreviewArea.classList.add("is-scanning");
+      cameraMensagem.textContent = "Cadastro facial guiado";
+      cameraSubmensagem.textContent = "Siga uma etapa por vez e capture quando estiver pronto";
 
-      await aguardar(1200);
+      if (!cadastroGuiado.obterEstado().ativo) {
+        cadastroGuiado.iniciar();
+        return;
+      }
 
-      const imagemBase64 = capturarImagemBiometria(videoBiometria, canvasBiometria);
+      const captura = await cadastroGuiado.capturarAtual();
+
+      if (!captura?.aceita || !captura?.concluido) {
+        return;
+      }
+
+      cadastroFacialProcessando = true;
+      atualizarBotoes();
+      atualizarFeedback("Salvando e vinculando as cinco amostras faciais...", "loading");
 
       const resultado = await cadastrarFacePython({
         alunoId: chamadaAberta.alunoId,
         usuarioId: usuario.id,
-        pessoaId: chamadaAberta.alunoId,
+        pessoaId: usuario.id,
         perfil: "aluno",
         alunoNome: usuario.nome || "Aluno",
-        imagemBase64
+        imagensBase64: captura.imagensBase64,
+        modoGuiado: true,
+        etapasCadastro: captura.etapasCadastro
       });
 
       console.log("Cadastro facial:", resultado);
 
+      cadastroFacialProcessando = false;
       faceCadastrada = true;
       rostoValidado = false;
 
@@ -431,13 +678,65 @@ function configurarBiometriaReal() {
       atualizarBotoes();
     } catch (erro) {
       console.error("Erro ao cadastrar rosto:", erro);
+      cadastroFacialProcessando = false;
       atualizarFeedback(erro.message || "Erro ao cadastrar rosto.", "error");
       cameraMensagem.textContent = "Cadastro facial não concluído";
-      cameraSubmensagem.textContent = "Verifique a câmera e tente novamente.";
+      cameraSubmensagem.textContent = "Corrija o enquadramento e tente novamente.";
       cameraPreviewArea.classList.remove("is-scanning");
       atualizarBotoes();
     }
   });
+
+  async function enviarSolicitacaoBiometricaReconhecida({ silencioso = false } = {}) {
+    if (presencaConfirmada || solicitacaoEnviada) {
+      atualizarBotoes();
+      return solicitacaoBiometrica;
+    }
+
+    if (!rostoValidado) {
+      throw new Error("O rosto precisa ser reconhecido antes de enviar a presença.");
+    }
+
+    await garantirChamadaAindaAberta();
+
+    if (!chamadaAberta?.alunoId || !chamadaAberta?.aulaId) {
+      throw new Error("Nenhuma chamada aberta carregada.");
+    }
+
+    btnConfirmar.disabled = true;
+
+    if (!silencioso) {
+      atualizarFeedback("Rosto reconhecido. Enviando validação ao professor...", "loading");
+      atualizarStatus("Enviando presença", "loading");
+    }
+
+    const solicitacao = await solicitarConfirmacaoPresencaBiometrica({
+      alunoId: chamadaAberta.alunoId,
+      aulaId: chamadaAberta.aulaId
+    });
+
+    solicitacaoBiometrica = solicitacao || {};
+    solicitacaoEnviada = true;
+    presencaConfirmada = false;
+    rostoValidado = true;
+
+    pararCameraBiometria(videoBiometria);
+    cameraPreviewArea.classList.remove("is-scanning");
+    cameraPreviewArea.classList.add("is-approved");
+    cameraMensagem.textContent = "Aguardando professor";
+    cameraSubmensagem.textContent =
+      "Seu rosto foi reconhecido. A solicitação foi enviada ao professor, mas sua presença ainda não foi registrada.";
+
+    atualizarFeedback(
+      "Reconhecimento concluído. Sua presença só será registrada depois da confirmação do professor.",
+      "loading"
+    );
+    atualizarStatus("Aguardando professor", "loading");
+    atualizarBotoes();
+
+    console.log("Solicitação biométrica PENDENTE enviada ao professor:", solicitacao);
+    return solicitacao;
+  }
 
   btnIniciar.addEventListener("click", async () => {
     try {
@@ -447,10 +746,22 @@ function configurarBiometriaReal() {
         return;
       }
 
+      if (solicitacaoEnviada) {
+        atualizarFeedback(
+          "Seu reconhecimento já foi enviado. Aguarde a confirmação do professor.",
+          "loading"
+        );
+        atualizarBotoes();
+        return;
+      }
+
       await garantirChamadaAindaAberta();
 
       if (!faceCadastrada) {
-        atualizarFeedback("Cadastre seu rosto antes de iniciar o reconhecimento facial.", "error");
+        atualizarFeedback(
+          "Cadastre seu rosto antes de iniciar o reconhecimento facial.",
+          "error"
+        );
         atualizarBotoes();
         return;
       }
@@ -458,47 +769,84 @@ function configurarBiometriaReal() {
       rostoValidado = false;
       atualizarBotoes();
 
-      atualizarFeedback("Iniciando câmera...", "loading");
+      atualizarFeedback("Abrindo câmera para reconhecimento facial...", "loading");
       atualizarStatus("Abrindo câmera", "loading");
       cameraMensagem.textContent = "Abrindo câmera...";
-      cameraSubmensagem.textContent = "Permita o acesso à webcam no navegador";
+      cameraSubmensagem.textContent = "Olhe normalmente para a câmera";
 
       await iniciarCameraBiometria(videoBiometria);
       atualizarBotoes();
 
-      if (facePlaceholder) facePlaceholder.style.display = "none";
+      if (facePlaceholder) {
+        facePlaceholder.style.display = "none";
+      }
 
-      atualizarFeedback("Câmera iniciada. Posicione seu rosto no centro.", "loading");
-      cameraMensagem.textContent = "Rosto em análise";
-      cameraSubmensagem.textContent = "Mantenha o rosto centralizado e com boa iluminação";
       cameraPreviewArea.classList.add("is-scanning");
       cameraPreviewArea.classList.remove("is-approved");
-      atualizarStatus("Validando rosto", "loading");
+      atualizarStatus("Reconhecendo rosto", "loading");
+      cameraMensagem.textContent = "Olhe para a câmera";
+      cameraSubmensagem.textContent =
+        "Fique de frente e centralizado. A comparação será feita automaticamente.";
+      atualizarFeedback(
+        "Reconhecimento facial em andamento. Mantenha o rosto visível por alguns instantes.",
+        "loading"
+      );
 
-      await aguardar(1200);
+      // Pequena espera apenas para a câmera estabilizar foco/exposição.
+      // Não há prova de vida, desafio ou movimento obrigatório.
+      await aguardar(900);
       await garantirChamadaAindaAberta();
 
-      const imagemBase64 = capturarImagemBiometria(videoBiometria, canvasBiometria);
-      atualizarFeedback("Enviando imagem para reconhecimento facial...", "loading");
-
       const usuario = obterUsuarioLogado();
+
+      if (!usuario?.id) {
+        throw new Error("Usuário logado não encontrado para o reconhecimento facial.");
+      }
+
+      const imagensBase64 = await capturarAmostrasBiometria(
+        videoBiometria,
+        canvasBiometria,
+        3,
+        550,
+        (atual, total) => {
+          if (atual < total) {
+            atualizarFeedback(
+              `Comparando rosto... amostra ${atual} de ${total} capturada. Continue olhando para a câmera.`,
+              "loading"
+            );
+          } else {
+            atualizarFeedback(
+              "Três amostras capturadas. Comparando com o cadastro facial...",
+              "loading"
+            );
+          }
+        }
+      );
 
       const resultado = await verificarFacePython({
         alunoId: chamadaAberta.alunoId,
         usuarioId: usuario.id,
-        pessoaId: chamadaAberta.alunoId,
+        pessoaId: usuario.id,
         perfil: "aluno",
-        imagemBase64
+        imagensBase64
       });
 
       console.log("Resultado da biometria:", resultado);
 
-      if (!resultado.reconhecido) {
+      if (!resultado?.reconhecido) {
         rostoValidado = false;
-        atualizarFeedback(resultado.mensagem || `Rosto não corresponde ao aluno cadastrado. Confiança: ${resultado.confianca}`, "error");
+
+        atualizarFeedback(
+          resultado?.mensagem || "O rosto não corresponde ao cadastro facial.",
+          "error"
+        );
         atualizarStatus("Aluno não reconhecido", "error");
-        cameraMensagem.textContent = "Aluno não reconhecido";
-        cameraSubmensagem.textContent = "Tente novamente com melhor iluminação.";
+        cameraMensagem.textContent = "Rosto não reconhecido";
+        cameraSubmensagem.textContent = resultado?.amostrasAmbiguas > 0
+          ? "Há duas pessoas muito próximas. Deixe o aluno claramente à frente."
+          : resultado?.esperadoForaPrincipal > 0
+            ? "Seu rosto apareceu ao fundo. Aproxime-se e fique no centro."
+            : "Centralize o rosto, melhore a iluminação e tente novamente.";
         cameraPreviewArea.classList.remove("is-scanning", "is-approved");
         btnIniciar.textContent = "Tentar novamente";
         atualizarBotoes();
@@ -506,22 +854,49 @@ function configurarBiometriaReal() {
       }
 
       rostoValidado = true;
-      atualizarFeedback(`Aluno reconhecido com sucesso. Confiança: ${resultado.confianca}`, "success");
+
+      const complementoMultiplasFaces = resultado.amostrasComMultiplasFaces > 0
+        ? " As outras pessoas no enquadramento foram ignoradas."
+        : "";
+
+      atualizarFeedback(
+        `Aluno reconhecido com sucesso.${complementoMultiplasFaces} Enviando solicitação para o professor...`,
+        "success"
+      );
       atualizarStatus("Aluno reconhecido", "success");
       cameraMensagem.textContent = "Aluno reconhecido com sucesso";
-      cameraSubmensagem.textContent = "Validação pronta para confirmação";
+      cameraSubmensagem.textContent = "Enviando solicitação de presença automaticamente.";
       cameraPreviewArea.classList.remove("is-scanning");
       cameraPreviewArea.classList.add("is-approved");
-      btnIniciar.textContent = "Reconhecimento concluído";
       atualizarBotoes();
+
+      // Fluxo igual ao utilizado antes da versão 4.0.0:
+      // o aluno só inicia o reconhecimento. Após a comparação facial aprovada,
+      // é criada SOMENTE uma solicitação PENDENTE para o professor.
+      // A presença oficial só pode ser criada pelo backend após o professor confirmar.
+      try {
+        await enviarSolicitacaoBiometricaReconhecida();
+      } catch (erroEnvio) {
+        console.error("Erro ao enviar presença automaticamente:", erroEnvio);
+        atualizarFeedback(
+          `Rosto reconhecido, mas não foi possível enviar a solicitação ao professor. ${erroEnvio.message || "Tente iniciar o reconhecimento novamente."}`,
+          "error"
+        );
+        atualizarStatus("Rosto reconhecido", "success");
+        cameraMensagem.textContent = "Rosto reconhecido";
+        cameraSubmensagem.textContent =
+          "Tente iniciar o reconhecimento novamente para reenviar a solicitação.";
+        atualizarBotoes();
+      }
     } catch (erro) {
       console.error("Erro na biometria:", erro);
       rostoValidado = false;
       atualizarFeedback(erro.message || "Erro ao validar biometria.", "error");
       atualizarStatus("Erro na validação", "error");
-      cameraMensagem.textContent = "Erro ao validar rosto";
-      cameraSubmensagem.textContent = "Verifique se a chamada está aberta e se o servidor Python está rodando.";
-      cameraPreviewArea.classList.remove("is-scanning");
+      cameraMensagem.textContent = "Não foi possível reconhecer";
+      cameraSubmensagem.textContent =
+        "Verifique a câmera, a chamada e o servidor de biometria e tente novamente.";
+      cameraPreviewArea.classList.remove("is-scanning", "is-approved");
       atualizarBotoes();
     }
   });
@@ -529,54 +904,40 @@ function configurarBiometriaReal() {
   btnConfirmar.addEventListener("click", async () => {
     try {
       if (presencaConfirmada) {
-        atualizarFeedback("Sua presença já foi confirmada nesta chamada.", "success");
+        atualizarFeedback(
+          "Sua presença já foi confirmada pelo professor nesta chamada.",
+          "success"
+        );
+        atualizarBotoes();
+        return;
+      }
+
+      if (solicitacaoEnviada) {
+        atualizarFeedback(
+          "Sua biometria já foi enviada. Aguarde a confirmação do professor.",
+          "loading"
+        );
         atualizarBotoes();
         return;
       }
 
       if (!rostoValidado) {
-        atualizarFeedback("Valide seu rosto antes de confirmar presença.", "error");
+        atualizarFeedback(
+          "Inicie o reconhecimento facial antes de enviar a presença.",
+          "error"
+        );
         atualizarBotoes();
         return;
       }
 
-      await garantirChamadaAindaAberta();
-
-      if (!chamadaAberta?.alunoId || !chamadaAberta?.aulaId) {
-        throw new Error("Nenhuma chamada aberta carregada.");
-      }
-
-      btnConfirmar.disabled = true;
-      atualizarFeedback("Registrando presença biométrica no banco...", "loading");
-
-      const presenca = await registrarPresencaBiometrica({
-        alunoId: chamadaAberta.alunoId,
-        aulaId: chamadaAberta.aulaId
-      });
-
-      presencaConfirmada = true;
-      rostoValidado = true;
-
-      atualizarFeedback("Presença biométrica registrada no banco.", "success");
-      atualizarStatus("Presença confirmada", "confirmed");
-
-      btnIniciar.textContent = "Reconhecimento finalizado";
-      btnConfirmar.textContent = "Presença já confirmada";
-      btnParar.textContent = "Câmera encerrada";
-
-      pararCameraBiometria(videoBiometria);
-      cameraPreviewArea.classList.remove("is-scanning");
-      cameraPreviewArea.classList.add("is-approved");
-      cameraMensagem.textContent = "Presença confirmada";
-      cameraSubmensagem.textContent = "Registro enviado para o professor.";
-
-      if (monitorChamada) clearInterval(monitorChamada);
-
-      console.log("Presença registrada no banco:", presenca);
-      atualizarBotoes();
+      atualizarFeedback("Tentando enviar a presença novamente...", "loading");
+      await enviarSolicitacaoBiometricaReconhecida();
     } catch (erro) {
-      console.error("Erro ao confirmar presença biométrica:", erro);
-      atualizarFeedback(erro.message || "Erro ao registrar presença no banco.", "error");
+      console.error("Erro ao enviar confirmação biométrica:", erro);
+      atualizarFeedback(
+        erro.message || "Erro ao enviar a validação para o professor.",
+        "error"
+      );
       atualizarBotoes();
     }
   });
@@ -584,6 +945,17 @@ function configurarBiometriaReal() {
   btnParar.addEventListener("click", () => {
     if (presencaConfirmada) {
       atualizarFeedback("Presença já confirmada. Não é necessário reabrir a câmera.", "success");
+      atualizarBotoes();
+      return;
+    }
+
+    if (rostoValidado) {
+      atualizarFeedback("Aluno reconhecido. Envie a validação ao professor antes de encerrar a câmera.", "success");
+      atualizarStatus("Aluno reconhecido", "success");
+      cameraMensagem.textContent = "Aluno reconhecido com sucesso";
+      cameraSubmensagem.textContent = "Envie a validação para o professor confirmar na chamada.";
+      cameraPreviewArea.classList.remove("is-scanning");
+      cameraPreviewArea.classList.add("is-approved");
       atualizarBotoes();
       return;
     }
@@ -627,7 +999,7 @@ function limparHorario(valor) {
 }
 
 function obterUsuarioLogado() {
-  const usuarioSalvo = localStorage.getItem("usuario");
+  const usuarioSalvo = (sessionStorage.getItem("usuario") || localStorage.getItem("usuario"));
 
   if (!usuarioSalvo) return null;
 

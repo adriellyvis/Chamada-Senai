@@ -1,4 +1,9 @@
 import { request } from "../../../core/api.js";
+import {
+  buscarConfirmacoesBiometricasPendentes,
+  confirmarSolicitacaoBiometrica,
+  recusarSolicitacaoBiometrica
+} from "../api/confirmacoes-biometricas-api.js";
 
 let aulaAtualId = null;
 let turmaDisciplinaAtualId = null;
@@ -190,7 +195,7 @@ export async function abrirChamadaProfessor(turmaDisciplinaIdInicial = "") {
       </div>
 
       <div class="topbar-actions">
-        <button class="bell-btn" type="button">🔔</button>
+        <button class="bell-btn" type="button" aria-label="Notificações"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></button>
         <div class="search-pill">
           <input type="text" placeholder="Buscar alunos e turmas..." />
           <span>⌕</span>
@@ -248,8 +253,12 @@ export async function abrirChamadaProfessor(turmaDisciplinaIdInicial = "") {
             <strong id="contadorAtrasados">0</strong>
           </div>
           <div class="resumo-item resumo-item--biometria">
-            <span>Biometria</span>
+            <span>Biometria confirmada</span>
             <strong id="contadorBiometria">0</strong>
+          </div>
+          <div class="resumo-item resumo-item--biometria-pendente">
+            <span>Aguardando professor</span>
+            <strong id="contadorBiometriaPendente">0</strong>
           </div>
           <div class="resumo-item resumo-item--manual">
             <span>Manual</span>
@@ -302,9 +311,10 @@ export async function abrirChamadaProfessor(turmaDisciplinaIdInicial = "") {
 
 async function carregarAlunosChamada(opcoes = {}) {
   try {
-    const [alunos, presencas] = await Promise.all([
+    const [alunos, presencas, solicitacoesPendentes] = await Promise.all([
       request(`/professor/aula/${aulaAtualId}/alunos`),
-      request(`/professor/aulas/${aulaAtualId}/presencas`).catch(() => [])
+      request(`/professor/aulas/${aulaAtualId}/presencas`).catch(() => []),
+      buscarConfirmacoesBiometricasPendentes().catch(() => [])
     ]);
 
     const presencasPorAluno = new Map(
@@ -314,12 +324,25 @@ async function carregarAlunosChamada(opcoes = {}) {
       ])
     );
 
+    const pendentesDaAula = (solicitacoesPendentes || []).filter(item => {
+      const itemAulaId = Number(item.aulaId ?? item.aula?.id);
+      return !itemAulaId || itemAulaId === Number(aulaAtualId);
+    });
+
+    const solicitacoesPorAluno = new Map(
+      pendentesDaAula.map(item => [
+        Number(item.alunoId ?? item.aluno?.id),
+        item
+      ])
+    );
+
     const alunosComPresenca = (alunos || []).map(aluno => {
       const alunoId = Number(aluno.id ?? aluno.alunoId);
 
       return {
         ...aluno,
-        presencaProfessor: presencasPorAluno.get(alunoId) || null
+        presencaProfessor: presencasPorAluno.get(alunoId) || null,
+        solicitacaoBiometrica: solicitacoesPorAluno.get(alunoId) || null
       };
     });
 
@@ -385,11 +408,19 @@ function renderizarAlunosChamada(alunos) {
         const presencaBiometricaValidada =
           metodoNormalizado === "BIOMETRIA" && validacaoBiometrica;
 
-        const bloqueioBiometria = presencaBiometricaValidada ? "disabled" : "";
+        const solicitacaoBiometrica = aluno.solicitacaoBiometrica || null;
+        const biometriaPendente = Boolean(solicitacaoBiometrica) &&
+          normalizarStatusSolicitacaoBiometrica(
+            solicitacaoBiometrica.status ?? solicitacaoBiometrica.situacao ?? solicitacaoBiometrica.estado
+          ) === "PENDENTE";
+
+        const bloqueioBiometria = (presencaBiometricaValidada || biometriaPendente) ? "disabled" : "";
 
         const tituloBloqueioBiometria = presencaBiometricaValidada
-          ? "Presença validada por biometria. Alteração manual bloqueada."
-          : "";
+          ? "Presença biométrica confirmada. Alteração manual bloqueada."
+          : biometriaPendente
+            ? "Existe uma biometria aguardando sua confirmação. Confirme ou recuse antes de marcar manualmente."
+            : "";
 
         return `
           <article class="chamada-aluno-item ${statusNormalizado}">
@@ -407,8 +438,14 @@ function renderizarAlunosChamada(alunos) {
                 </p>
 
                 <p class="chamada-metodo-presenca">
-                  ${renderizarMetodoPresenca(metodoOriginal, validacaoBiometrica)}
+                  ${renderizarMetodoPresenca(
+                    metodoOriginal,
+                    validacaoBiometrica,
+                    biometriaPendente
+                  )}
                 </p>
+
+                ${biometriaPendente ? renderizarSolicitacaoBiometrica(solicitacaoBiometrica) : ""}
               </div>
             </div>
 
@@ -455,7 +492,7 @@ function renderizarAlunosChamada(alunos) {
 
 function adicionarEventosPresenca() {
   document
-    .querySelectorAll("[data-aluno-id]")
+    .querySelectorAll(".btn-status[data-aluno-id][data-status]")
     .forEach(botao => {
       botao.addEventListener("click", () => {
         registrarPresenca(
@@ -464,6 +501,72 @@ function adicionarEventosPresenca() {
         );
       });
     });
+
+  document
+    .querySelectorAll("[data-biometria-confirmar]")
+    .forEach(botao => {
+      botao.addEventListener("click", async () => {
+        await confirmarBiometriaPendente(
+          botao.dataset.biometriaConfirmar,
+          botao
+        );
+      });
+    });
+
+  document
+    .querySelectorAll("[data-biometria-recusar]")
+    .forEach(botao => {
+      botao.addEventListener("click", async () => {
+        await recusarBiometriaPendente(
+          botao.dataset.biometriaRecusar,
+          botao
+        );
+      });
+    });
+}
+
+async function confirmarBiometriaPendente(solicitacaoId, botao) {
+  if (!solicitacaoId) return;
+
+  const botoes = botao.closest(".biometria-pendente-acoes")?.querySelectorAll("button") || [];
+  botoes.forEach(item => item.disabled = true);
+  const textoOriginal = botao.textContent;
+  botao.textContent = "Confirmando...";
+
+  try {
+    await confirmarSolicitacaoBiometrica(solicitacaoId);
+    window.dispatchEvent(new CustomEvent("eyecount:biometria-professor-atualizada"));
+    await carregarAlunosChamada();
+  } catch (erro) {
+    console.error("Erro ao confirmar biometria:", erro);
+    alert(erro.message || "Não foi possível confirmar a biometria.");
+    botoes.forEach(item => item.disabled = false);
+    botao.textContent = textoOriginal;
+  }
+}
+
+async function recusarBiometriaPendente(solicitacaoId, botao) {
+  if (!solicitacaoId) return;
+
+  if (!window.confirm("Recusar esta validação biométrica? O aluno poderá tentar novamente.")) {
+    return;
+  }
+
+  const botoes = botao.closest(".biometria-pendente-acoes")?.querySelectorAll("button") || [];
+  botoes.forEach(item => item.disabled = true);
+  const textoOriginal = botao.textContent;
+  botao.textContent = "Recusando...";
+
+  try {
+    await recusarSolicitacaoBiometrica(solicitacaoId);
+    window.dispatchEvent(new CustomEvent("eyecount:biometria-professor-atualizada"));
+    await carregarAlunosChamada();
+  } catch (erro) {
+    console.error("Erro ao recusar biometria:", erro);
+    alert(erro.message || "Não foi possível recusar a biometria.");
+    botoes.forEach(item => item.disabled = false);
+    botao.textContent = textoOriginal;
+  }
 }
 
 async function registrarPresenca(alunoId, status) {
@@ -545,7 +648,19 @@ function atualizarContadoresChamada(alunos) {
   // Isso mostra ao professor quantos ainda faltam validar presença.
   const ausentes = Math.max(0, totalAlunos - presentes - atrasados);
 
-  const biometria = alunos.filter(aluno => obterMetodoAluno(aluno) === "BIOMETRIA").length;
+  const biometria = alunos.filter(aluno =>
+    obterMetodoAluno(aluno) === "BIOMETRIA" &&
+    Boolean(aluno.presencaProfessor?.validacaoBiometrica ?? aluno.validacaoBiometrica)
+  ).length;
+
+  const biometriaPendente = alunos.filter(aluno => {
+    const solicitacao = aluno.solicitacaoBiometrica;
+    if (!solicitacao) return false;
+    return normalizarStatusSolicitacaoBiometrica(
+      solicitacao.status ?? solicitacao.situacao ?? solicitacao.estado
+    ) === "PENDENTE";
+  }).length;
+
   const manual = alunos.filter(aluno => obterMetodoAluno(aluno) === "MANUAL").length;
 
   setTexto("contadorTotalAlunos", totalAlunos);
@@ -553,6 +668,7 @@ function atualizarContadoresChamada(alunos) {
   setTexto("contadorAusentes", ausentes);
   setTexto("contadorAtrasados", atrasados);
   setTexto("contadorBiometria", biometria);
+  setTexto("contadorBiometriaPendente", biometriaPendente);
   setTexto("contadorManual", manual);
 }
 
@@ -577,7 +693,87 @@ function normalizarStatusChamada(status) {
   return mapa[texto] || texto;
 }
 
-function renderizarMetodoPresenca(metodo, validacaoBiometrica) {
+function normalizarStatusSolicitacaoBiometrica(valor) {
+  const status = String(valor || "PENDENTE")
+    .trim()
+    .toUpperCase()
+    .replaceAll("-", "_");
+
+  if (["PENDENTE", "AGUARDANDO", "AGUARDANDO_CONFIRMACAO"].includes(status)) return "PENDENTE";
+  if (["CONFIRMADA", "CONFIRMADO", "APROVADA", "APROVADO"].includes(status)) return "CONFIRMADA";
+  if (["RECUSADA", "RECUSADO", "REJEITADA", "REJEITADO"].includes(status)) return "RECUSADA";
+
+  return status;
+}
+
+function renderizarSolicitacaoBiometrica(solicitacao = {}) {
+  const id = Number(solicitacao.id ?? solicitacao.solicitacaoId) || "";
+  const horario = formatarHorarioSolicitacaoBiometrica(
+    solicitacao.horarioSolicitacao ??
+    solicitacao.horarioBiometria ??
+    solicitacao.dataCriacao ??
+    solicitacao.criadoEm
+  );
+
+  const statusSugerido = String(
+    solicitacao.statusSugerido ??
+    solicitacao.statusCalculado ??
+    solicitacao.presencaSugerida ??
+    ""
+  ).trim().toUpperCase();
+
+  const rotuloStatus = statusSugerido === "ATRASADO"
+    ? "Atrasado pelo horário da biometria"
+    : statusSugerido === "PRESENTE"
+      ? "Presente pelo horário da biometria"
+      : "Status será calculado pelo servidor";
+
+  return `
+    <div class="biometria-pendente-box">
+      <div class="biometria-pendente-cabecalho">
+        <span class="material-symbols-rounded" aria-hidden="true">face_6</span>
+        <div>
+          <strong>Biometria aguardando confirmação</strong>
+          <small>${escapeHtml(horario || "Recebida agora")} • ${escapeHtml(rotuloStatus)}</small>
+        </div>
+      </div>
+
+      <div class="biometria-pendente-acoes">
+        <button class="btn-biometria-confirmar" type="button" data-biometria-confirmar="${escapeHtml(id)}">
+          <span class="material-symbols-rounded" aria-hidden="true">check</span>
+          Confirmar presença
+        </button>
+        <button class="btn-biometria-recusar" type="button" data-biometria-recusar="${escapeHtml(id)}">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+          Recusar
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function formatarHorarioSolicitacaoBiometrica(valor) {
+  if (!valor) return "";
+
+  const data = new Date(valor);
+  if (!Number.isNaN(data.getTime())) {
+    return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  const texto = String(valor);
+  const match = texto.match(/(\d{2}:\d{2})/);
+  return match?.[1] || texto;
+}
+
+function renderizarMetodoPresenca(metodo, validacaoBiometrica, biometriaPendente = false) {
+  if (biometriaPendente) {
+    return `
+      <span class="badge-presenca badge-biometria-pendente">
+        Aguardando confirmação
+      </span>
+    `;
+  }
+
   const metodoNormalizado = String(metodo || "")
     .trim()
     .toUpperCase();
@@ -585,7 +781,7 @@ function renderizarMetodoPresenca(metodo, validacaoBiometrica) {
   if (metodoNormalizado === "BIOMETRIA" && validacaoBiometrica) {
     return `
       <span class="badge-presenca badge-biometria">
-        Biometria validada
+        Biometria confirmada
       </span>
     `;
   }
@@ -611,6 +807,15 @@ function renderizarMetodoPresenca(metodo, validacaoBiometrica) {
       Sem validação
     </span>
   `;
+}
+
+function escapeHtml(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function formatarStatusChamada(status) {

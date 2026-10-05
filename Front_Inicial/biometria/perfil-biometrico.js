@@ -1,6 +1,5 @@
 import {
   iniciarCameraBiometria,
-  capturarImagemBiometria,
   pararCameraBiometria,
   cameraEstaAtiva
 } from "./camera-biometria.js";
@@ -11,11 +10,16 @@ import {
   verificarServidorBiometria
 } from "./biometria-api.js";
 
+import {
+  criarCadastroFacialGuiado,
+  prepararPainelCadastroFacialGuiado
+} from "./cadastro-facial-guiado.js";
+
 export function obterUsuarioPerfil() {
   const chaves = ["usuario", "usuarioLogado"];
 
   for (const chave of chaves) {
-    const valor = localStorage.getItem(chave);
+    const valor = sessionStorage.getItem(chave) || localStorage.getItem(chave);
 
     if (!valor) continue;
 
@@ -44,21 +48,10 @@ export function normalizarPerfil(perfil, fallback = "usuario") {
 }
 
 export function resolverIdentificadorBiometrico(usuario = {}, perfil = "usuario") {
-  const perfilNormalizado = String(perfil ?? "").toLowerCase();
-
-  if (perfilNormalizado === "aluno") {
-    return usuario.alunoId ?? usuario.idAluno ?? usuario.estudanteId ?? usuario.pessoaId ?? usuario.id;
-  }
-
-  if (perfilNormalizado === "professor") {
-    return usuario.professorId ?? usuario.idProfessor ?? usuario.pessoaId ?? usuario.id;
-  }
-
-  if (perfilNormalizado === "gestor") {
-    return usuario.gestorId ?? usuario.idGestor ?? usuario.pessoaId ?? usuario.id;
-  }
-
-  return usuario.pessoaId ?? usuario.usuarioId ?? usuario.id;
+  // A biometria é vinculada exclusivamente à tabela usuarios.
+  // IDs de aluno/professor/gestor continuam sendo enviados separadamente
+  // apenas quando alguma regra de domínio precisar deles.
+  return usuario.usuarioId ?? usuario.id ?? usuario.pessoaId ?? null;
 }
 
 export function montarHeroPerfil({ usuario, perfil, descricao }) {
@@ -150,9 +143,11 @@ export function montarCardBiometriaPerfil({ titulo = "Cadastro facial", descrica
         </div>
       </div>
 
+      <div id="perfilBioGuia"></div>
+
       <div class="perfil-bio-actions">
         <button class="perfil-bio-btn secondary" id="btnPerfilAlternarCamera" type="button">Abrir câmera</button>
-        <button class="perfil-bio-btn primary" id="btnPerfilCadastrarFace" type="button">Cadastrar rosto</button>
+        <button class="perfil-bio-btn primary" id="btnPerfilCadastrarFace" type="button">Iniciar cadastro guiado</button>
       </div>
 
       <div class="perfil-bio-feedback" id="perfilBioFeedback">
@@ -174,6 +169,7 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
   const status = document.getElementById("perfilBioStatus");
   const btnAlternarCamera = document.getElementById("btnPerfilAlternarCamera");
   const btnCadastrar = document.getElementById("btnPerfilCadastrarFace");
+  const guiaContainer = document.getElementById("perfilBioGuia");
 
   if (!video || !canvas || !stage || !feedback || !status || !btnAlternarCamera || !btnCadastrar) {
     console.error("Elementos do perfil biométrico não encontrados.");
@@ -183,8 +179,10 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
   const perfilNormalizado = String(perfil || usuario?.perfil || "usuario").toLowerCase();
   const idBiometrico = pessoaId || resolverIdentificadorBiometrico(usuario, perfilNormalizado);
   const nome = pessoaNome || usuario?.nome || "Usuário";
+  const painelGuia = prepararPainelCadastroFacialGuiado(guiaContainer);
 
   let cameraAberta = false;
+  let cadastroSalvo = false;
 
   const atualizarBotaoCamera = () => {
     const ativa = cameraEstaAtiva() && cameraAberta;
@@ -211,7 +209,7 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
     stage.classList.remove("is-approved");
     atualizarBotaoCamera();
 
-    feedback.textContent = "Câmera aberta. Posicione o rosto no centro.";
+    feedback.textContent = "Câmera aberta. Inicie o cadastro guiado e siga cada instrução.";
     feedback.className = "perfil-bio-feedback success";
   };
 
@@ -224,6 +222,33 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
     feedback.className = "perfil-bio-feedback";
   };
 
+  const cadastroGuiado = criarCadastroFacialGuiado({
+    videoElement: video,
+    canvasElement: canvas,
+    aoAtualizar(estadoGuia) {
+      painelGuia.atualizar(estadoGuia);
+      btnCadastrar.textContent = estadoGuia.textoBotao;
+      btnCadastrar.disabled = Boolean(estadoGuia.processando);
+
+      if (estadoGuia.tipo === "validando") {
+        stage.classList.add("is-scanning");
+        feedback.textContent = estadoGuia.mensagem;
+        feedback.className = "perfil-bio-feedback loading";
+      } else if (estadoGuia.tipo === "rejeitada" || estadoGuia.tipo === "erro") {
+        stage.classList.remove("is-scanning");
+        feedback.textContent = estadoGuia.mensagem;
+        feedback.className = "perfil-bio-feedback error";
+      } else if (estadoGuia.tipo === "aceita") {
+        stage.classList.remove("is-scanning");
+        feedback.textContent = estadoGuia.mensagem;
+        feedback.className = "perfil-bio-feedback success";
+      } else if (estadoGuia.tipo === "pronta") {
+        feedback.textContent = estadoGuia.mensagem;
+        feedback.className = "perfil-bio-feedback loading";
+      }
+    }
+  });
+
   btnAlternarCamera.disabled = true;
   btnCadastrar.disabled = true;
   atualizarBotaoCamera();
@@ -235,7 +260,7 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
       throw new Error(servidor?.mensagem || "Servidor de biometria offline.");
     }
 
-    feedback.textContent = "Servidor de biometria ativo. Você já pode abrir a câmera.";
+    feedback.textContent = "Servidor de biometria ativo. Abra a câmera para começar.";
     feedback.className = "perfil-bio-feedback success";
 
     btnAlternarCamera.disabled = false;
@@ -274,34 +299,53 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
         throw new Error("Não foi possível identificar o usuário para vincular a face.");
       }
 
-      feedback.textContent = "Preparando captura facial...";
-      feedback.className = "perfil-bio-feedback loading";
-      stage.classList.remove("is-approved");
+      const cameraVinculada = Boolean(
+        video.srcObject?.getVideoTracks?.().some(track => track.readyState === "live")
+      );
 
-      if (!cameraEstaAtiva()) {
+      if (!cameraEstaAtiva() || !cameraVinculada) {
         await abrirCamera();
       } else {
         cameraAberta = true;
         atualizarBotaoCamera();
       }
 
-      stage.classList.add("is-camera-on", "is-scanning");
+      if (cadastroSalvo || cadastroGuiado.obterEstado().concluido) {
+        cadastroSalvo = false;
+        stage.classList.remove("is-approved");
+        cadastroGuiado.reiniciar();
+        return;
+      }
 
-      await aguardar(1100);
+      if (!cadastroGuiado.obterEstado().ativo) {
+        cadastroGuiado.iniciar();
+        return;
+      }
 
-      const imagemBase64 = capturarImagemBiometria(video, canvas);
+      const captura = await cadastroGuiado.capturarAtual();
+
+      if (!captura?.aceita || !captura?.concluido) {
+        return;
+      }
+
+      btnCadastrar.disabled = true;
+      feedback.textContent = "Salvando as cinco amostras faciais...";
+      feedback.className = "perfil-bio-feedback loading";
 
       const resultado = await cadastrarFacePython({
         perfil: perfilNormalizado,
-        pessoaId: idBiometrico,
+        pessoaId: usuario?.usuarioId ?? usuario?.id ?? idBiometrico,
         pessoaNome: nome,
-        usuarioId: usuario?.id,
+        usuarioId: usuario?.usuarioId ?? usuario?.id,
         alunoId: perfilNormalizado === "aluno"
           ? (usuario?.alunoId ?? usuario?.idAluno ?? usuario?.estudanteId ?? null)
           : null,
-        imagemBase64
+        imagensBase64: captura.imagensBase64,
+        modoGuiado: true,
+        etapasCadastro: captura.etapasCadastro
       });
 
+      cadastroSalvo = true;
       stage.classList.remove("is-scanning");
       stage.classList.add("is-approved");
 
@@ -309,12 +353,15 @@ export async function configurarCadastroFacialPerfil({ perfil, usuario, pessoaId
       feedback.className = "perfil-bio-feedback success";
       status.textContent = "Cadastrado";
       status.className = "perfil-bio-status ok";
+      btnCadastrar.textContent = "Cadastrar novamente";
+      btnCadastrar.disabled = false;
       atualizarBotaoCamera();
     } catch (erro) {
       console.error("Erro ao cadastrar face pelo perfil:", erro);
       stage.classList.remove("is-scanning");
       feedback.textContent = erro.message || "Erro ao cadastrar rosto.";
       feedback.className = "perfil-bio-feedback error";
+      btnCadastrar.disabled = false;
       atualizarBotaoCamera();
     }
   });
@@ -324,8 +371,8 @@ async function atualizarStatusFace({ perfil, usuario, pessoaId, status }) {
   try {
     const resultado = await consultarFacePython({
       perfil,
-      pessoaId,
-      usuarioId: usuario?.id,
+      pessoaId: usuario?.usuarioId ?? usuario?.id ?? pessoaId,
+      usuarioId: usuario?.usuarioId ?? usuario?.id,
       alunoId: perfil === "aluno"
         ? (usuario?.alunoId ?? usuario?.idAluno ?? usuario?.estudanteId ?? null)
         : null

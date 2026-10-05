@@ -77,7 +77,7 @@ function montarTopo(titulo, subtitulo, placeholder) {
         <p class="page-sub">${subtitulo}</p>
       </div>
       <div class="topbar-actions">
-        <button class="bell-btn" type="button" aria-label="Notificações">🔔</button>
+        <button class="bell-btn" type="button" aria-label="Notificações"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></button>
         <div class="search-pill busca-global-professor">
           <input class="busca-global-professor-input" type="search" placeholder="Buscar alunos e turmas..." autocomplete="off" />
           <span aria-hidden="true">⌕</span>

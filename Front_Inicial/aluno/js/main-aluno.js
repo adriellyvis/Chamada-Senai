@@ -1,10 +1,19 @@
 import { abrirDashboardAluno } from "./pages/dashboard-aluno.js";
 import { abrirFrequenciaAluno } from "./pages/frequencia-aluno.js";
+import { abrirNotasAluno } from "./pages/notas-aluno.js";
 import { abrirChamadaAluno } from "./pages/chamada-aluno.js";
 import { abrirAvisosAluno } from "./pages/avisos-aluno.js";
+import { abrirAgendaAluno } from "./pages/agenda-aluno.js";
 import { abrirPerfilAluno } from "./pages/perfil-aluno.js";
+import { abrirConfiguracoesAluno } from "./pages/configuracoes-aluno.js";
 import { configurarNotificacoesAluno, atualizarNotificacoesAluno } from "./components/notificacoes-aluno.js";
 import { configurarBuscaAluno } from "./components/busca-aluno.js";
+import {
+  aplicarConfiguracoesInterface,
+  alternarTemaInterface,
+  deveConfirmarSaida,
+  obterConfiguracoes
+} from "../../core/configuracoes-ui.js";
 
 const paginas = {
   perfil: {
@@ -28,6 +37,13 @@ const paginas = {
     abrir: abrirFrequenciaAluno
   },
 
+  notas: {
+    id: "page-notas",
+    titulo: "MINHAS NOTAS",
+    subtitulo: "Acompanhe suas avaliações e médias por disciplina.",
+    abrir: abrirNotasAluno
+  },
+
   chamada: {
     id: "page-chamada",
     titulo: "CHAMADA FACIAL",
@@ -37,28 +53,54 @@ const paginas = {
 
   avisos: {
     id: "page-avisos",
-    titulo: "AVISOS",
-    subtitulo: "Veja comunicados importantes da escola.",
+    titulo: "AVISOS E OCORRÊNCIAS",
+    subtitulo: "Acompanhe comunicados, feedbacks e registros acadêmicos.",
     abrir: abrirAvisosAluno
+  },
+
+  agenda: {
+    id: "page-agenda",
+    titulo: "MINHA AGENDA",
+    subtitulo: "Consulte os horários das suas aulas durante a semana.",
+    abrir: abrirAgendaAluno
+  },
+
+  configuracoes: {
+    id: "page-configuracoes",
+    titulo: "CONFIGURAÇÕES",
+    subtitulo: "Personalize o Portal do Aluno.",
+    abrir: abrirConfiguracoesAluno
   }
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+  aplicarConfiguracoesInterface("aluno");
   carregarUsuario();
   configurarNavegacao();
   configurarTema();
   configurarMenuPerfil();
   configurarNotificacoesAluno({ navegarPara });
   configurarBuscaAluno({ navegarPara });
+  configurarNavegacaoExterna();
 
-  await navegarPara("dashboard");
+  const paginaInicial = obterConfiguracoes("aluno").paginaInicial;
+  await navegarPara(paginas[paginaInicial] ? paginaInicial : "dashboard");
 });
+
+function configurarNavegacaoExterna() {
+  window.addEventListener("aluno:navegar", event => {
+    const pagina = event?.detail?.pagina;
+    if (!pagina) return;
+    navegarPara(pagina);
+  });
+}
 
 function carregarUsuario() {
   const nomeAluno = document.getElementById("nomeAluno");
   const avatarAluno = document.getElementById("avatarAluno");
+  const usuarioSalvo = (sessionStorage.getItem("usuario") || localStorage.getItem("usuario"));
 
-  const usuarioSalvo = localStorage.getItem("usuario");
+  if (!nomeAluno || !avatarAluno) return;
 
   if (!usuarioSalvo) {
     nomeAluno.textContent = "Aluno";
@@ -80,9 +122,7 @@ function carregarUsuario() {
 }
 
 function configurarNavegacao() {
-  const botoes = document.querySelectorAll(".sidebar__item");
-
-  botoes.forEach((botao) => {
+  document.querySelectorAll(".sidebar__item").forEach(botao => {
     botao.addEventListener("click", () => {
       navegarPara(botao.dataset.page);
     });
@@ -91,22 +131,25 @@ function configurarNavegacao() {
 
 async function navegarPara(nomePagina) {
   const config = paginas[nomePagina];
-
   if (!config) return;
 
-  document.querySelectorAll(".sidebar__item").forEach((botao) => {
+  document.querySelectorAll(".sidebar__item").forEach(botao => {
     botao.classList.toggle("is-active", botao.dataset.page === nomePagina);
   });
 
-  document.querySelectorAll(".page").forEach((page) => {
+  document.querySelectorAll(".page").forEach(page => {
     page.classList.remove("is-active");
   });
 
   const paginaAtual = document.getElementById(config.id);
+  if (!paginaAtual) return;
+
   paginaAtual.classList.add("is-active");
 
-  document.getElementById("tituloPagina").textContent = config.titulo;
-  document.getElementById("subtituloPagina").textContent = config.subtitulo;
+  const titulo = document.getElementById("tituloPagina");
+  const subtitulo = document.getElementById("subtituloPagina");
+  if (titulo) titulo.textContent = config.titulo;
+  if (subtitulo) subtitulo.textContent = config.subtitulo;
 
   await config.abrir(paginaAtual);
   await atualizarNotificacoesAluno();
@@ -120,68 +163,56 @@ function configurarMenuPerfil() {
   const btnLogout = document.getElementById("btnLogout");
   const btnAbrirPerfilAluno = document.getElementById("btnAbrirPerfilAluno");
 
-  if (btnAbrirPerfilAluno) {
-    btnAbrirPerfilAluno.addEventListener("click", () => {
-      navegarPara("perfil");
-    });
-  }
+  btnAbrirPerfilAluno?.addEventListener("click", () => {
+    navegarPara("perfil");
+  });
 
   if (!btnMenuPerfil || !menuDropdown) return;
 
-  btnMenuPerfil.addEventListener("click", (event) => {
+  btnMenuPerfil.addEventListener("click", event => {
     event.stopPropagation();
     menuDropdown.classList.toggle("is-open");
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", event => {
     if (!menuDropdown.contains(event.target) && event.target !== btnMenuPerfil) {
       menuDropdown.classList.remove("is-open");
     }
   });
 
-  if (btnPerfil) {
-    btnPerfil.addEventListener("click", () => {
-      navegarPara("perfil");
-      menuDropdown.classList.remove("is-open");
-    });
-  }
+  btnPerfil?.addEventListener("click", () => {
+    navegarPara("perfil");
+    menuDropdown.classList.remove("is-open");
+  });
 
-  if (btnConfiguracoes) {
-    btnConfiguracoes.addEventListener("click", () => {
-      alert("Configurações em construção.");
-      menuDropdown.classList.remove("is-open");
-    });
-  }
+  btnConfiguracoes?.addEventListener("click", () => {
+    navegarPara("configuracoes");
+    menuDropdown.classList.remove("is-open");
+  });
 
-  if (btnLogout) {
-    btnLogout.addEventListener("click", () => {
-      const confirmar = confirm("Deseja sair do portal do aluno?");
-      if (!confirmar) return;
-
-      localStorage.removeItem("usuario");
-      window.location.href = "/login/area-login-aluno.html";
-    });
-  }
+  btnLogout?.addEventListener("click", sairAluno);
 }
+
 function configurarTema() {
-  const btnTemaSwitch = document.getElementById("btnTemaSwitch");
+  document.getElementById("btnTemaSwitch")?.addEventListener("click", () => {
+    alternarTemaInterface("aluno");
+  });
+}
 
-  const temaSalvo = localStorage.getItem("tema-aluno");
-
-  if (temaSalvo) {
-    document.documentElement.setAttribute("data-theme", temaSalvo);
+function sairAluno() {
+  if (
+    deveConfirmarSaida("aluno") &&
+    !window.confirm("Deseja sair do portal do aluno?")
+  ) {
+    return;
   }
 
-  const alternar = () => {
-    const html = document.documentElement;
-    const atual = html.getAttribute("data-theme");
-    const novo = atual === "dark" ? "light" : "dark";
-
-    html.setAttribute("data-theme", novo);
-    localStorage.setItem("tema-aluno", novo);
-  };
-
-  if (btnTemaSwitch) {
-    btnTemaSwitch.addEventListener("click", alternar);
-  }
+  localStorage.removeItem("usuario");
+  sessionStorage.removeItem("usuario");
+  localStorage.removeItem("usuarioLogado");
+  sessionStorage.removeItem("usuarioLogado");
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
+  sessionStorage.clear();
+  window.location.href = "../login/area-login-aluno.html";
 }

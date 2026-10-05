@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Área do aluno</title>
+    <title>Área do aluno - Prezence</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     /> 
     <link rel="stylesheet" href="./css/area-aluno.css" />
-  </head>
+      <link rel="stylesheet" href="./css/suporte-acesso.css" />
+      <link rel="stylesheet" href="css/mobile-login.css" />
+</head>
   <body>
     <div class="card">
       <!-- LADO ESQUERDO: ilustração e descrição -->
@@ -127,7 +129,7 @@
 
       <!-- LADO DIREITO: formulário de login e links -->
       <div class="right">
-        <a href="/index.html" class="back-link">
+        <a href="../index.html" class="back-link">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -143,27 +145,100 @@
 
         <h2>Bem-vindo, Aluno(a)!</h2>
         <p class="subtitle">
-          Insira seus dados para entrar<br />ou <a href="#">cadastre-se.</a>
+          Insira seus dados para entrar no portal.
         </p>
 
-        <label for="email">E-mail ou matrícula</label>
-        <input type="text" id="email" placeholder="Ex: aluno@senai.edu.br" />
+        <div class="login-mode-tabs" role="tablist" aria-label="Forma de acesso">
+          <button type="button" class="login-mode-btn ativo" data-login-mode="email" role="tab" aria-selected="true">E-mail</button>
+          <button type="button" class="login-mode-btn" data-login-mode="ra" role="tab" aria-selected="false">RA</button>
+        </div>
+
+        <div id="painelLoginEmail" class="login-mode-panel">
+          <label for="emailLogin">E-mail</label>
+          <input
+            type="text"
+            id="emailLogin"
+            placeholder="Ex: aluno@senai.edu.br"
+            autocomplete="username"
+          />
+        </div>
+
+        <div id="painelLoginRa" class="login-mode-panel" hidden>
+          <div class="ra-login-grid">
+            <div class="ra-login-field ra-login-principal">
+              <label for="raLogin">RA</label>
+              <input
+                type="text"
+                id="raLogin"
+                placeholder="Ex: 2026001"
+                inputmode="numeric"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="ra-login-field">
+              <label for="digitoRaLogin">Dígito RA</label>
+              <input
+                type="text"
+                id="digitoRaLogin"
+                placeholder="01"
+                inputmode="numeric"
+                maxlength="2"
+              />
+            </div>
+
+            <div class="ra-login-field">
+              <label for="ufLogin">UF</label>
+              <select id="ufLogin" aria-label="UF do RA">
+                <option value="">UF</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+              </select>
+            </div>
+          </div>
+          <p class="ra-login-hint">Use o RA, o dígito e a UF cadastrados pela instituição.</p>
+        </div>
 
         <label for="senha">Senha</label>
         <input type="password" id="senha" placeholder="••••••••••••" />
 
         <div class="row">
-          <label class="checkbox-label">
-            <input type="checkbox" /> Lembrar-me
+          <label class="checkbox-label" title="Mantém você conectado neste navegador. A senha não é armazenada.">
+            <input type="checkbox" id="lembrarMe" /> Lembrar-me
           </label>
-          <a href="#" class="forgot">Esqueceu a senha?</a>
+          <a href="./recuperar-senha.html?perfil=aluno" class="forgot" data-acesso-ajuda="senha">Esqueceu a senha?</a>
         </div>
 
         <button class="btn" id="btnLogin">Entrar no portal</button>
 
         <p class="help">
           <strong>Problemas com o acesso?</strong>
-          <a href="#">Fale com a secretaria.</a>
+          <a href="./suporte.html?perfil=aluno" data-acesso-ajuda="secretaria">Fale com a secretaria.</a>
         </p>
         <p
           id="erro"
@@ -173,5 +248,6 @@
     </div>
 
     <script src="./js/area-login-aluno.js"></script>
+    <script src="./js/suporte-acesso.js"></script>
   </body>
 </html>

@@ -84,6 +84,10 @@
 .notificacoes-aluno-lista {
   max-height: 430px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
   padding: 8px 12px;
 }
 

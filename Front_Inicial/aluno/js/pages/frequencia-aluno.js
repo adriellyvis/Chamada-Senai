@@ -40,7 +40,7 @@ export async function abrirFrequenciaAluno(container) {
   });
 
   configurarFiltrosFrequencia(registros);
-  aplicarDisciplinaPendente();
+  aplicarFiltrosPendentes();
   configurarAtalhoChamada();
 }
 
@@ -153,9 +153,9 @@ function montarFrequencia({ dashboard, registros }) {
             <h3>Última validação</h3>
 
             <div class="last-bio-box">
-              <span class="bio-icon">◉</span>
+              <span class="bio-icon"><span class="material-symbols-rounded" aria-hidden="true">face</span></span>
               ${ultimoRegistroBiometrico
-                ? `<strong>${escaparHtml(ultimoRegistroBiometrico.status)}</strong><p>${escaparHtml(ultimoRegistroBiometrico.disciplina)} • ${escaparHtml(ultimoRegistroBiometrico.data)} • ${escaparHtml(ultimoRegistroBiometrico.horario)}</p>`
+                ? `<strong>${escaparHtml(ultimoRegistroBiometrico.status)}</strong><p>${escaparHtml(ultimoRegistroBiometrico.disciplina)} • Prof. ${escaparHtml(ultimoRegistroBiometrico.professor)}<br>${escaparHtml(ultimoRegistroBiometrico.data)} • ${escaparHtml(ultimoRegistroBiometrico.horario)}</p>`
                 : `<strong>Nenhuma validação recente</strong><p>Quando usar biometria, o registro aparecerá aqui.</p>`}
             </div>
 
@@ -212,24 +212,38 @@ function configurarFiltrosFrequencia(registros) {
   registroSelect.addEventListener("change", atualizarTabela);
 }
 
-function aplicarDisciplinaPendente() {
+function aplicarFiltrosPendentes() {
   const disciplinaPendente = sessionStorage.getItem("alunoDisciplinaBuscaPendente");
-  if (!disciplinaPendente) return;
+  const registroPendente = sessionStorage.getItem("alunoRegistroFiltroPendente");
 
   sessionStorage.removeItem("alunoDisciplinaBuscaPendente");
+  sessionStorage.removeItem("alunoRegistroFiltroPendente");
 
-  const select = document.getElementById("filtroDisciplinaFrequencia");
-  if (!select) return;
+  const disciplinaSelect = document.getElementById("filtroDisciplinaFrequencia");
+  const registroSelect = document.getElementById("filtroRegistroFrequencia");
 
-  const opcao = [...select.options].find(item =>
-    normalizarTextoBusca(item.value) === normalizarTextoBusca(disciplinaPendente)
-  );
+  if (disciplinaPendente && disciplinaSelect) {
+    const opcao = [...disciplinaSelect.options].find(item =>
+      normalizarTextoBusca(item.value) === normalizarTextoBusca(disciplinaPendente)
+    );
 
-  if (!opcao) return;
+    if (opcao) {
+      disciplinaSelect.value = opcao.value;
+    }
+  }
 
-  select.value = opcao.value;
-  select.dispatchEvent(new Event("change"));
-  select.closest(".frequencia-table-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (registroPendente && registroSelect) {
+    const opcao = [...registroSelect.options].find(item => item.value === registroPendente);
+    if (opcao) registroSelect.value = opcao.value;
+  }
+
+  if (disciplinaPendente || registroPendente) {
+    (registroSelect || disciplinaSelect)?.dispatchEvent(new Event("change"));
+    document.querySelector(".frequencia-table-card")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
 }
 
 function normalizarTextoBusca(valor) {
@@ -252,24 +266,29 @@ function cardResumo(titulo, valor, detalhe, tipo) {
 
 function linhaFrequencia(registro) {
   return `
-    <tr>
-      <td><strong>${escaparHtml(registro.data)}</strong></td>
-      <td>${escaparHtml(registro.disciplina)}</td>
-      <td>${escaparHtml(registro.professor)}</td>
-      <td>${escaparHtml(registro.horario)}</td>
-      <td>
+    <tr class="frequencia-registro-row">
+      <td data-label="Data"><strong>${escaparHtml(registro.data)}</strong></td>
+      <td data-label="Disciplina">${escaparHtml(registro.disciplina)}</td>
+      <td data-label="Professor" class="frequencia-professor">
+        <div class="frequencia-professor-conteudo">
+          <span class="material-symbols-rounded" aria-hidden="true">person</span>
+          <span>${escaparHtml(registro.professor)}</span>
+        </div>
+      </td>
+      <td data-label="Horário">${escaparHtml(registro.horario)}</td>
+      <td data-label="Status">
         <span class="freq-status freq-status--${escaparHtml(registro.tipo)}">
           ${escaparHtml(registro.status)}
         </span>
       </td>
-      <td>${escaparHtml(registro.registro)}</td>
+      <td data-label="Registro">${escaparHtml(registro.registro)}</td>
     </tr>
   `;
 }
 
 function linhaVazia(mensagem) {
   return `
-    <tr>
+    <tr class="frequencia-empty-row">
       <td colspan="6" class="frequencia-empty">
         ${escaparHtml(mensagem)}
       </td>
@@ -293,7 +312,7 @@ function configurarAtalhoChamada() {
 
 function obterUsuarioLogado() {
   try {
-    return JSON.parse(localStorage.getItem("usuario")) || null;
+    return JSON.parse((sessionStorage.getItem("usuario") || localStorage.getItem("usuario"))) || null;
   } catch (erro) {
     console.error("Erro ao ler usuário logado:", erro);
     return null;
@@ -337,13 +356,16 @@ function normalizarRegistros(historico) {
       const status = formatarStatus(statusOriginal);
       const tipo = tipoStatus(statusOriginal);
       const registro = formatarRegistro(item.metodo ?? item.registro ?? item.tipoRegistro);
+      const dataAula = item.dataAula ?? item.data ?? item.dia ?? item.dataPresenca;
+      const horarioRegistro = item.horarioRegistro ?? item.horario ?? item.hora ?? item.horaRegistro ?? item.horaInicio;
 
       return {
-        data: formatarData(item.data ?? item.dataAula ?? item.dia ?? item.dataPresenca),
-        dataOrdenacao: normalizarDataOrdenacao(item.data ?? item.dataAula ?? item.dia ?? item.dataPresenca),
+        aulaId: item.aulaId ?? item.id ?? null,
+        data: formatarData(dataAula),
+        dataOrdenacao: normalizarDataOrdenacao(dataAula, horarioRegistro),
         disciplina: item.disciplina ?? item.nomeDisciplina ?? item.unidadeCurricular ?? "Disciplina não informada",
         professor: item.professor ?? item.nomeProfessor ?? item.docente ?? "Professor não informado",
-        horario: formatarHorario(item.horario ?? item.hora ?? item.horaRegistro ?? item.horaInicio),
+        horario: formatarHorario(horarioRegistro),
         status,
         registro,
         registroTipo: tipoRegistro(registro),
@@ -392,29 +414,59 @@ function tipoRegistro(registro) {
 function formatarData(valor) {
   if (!valor) return "--";
 
-  const data = new Date(valor);
+  const meses = [
+    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
+    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"
+  ];
 
-  if (!Number.isNaN(data.getTime())) {
-    return data.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short"
-    }).replace(".", "").toUpperCase();
+  const texto = String(valor).trim();
+  const dataSomente = texto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (dataSomente) {
+    const [, , mes, dia] = dataSomente;
+    const indiceMes = Number(mes) - 1;
+    return `${dia} ${meses[indiceMes] ?? mes}`;
   }
 
-  return String(valor);
+  const data = new Date(texto);
+
+  if (!Number.isNaN(data.getTime())) {
+    return `${String(data.getDate()).padStart(2, "0")} ${meses[data.getMonth()]}`;
+  }
+
+  return texto;
 }
 
-function normalizarDataOrdenacao(valor) {
-  if (!valor) return 0;
+function normalizarDataOrdenacao(dataAula, horarioRegistro) {
+  const horarioTexto = String(horarioRegistro ?? "").trim();
 
-  const data = new Date(valor);
+  if (horarioTexto) {
+    const dataHora = new Date(horarioTexto);
+    if (!Number.isNaN(dataHora.getTime())) return dataHora.getTime();
+  }
+
+  const dataTexto = String(dataAula ?? "").slice(0, 10);
+  const partes = dataTexto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (partes) {
+    const [, ano, mes, dia] = partes;
+    return new Date(Number(ano), Number(mes) - 1, Number(dia)).getTime();
+  }
+
+  const data = new Date(dataTexto);
   return Number.isNaN(data.getTime()) ? 0 : data.getTime();
 }
 
 function formatarHorario(valor) {
   if (!valor) return "--";
 
-  return String(valor).slice(0, 5);
+  const texto = String(valor).trim();
+  const horaDataCompleta = texto.match(/[T\s](\d{2}:\d{2})(?::\d{2})?/);
+
+  if (horaDataCompleta) return horaDataCompleta[1];
+
+  const horaSimples = texto.match(/^(\d{2}:\d{2})(?::\d{2})?/);
+  return horaSimples ? horaSimples[1] : "--";
 }
 
 function formatarPercentual(valor) {

@@ -1,18 +1,36 @@
 const API_HOST = window.location.hostname || "localhost";
 const API_URL = `http://${API_HOST}:8080`;
 
+function obterUsuarioSessao() {
+  try {
+    const valor = sessionStorage.getItem("usuario") || localStorage.getItem("usuario");
+    return valor ? JSON.parse(valor) : null;
+  } catch {
+    return null;
+  }
+}
+
+function encerrarSessao() {
+  localStorage.removeItem("usuario");
+  sessionStorage.removeItem("usuario");
+  window.location.href = "../index.html";
+}
+
 export async function request(
   url,
   options = {}
 ) {
 
-  const usuario =
-    JSON.parse(
-      localStorage.getItem("usuario")
-    );
+  const usuario = obterUsuarioSessao();
+  const token = usuario?.token;
+
+  if (!token) {
+    encerrarSessao();
+    throw new Error("Sessão expirada. Entre novamente.");
+  }
 
   const headers = {
-    "usuario-id": usuario?.id,
+    "Authorization": `Bearer ${token}`,
     ...(options.headers || {})
   };
 
@@ -30,27 +48,28 @@ export async function request(
   );
 
   if (response.status === 401) {
-
-    localStorage.removeItem(
-      "usuario"
-    );
-
-    window.location.href =
-      "/index.html";
-
-    return;
+    encerrarSessao();
+    throw new Error("Sessão expirada. Entre novamente.");
   }
 
-  const data =
-    await response
-      .json()
-      .catch(() => null);
+  if (response.status === 204) {
+    return null;
+  }
+
+  const texto = await response.text();
+  let data = null;
+
+  try {
+    data = texto ? JSON.parse(texto) : null;
+  } catch {
+    data = texto || null;
+  }
 
   if (!response.ok) {
-
     throw new Error(
       data?.mensagem ||
       data?.message ||
+      (typeof data === "string" ? data : "") ||
       "Erro na requisição"
     );
   }

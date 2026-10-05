@@ -309,3 +309,78 @@ body.dark .modal-disciplina-acoes button:first-child:hover {
   background: rgba(124, 58, 237, 0.18);
   color: #ffffff;
 }
+/* =========================================================
+   SIGLA DA DISCIPLINA
+========================================================= */
+
+.disciplina-sigla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.modal-disciplina form {
+  display: grid;
+  gap: 16px;
+}
+
+.modal-disciplina label small {
+  display: block;
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.modal-disciplina-acoes {
+  margin-top: 6px;
+}
+
+.modal-disciplina-acoes button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+body.dark .disciplina-sigla {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+  border: 1px solid rgba(129, 140, 248, 0.28);
+}
+
+body.dark .modal-disciplina label small {
+  color: #a78bfa;
+}
+
+@media (max-width: 720px) {
+  .disciplinas-header {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .disciplinas-toolbar input {
+    width: 100%;
+  }
+
+  .disciplinas-card {
+    overflow-x: auto;
+  }
+
+  .disciplinas-table {
+    min-width: 620px;
+  }
+
+  .modal-disciplina {
+    width: calc(100% - 28px);
+    max-width: 420px;
+  }
+}

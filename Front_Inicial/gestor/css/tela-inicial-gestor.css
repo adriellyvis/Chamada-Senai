@@ -93,31 +93,36 @@ nav a.ativo {
 }
 
 .sidebar-icon-btn {
-    width: 44px;
-    height: 44px;
-    border: none;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    background: transparent;
-    color: #c4b5fd;
-    font-size: 22px;
-    cursor: pointer;
-    transition: 0.2s ease;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #dfe5ef;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #6d28d9;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.sidebar-icon-btn:hover {
-  background: rgba(124, 58, 237, 0.18);
-  color: #ffffff;
+.sidebar-icon-btn:hover,
+.sidebar-icon-btn[aria-expanded="true"] {
+  background: #f3e8ff;
+  border-color: #c4b5fd;
+  color: #5b21b6;
   transform: translateY(-2px);
 }
 
 .tema-btn {
-  color: #0ea5e9;
+  color: #f59e0b;
 }
 
 .tema-btn:hover {
-  background: rgba(14, 165, 233, 0.16);
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #d97706;
 }
 
 .config-wrapper {
@@ -127,22 +132,31 @@ nav a.ativo {
 .config-menu {
   position: absolute;
   left: 0;
-  bottom: 54px;
-
-  width: 210px;
+  bottom: 56px;
+  width: 220px;
   padding: 10px;
-
-  background: #1d0f4f;
-  border: 1px solid rgba(167, 139, 250, 0.24);
-  border-radius: 18px;
-
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-
   display: none;
   flex-direction: column;
   gap: 6px;
-
   z-index: 999;
+
+  background: #ffffff;
+  border: 1px solid #dfe5ef;
+  border-radius: 18px;
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.18);
+}
+
+.config-menu::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: -7px;
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  background: inherit;
+  border-right: 1px solid #dfe5ef;
+  border-bottom: 1px solid #dfe5ef;
 }
 
 .config-menu.ativo {
@@ -150,40 +164,41 @@ nav a.ativo {
 }
 
 .config-menu button {
-  height: 42px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 42px;
   padding: 0 12px;
-
   border: none;
   border-radius: 12px;
-
-  background: transparent;
-  color: #ddd6fe;
-
   display: flex;
   align-items: center;
   gap: 10px;
 
+  background: transparent;
+  color: #334155;
   font-size: 14px;
   font-weight: 700;
-
-  cursor: pointer;
   text-align: left;
-
+  cursor: pointer;
   transition: 0.2s ease;
 }
 
-.config-menu button:hover {
-  background: rgba(124, 58, 237, 0.24);
-  color: #ffffff;
+.config-menu button:hover,
+.config-menu button:focus-visible {
+  outline: none;
+  background: #f3e8ff;
+  color: #5b21b6;
 }
 
 #btnLogout {
-  color: #fca5a5;
+  color: #dc2626;
 }
 
-#btnLogout:hover {
-  background: rgba(239, 68, 68, 0.16);
-  color: #fecaca;
+#btnLogout:hover,
+#btnLogout:focus-visible {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .topo h1 {
@@ -557,11 +572,16 @@ body.dark .sidebar-footer {
 }
 
 body.dark .sidebar-icon-btn {
+  background: #21124d;
   color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.22);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
 }
 
-body.dark .sidebar-icon-btn:hover {
-  background: rgba(124, 58, 237, 0.22);
+body.dark .sidebar-icon-btn:hover,
+body.dark .sidebar-icon-btn[aria-expanded="true"] {
+  background: rgba(124, 58, 237, 0.28);
+  border-color: rgba(167, 139, 250, 0.38);
   color: #ffffff;
 }
 
@@ -578,14 +598,20 @@ body.dark .tema-btn:hover {
 body.dark .config-menu {
   background: #21124d;
   border-color: rgba(167, 139, 250, 0.28);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.46);
+}
+
+body.dark .config-menu::after {
+  border-right-color: rgba(167, 139, 250, 0.28);
+  border-bottom-color: rgba(167, 139, 250, 0.28);
 }
 
 body.dark .config-menu button {
   color: #ddd6fe;
 }
 
-body.dark .config-menu button:hover {
+body.dark .config-menu button:hover,
+body.dark .config-menu button:focus-visible {
   background: rgba(124, 58, 237, 0.26);
   color: #ffffff;
 }
@@ -594,7 +620,8 @@ body.dark #btnLogout {
   color: #fca5a5;
 }
 
-body.dark #btnLogout:hover {
+body.dark #btnLogout:hover,
+body.dark #btnLogout:focus-visible {
   background: rgba(239, 68, 68, 0.18);
   color: #fecaca;
 }

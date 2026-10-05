@@ -1,10 +1,9 @@
 <!DOCTYPE html>
- 
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EyeCount</title>
+<title>Prezence</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +11,7 @@
 <div class="container">
 <!-- ESQUERDA -->
 <div class="left">
-    <small style="color: rgb(23, 179, 252);">TECNOLOGIA BYOID</small>
+    <small>TECNOLOGIA BYOID</small>
     <h1>A chamada do futuro é a <span>Biometria</span></h1>
     <p>
         Segurança, agilidade e precisão no gerenciamento de frequências.
@@ -21,24 +20,111 @@
 </div>
 
 <!-- DIREITA -->
-<div class="right" style="background: white;">
-    <div class="avatar" ></div>
+<div class="right">
+    <div class="avatar" aria-hidden="true"></div>
 
     <h2>Bem-vindo</h2>
     <p>Escolha sua forma de acesso</p>
 
-    <a href="/login/area-login-aluno.html" class="btn">Sou aluno</a>
-    <a href="/login/area-login-professor.html" class="btn">Sou professor</a>
-    <a href="/login/area-login-gestor.html" class="btn">Sou administrador</a>
+    <a href="login/area-login-aluno.html" class="btn">Sou aluno</a>
+    <a href="login/area-login-professor.html" class="btn">Sou professor</a>
+    <a href="login/area-login-gestor.html" class="btn">Sou administrador</a>
 
-    <div class="divisao"></div>
-
-    <div class="footer">
-        <a href="#" style="padding-left: 10px;">Esqueci minha senha</a>
-        <a href="#" style="padding-right: 10px;">Ajuda</a>
+    <div class="mobile-access-divider" aria-hidden="true">
+        <span></span>
+        <em>ou</em>
+        <span></span>
     </div>
+
+    <button type="button" class="mobile-access-trigger" id="mobileAccessTrigger">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 3h7v2H5v5H3V3Zm11 0h7v7h-2V5h-5V3ZM3 14h2v5h5v2H3v-7Zm16 0h2v7h-7v-2h5v-5ZM7 7h3v3H7V7Zm7 0h3v3h-3V7Zm-7 7h3v3H7v-3Zm5-2h2v2h-2v-2Zm2 2h3v3h-3v-3Zm-2 3h2v2h-2v-2Z"/>
+        </svg>
+        <span>
+            <strong>Acessar pelo celular</strong>
+            <small>Abra o QR Code para entrar no Prezence</small>
+        </span>
+        <svg class="mobile-access-arrow" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 18 6-6-6-6 1.4-1.4L17.8 12l-7.4 7.4L9 18Z"/>
+        </svg>
+    </button>
+</div>
 </div>
 
+<div class="mobile-access-modal" id="mobileAccessModal" hidden>
+    <div class="mobile-access-backdrop" data-mobile-close></div>
+
+    <section class="mobile-access-dialog" role="dialog" aria-modal="true" aria-labelledby="mobileAccessTitle">
+        <button class="mobile-access-close" type="button" data-mobile-close aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+        </button>
+
+        <header class="mobile-access-header">
+            <div class="mobile-access-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v14h10V4H7Zm4 15h2v1h-2v-1Z"/></svg>
+            </div>
+            <div>
+                <span class="mobile-access-kicker">ACESSO MOBILE</span>
+                <h2 id="mobileAccessTitle">Abra o Prezence no celular</h2>
+                <p>Use um aparelho conectado à mesma rede do computador e escaneie o QR Code.</p>
+            </div>
+        </header>
+
+        <div class="mobile-access-content">
+            <div class="mobile-qr-panel">
+                <div class="mobile-qr-frame">
+                    <canvas id="mobileQrCanvas" width="232" height="232" aria-label="QR Code de acesso ao Prezence"></canvas>
+                    <div class="mobile-qr-placeholder" id="mobileQrPlaceholder" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v2H5v5H3V3Zm11 0h7v7h-2V5h-5V3ZM3 14h2v5h5v2H3v-7Zm16 0h2v7h-7v-2h5v-5ZM7 7h3v3H7V7Zm7 0h3v3h-3V7Zm-7 7h3v3H7v-3Zm5-5h2v2h-2V9Zm3 3h2v2h-2v-2Zm-3 3h2v2h-2v-2Zm3 3h2v2h-2v-2Z"/></svg>
+                        <strong>Configure o endereço da rede</strong>
+                        <span>O endereço 127.0.0.1 funciona apenas neste computador.</span>
+                    </div>
+                </div>
+                <div class="mobile-network-badges">
+                    <span><i class="status-dot"></i> Mesma rede Wi-Fi</span>
+                    <span class="secure-badge" id="mobileSecureBadge"><i class="status-dot"></i> HTTPS recomendado</span>
+                </div>
+            </div>
+
+            <div class="mobile-access-setup">
+                <div class="mobile-step">
+                    <span class="mobile-step-number">1</span>
+                    <div>
+                        <strong>Informe o endereço acessível pelo celular</strong>
+                        <p>Se estiver usando <b>127.0.0.1</b> ou <b>localhost</b>, troque pelo IP do notebook na rede.</p>
+                    </div>
+                </div>
+
+                <label class="mobile-url-label" for="mobileAccessUrl">Endereço mobile</label>
+                <div class="mobile-url-control">
+                    <input id="mobileAccessUrl" type="url" spellcheck="false" autocomplete="off" placeholder="https://192.168.0.15:5501/index.html">
+                    <button type="button" id="mobileQrUpdate">Atualizar QR</button>
+                </div>
+                <p class="mobile-url-status" id="mobileUrlStatus" aria-live="polite"></p>
+
+                <div class="mobile-step mobile-step-second">
+                    <span class="mobile-step-number">2</span>
+                    <div>
+                        <strong>Escaneie e faça login normalmente</strong>
+                        <p>Para o Face Scan no celular, prefira HTTPS para permitir o uso da câmera frontal.</p>
+                    </div>
+                </div>
+
+                <button type="button" class="mobile-copy-button" id="mobileCopyLink">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3h13v13h-4v5H3V7h5Zm2 0h7v7h2V5h-9v2Zm5 2H5v10h10V9Z"/></svg>
+                    <span>Copiar link de acesso</span>
+                </button>
+            </div>
+        </div>
+
+        <footer class="mobile-access-footer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17h2v-6h-2v6Zm0-8h2V7h-2v2Zm1-7a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z"/></svg>
+            <span>O QR Code é gerado localmente no navegador e não envia o endereço para serviços externos.</span>
+        </footer>
+    </section>
 </div>
+
+<script src="core/qrcode-local.js"></script>
+<script src="core/mobile-access.js"></script>
 </body>
 </html>

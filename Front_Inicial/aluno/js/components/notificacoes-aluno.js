@@ -1,6 +1,8 @@
 import { request } from "../../../core/api.js";
 import { buscarChamadaAbertaAluno } from "../../../biometria/chamada-aberta-api.js";
+import { obterConfiguracoes } from "../../../core/configuracoes-ui.js";
 import {
+  carregarAvisosAluno,
   obterAvisosComEstado,
   marcarAvisoComoLido,
   marcarTodosAvisosComoLidos
@@ -28,6 +30,12 @@ export function configurarNotificacoesAluno({ navegarPara } = {}) {
       if (abrir) await atualizarNotificacoesAluno();
     });
 
+    // Mantém interações de rolagem/scrollbar confinadas ao painel.
+    // O fechamento continua acontecendo apenas ao clicar realmente fora.
+    painel.addEventListener("pointerdown", event => {
+      event.stopPropagation();
+    });
+
     painel.addEventListener("click", async event => {
       event.stopPropagation();
 
@@ -38,7 +46,7 @@ export function configurarNotificacoesAluno({ navegarPara } = {}) {
       }
 
       if (event.target.closest("#btnMarcarTodasNotificacoesAluno")) {
-        marcarTodasComoLidas();
+        await marcarTodasComoLidas();
         await atualizarNotificacoesAluno();
       }
     });
@@ -64,28 +72,57 @@ export function configurarNotificacoesAluno({ navegarPara } = {}) {
 export async function atualizarNotificacoesAluno() {
   const painel = document.getElementById("painelNotificacoesAluno");
   const badge = document.getElementById("badgeNotificacoesAluno");
+  const botao = document.getElementById("btnNotificacoesAluno");
   if (!painel || !badge) return;
 
+  const preferencias = obterConfiguracoes("aluno");
+
+  if (!preferencias.notificacoes) {
+    notificacoesCache = [];
+    badge.hidden = true;
+    badge.textContent = "0";
+    if (botao) botao.setAttribute("aria-label", "Notificações desativadas");
+    painel.innerHTML = `
+      <div class="notificacoes-aluno-vazio">
+        <strong>Notificações desativadas.</strong>
+        <span>Você pode ativá-las novamente em Configurações.</span>
+      </div>
+    `;
+    return;
+  }
+
+  if (botao) botao.setAttribute("aria-label", "Abrir notificações");
   painel.innerHTML = montarCarregamento();
 
   const usuario = obterUsuarioLogado();
-  const avisos = obterAvisosComEstado().map(aviso => ({
-    id: `aviso:${aviso.id}`,
-    tipo: "aviso",
-    referencia: aviso.id,
-    titulo: aviso.titulo,
-    descricao: `${aviso.tag} • ${aviso.data}`,
-    prioridade: aviso.prioridade === "importante" ? "alta" : "normal",
-    lida: aviso.lido,
-    icone: aviso.tipo === "frequencia" ? "!" : "i"
-  }));
+
+  if (preferencias.notificacoesAvisos) {
+    await carregarAvisosAluno().catch(erro => console.error("Erro ao atualizar avisos:", erro));
+  }
+
+  const avisos = preferencias.notificacoesAvisos
+    ? obterAvisosComEstado().map(aviso => ({
+        id: `aviso:${aviso.id}`,
+        tipo: "aviso",
+        referencia: aviso.id,
+        titulo: aviso.titulo,
+        descricao: `${aviso.tag} • ${aviso.data}`,
+        prioridade: aviso.prioridade === "importante" ? "alta" : "normal",
+        lida: aviso.lido,
+        icone: aviso.tipo === "frequencia" ? "warning" : "campaign"
+      }))
+    : [];
 
   const dinamicas = [];
 
   if (usuario?.id) {
     const [dashboard, chamada] = await Promise.all([
-      request(`/aluno/dashboard/${usuario.id}`).catch(() => null),
-      buscarChamadaAbertaAluno(usuario.id).catch(() => null)
+      preferencias.notificacoesFrequencia
+        ? request(`/aluno/dashboard/${usuario.id}`).catch(() => null)
+        : Promise.resolve(null),
+      preferencias.notificacoesChamada
+        ? buscarChamadaAbertaAluno(usuario.id).catch(() => null)
+        : Promise.resolve(null)
     ]);
 
     if (chamada) {
@@ -98,7 +135,7 @@ export async function atualizarNotificacoesAluno() {
         descricao: `${chamada.disciplina ?? "Disciplina"} • ${chamada.turma ?? "Sua turma"}`,
         prioridade: "alta",
         lida: notificacaoDinamicaEstaLida(assinatura),
-        icone: "◎"
+        icone: "face"
       });
     }
 
@@ -113,7 +150,7 @@ export async function atualizarNotificacoesAluno() {
         descricao: `Sua frequência atual é ${frequencia.toFixed(1).replace(".0", "")}%`,
         prioridade: frequencia < 50 ? "critica" : "alta",
         lida: notificacaoDinamicaEstaLida(assinatura),
-        icone: "!"
+        icone: "warning"
       });
     }
   }
@@ -133,7 +170,7 @@ async function selecionarNotificacao(id) {
   if (!notificacao) return;
 
   if (notificacao.tipo === "aviso") {
-    marcarAvisoComoLido(notificacao.referencia);
+    await marcarAvisoComoLido(notificacao.referencia).catch(() => {});
     sessionStorage.setItem("alunoAvisoBuscaPendente", notificacao.referencia);
     fecharPainel();
     await navegar("avisos");
@@ -152,8 +189,8 @@ async function selecionarNotificacao(id) {
   atualizarNotificacoesAluno();
 }
 
-function marcarTodasComoLidas() {
-  marcarTodosAvisosComoLidos();
+async function marcarTodasComoLidas() {
+  await marcarTodosAvisosComoLidos().catch(() => {});
   notificacoesCache
     .filter(item => item.tipo !== "aviso")
     .forEach(item => marcarNotificacaoDinamicaComoLida(item.referencia));
@@ -190,7 +227,7 @@ function montarItem(item) {
       type="button"
       data-notificacao-id="${escaparHtml(item.id)}"
     >
-      <span class="notificacao-aluno-icone">${escaparHtml(item.icone)}</span>
+      <span class="notificacao-aluno-icone"><span class="material-symbols-rounded" aria-hidden="true">${escaparHtml(item.icone)}</span></span>
       <span class="notificacao-aluno-texto">
         <strong>${escaparHtml(item.titulo)}</strong>
         <small>${escaparHtml(item.descricao)}</small>
@@ -217,7 +254,7 @@ function prioridadeNumero(prioridade) {
 
 function obterUsuarioLogado() {
   try {
-    return JSON.parse(localStorage.getItem("usuario")) || null;
+    return JSON.parse((sessionStorage.getItem("usuario") || localStorage.getItem("usuario"))) || null;
   } catch {
     return null;
   }

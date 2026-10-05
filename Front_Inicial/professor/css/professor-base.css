@@ -1128,3 +1128,17 @@ textarea {
     right: 0;
   }
 }
+
+
+.bell-btn .material-symbols-rounded {
+  font-size: 22px;
+  line-height: 1;
+  font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+}
+
+
+/* Menu de perfil/configurações fica à esquerda; tema fica à direita. */
+.footer-menu-left .footer-dropdown {
+  left: 0;
+  right: auto;
+}

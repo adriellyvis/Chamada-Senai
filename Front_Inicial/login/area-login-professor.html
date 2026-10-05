@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Área do Professor</title>
+    <title>Área do Professor - Prezence</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/area-professor.css" />
-  </head>
+      <link rel="stylesheet" href="css/suporte-acesso.css" />
+      <link rel="stylesheet" href="css/mobile-login.css" />
+</head>
   <body>
     <div class="card">
       <!-- LEFT: ilustração e descrição -->
@@ -124,7 +126,7 @@
 
       <!-- RIGHT: formulário de login e links -->
       <div class="right">
-        <a href="/index.html" class="back-link">
+        <a href="../index.html" class="back-link">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -140,13 +142,13 @@
 
         <h2>Bem-vindo, Professor(a)!</h2>
         <p class="subtitle">
-          Insira seus dados para entrar<br />ou <a href="#">cadastre-se.</a>
+          Insira seus dados para entrar no portal.
         </p>
 
         <form id="formLoginProfessor">
 
       <label for="email">
-        E-mail ou matrícula
+        E-mail
       </label>
 
       <input
@@ -166,12 +168,12 @@
       />
 
       <div class="row">
-        <label class="checkbox-label">
-          <input type="checkbox" />
+        <label class="checkbox-label" title="Mantém você conectado neste navegador. A senha não é armazenada.">
+          <input type="checkbox" id="lembrarMe" />
           Lembrar-me
         </label>
 
-        <a href="#" class="forgot">
+        <a href="./recuperar-senha.html?perfil=professor" class="forgot" data-acesso-ajuda="senha">
           Esqueceu a senha?
         </a>
       </div>
@@ -186,9 +188,7 @@
 
       <p class="help">
         <strong>Problemas com o acesso?</strong>
-        <a href="#">
-          Fale com a secretaria.
-        </a>
+        <a href="./suporte.html?perfil=professor" data-acesso-ajuda="secretaria">Fale com a secretaria.</a>
       </p>
 
       <p
@@ -204,5 +204,6 @@
           </div>
     </div>
     <script src="js/area-login-professor.js"></script>
+    <script src="js/suporte-acesso.js"></script>
   </body>
 </html>

@@ -1,10 +1,55 @@
 const API_HOST = window.location.hostname || "localhost";
 const API_URL = `http://${API_HOST}:8080`;
 
+function sanitizarUsuario(usuario) {
+  if (!usuario || typeof usuario !== "object") return usuario;
+
+  const copia = { ...usuario };
+  delete copia.senha;
+  delete copia.password;
+  return copia;
+}
+
+
+function salvarSessaoUsuario(usuario) {
+  const valor = JSON.stringify(sanitizarUsuario(usuario));
+
+  localStorage.removeItem("usuario");
+  sessionStorage.removeItem("usuario");
+
+  if (lembrarMe?.checked) {
+    localStorage.setItem("usuario", valor);
+  } else {
+    sessionStorage.setItem("usuario", valor);
+  }
+}
+
 const email = document.getElementById("email");
 const senha = document.getElementById("senha");
 const btn = document.getElementById("btnLogin");
 const erro = document.getElementById("erro");
+const lembrarMe = document.getElementById("lembrarMe");
+const CHAVE_EMAIL_LEMBRADO = "prezence_login_email_professor";
+
+const emailLembrado = localStorage.getItem(CHAVE_EMAIL_LEMBRADO);
+if (emailLembrado) {
+  email.value = emailLembrado;
+  if (lembrarMe) lembrarMe.checked = true;
+}
+
+lembrarMe?.addEventListener("change", () => {
+  if (!lembrarMe.checked) {
+    localStorage.removeItem(CHAVE_EMAIL_LEMBRADO);
+  }
+});
+
+function atualizarEmailLembrado(valor) {
+  if (lembrarMe?.checked) {
+    localStorage.setItem(CHAVE_EMAIL_LEMBRADO, valor.trim());
+  } else {
+    localStorage.removeItem(CHAVE_EMAIL_LEMBRADO);
+  }
+}
 
 document.getElementById("formLoginProfessor").addEventListener( "submit", event => {
   event.preventDefault();
@@ -65,12 +110,18 @@ async function realizarLoginProfessor() {
 
     if (!ehProfessor) {
       localStorage.removeItem("usuario");
+      sessionStorage.removeItem("usuario");
       throw new Error("Acesso permitido apenas para professores.");
     }
 
-    localStorage.setItem("usuario", JSON.stringify(usuario));
+    if (!usuario?.token && !data?.token) {
+      throw new Error("O servidor não retornou o token de autenticação.");
+    }
 
-    window.location.href = "/professor/tela-inicial-professor.html";
+    salvarSessaoUsuario(usuario);
+    atualizarEmailLembrado(emailValor);
+
+    window.location.href = "../professor/tela-inicial-professor.html";
 
   } catch (err) {
     console.error(err);

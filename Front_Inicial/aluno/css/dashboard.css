@@ -1500,3 +1500,49 @@
 .biometric-list-card--modern .bio-records {
   grid-template-columns: none;
 }
+
+
+/* Home do aluno: estados reais da agenda, avisos e biometria. */
+.home-empty-state {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px;
+  border: 1px dashed var(--card-border);
+  border-radius: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  background: var(--primary-soft);
+}
+
+.home-empty-state strong {
+  color: var(--text-main);
+}
+
+.home-empty-state p {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.home-empty-state--compact {
+  min-height: 96px;
+  margin: 4px 0;
+}
+
+.bio-record-line--red > span {
+  background: var(--danger);
+}
+
+.bio-record-line--red b {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.side-card-header button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 6px;
+}

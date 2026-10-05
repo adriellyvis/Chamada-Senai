@@ -27,12 +27,14 @@ export async function abrirOcorrencias(elemento) {
       </select>
 
       <select id="filtroGravidadeOcorrenciaGestor" class="select-pill">
+        <option value="">Todas as gravidades</option>
         <option value="BAIXA">Baixa</option>
         <option value="MEDIA">Média</option>
         <option value="ALTA">Alta</option>
       </select>
 
-      <select id="tipoOcorrencia">
+      <select id="filtroTipoOcorrenciaGestor" class="select-pill">
+        <option value="">Todos os tipos</option>
         <option value="DISCIPLINAR">Disciplinar</option>
         <option value="ATESTADO">Atestado</option>
         <option value="JUSTIFICATIVA">Justificativa</option>
@@ -248,7 +250,7 @@ function abrirModalFinalizarOcorrencia(id, status) {
         </div>
 
         <button id="btnFecharFinalizarOcorrencia" type="button">
-          ×
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
         </button>
       </div>
 
@@ -357,7 +359,7 @@ function abrirModalDetalhesOcorrenciaGestor(ocorrencia) {
         </div>
 
         <button id="btnFecharDetalhesOcorrenciaGestor" type="button">
-          ×
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
         </button>
       </div>
 

@@ -82,6 +82,10 @@
 .notificacoes-professor-lista {
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
   padding: 8px 10px;
 }
 
@@ -280,4 +284,105 @@
     width: 40px;
     height: 40px;
   }
+}
+
+
+/* Fase 4: central de notificações funcional */
+.notificacoes-professor-item {
+  grid-template-columns: 44px minmax(0, 1fr) 22px;
+}
+.notificacoes-professor-avatar.material-symbols-rounded {
+  font-size: 22px;
+}
+.notificacoes-professor-item.chamada .notificacoes-professor-avatar {
+  background: #ecfdf5;
+  color: #059669;
+}
+.notificacoes-professor-item.prioridade-3:not(.chamada) .notificacoes-professor-avatar {
+  background: #fff1f2;
+  color: #e11d48;
+}
+.notificacoes-professor-item.prioridade-2 .notificacoes-professor-avatar {
+  background: #fff7e6;
+  color: #d97706;
+}
+.notificacoes-professor-chevron {
+  color: var(--muted-2);
+  font-size: 20px;
+}
+.notificacoes-professor-vazio > .material-symbols-rounded {
+  font-size: 34px;
+  color: var(--muted-2);
+}
+.bell-btn.is-disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Biometria aguardando confirmação */
+.notificacoes-professor-item.biometria .notificacoes-professor-avatar {
+  background: rgba(37, 99, 235, 0.10);
+  color: var(--blue);
+}
+
+.notificacoes-professor-item.biometria .notificacoes-professor-texto span {
+  color: var(--blue);
+}
+
+/* Fase 8: estado lida / não lida */
+.notificacoes-professor-item.is-read {
+  opacity: .68;
+  background: color-mix(in srgb, var(--panel-2) 58%, transparent);
+}
+.notificacoes-professor-item.is-unread .notificacoes-professor-texto strong {
+  font-weight: 800;
+}
+.notificacoes-professor-final {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 42px;
+}
+.notificacoes-professor-ponto {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, .10);
+}
+.notificacoes-professor-lida {
+  color: var(--muted-2);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.notificacoes-professor-acoes {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--line);
+}
+.notificacoes-professor-acao {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.notificacoes-professor-acao:hover {
+  border-color: var(--blue);
+}
+.notificacoes-professor-acao .material-symbols-rounded {
+  font-size: 18px;
 }

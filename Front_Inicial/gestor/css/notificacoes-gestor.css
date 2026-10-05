@@ -1,0 +1,89 @@
+/* Central de notificações do gestor */
+.notificacao { position: relative; }
+.notificacoes-gestor-badge {
+  position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px;
+  padding: 0 5px; display: grid; place-items: center; border: 2px solid #fff;
+  border-radius: 999px; background: #ef4444; color: #fff; font-size: 10px;
+  font-weight: 800; line-height: 16px; box-shadow: 0 4px 12px rgba(239,68,68,.25);
+}
+.notificacoes-gestor-badge[hidden] { display: none; }
+.notificacoes-gestor-painel {
+  position: fixed; z-index: 9999; max-height: min(570px, calc(100vh - 90px));
+  display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb;
+  border-radius: 20px; background: var(--panel, #fff); color: var(--text, #111827);
+  box-shadow: 0 24px 70px rgba(15,23,42,.22); animation: notifGestorEntrar .16s ease-out;
+}
+.notificacoes-gestor-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px; border-bottom: 1px solid var(--line, #e5e7eb);
+}
+.notificacoes-gestor-header div > span { display: block; margin-bottom: 4px; color: #315bdb; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+.notificacoes-gestor-header h3 { margin: 0; font-size: 19px; }
+.notificacoes-gestor-header > strong { min-width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; background: #eaf0ff; color: #315bdb; font-size: 14px; }
+.notificacoes-gestor-lista { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; touch-action: pan-y; padding: 8px 10px; }
+.notificacoes-gestor-item {
+  width: 100%; display: grid; grid-template-columns: 42px minmax(0,1fr) 22px;
+  align-items: center; gap: 11px; padding: 12px 10px; border: 0;
+  border-bottom: 1px solid var(--line-soft, #edf0f5); background: transparent;
+  color: inherit; text-align: left; cursor: pointer; transition: background .16s ease, transform .16s ease;
+}
+.notificacoes-gestor-item:last-child { border-bottom: 0; }
+.notificacoes-gestor-item:hover { background: var(--panel-2, #f7f8fc); transform: translateX(2px); }
+.notificacoes-gestor-icone { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: #eef2ff; color: #4f46e5; }
+.notificacoes-gestor-item.prioridade-3 .notificacoes-gestor-icone { background: #fff1f2; color: #e11d48; }
+.notificacoes-gestor-item.prioridade-2 .notificacoes-gestor-icone { background: #fff7e6; color: #d97706; }
+.notificacoes-gestor-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.notificacoes-gestor-copy strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.notificacoes-gestor-copy small { color: var(--muted, #6b7280); font-size: 11px; line-height: 1.35; }
+.notificacoes-gestor-copy span { color: #315bdb; font-size: 10px; font-weight: 800; }
+.notificacoes-gestor-seta { color: #9ca3af; font-size: 20px; }
+.notificacoes-gestor-footer { padding: 10px 12px 12px; border-top: 1px solid var(--line, #e5e7eb); }
+.notificacoes-gestor-footer button { width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line, #e5e7eb); border-radius: 12px; background: var(--panel-2, #f7f8fc); color: #315bdb; font-weight: 800; cursor: pointer; }
+.notificacoes-gestor-estado { min-height: 160px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: var(--muted, #6b7280); text-align: center; }
+.notificacoes-gestor-estado > .material-symbols-rounded { font-size: 34px; color: #94a3b8; }
+.notificacoes-gestor-estado strong { color: var(--text, #111827); font-size: 14px; }
+.notificacoes-gestor-estado small { font-size: 12px; }
+.notificacoes-gestor-spinner { width: 28px; height: 28px; margin-bottom: 5px; border: 3px solid #e5e7eb; border-top-color: #315bdb; border-radius: 50%; animation: notifGestorGirar .75s linear infinite; }
+body.dark .notificacoes-gestor-painel { border-color: rgba(255,255,255,.1); background: #17112c; color: #f8fafc; box-shadow: 0 24px 70px rgba(0,0,0,.48); }
+body.dark .notificacoes-gestor-badge { border-color: #17112c; }
+body.dark .notificacoes-gestor-item:hover, body.dark .notificacoes-gestor-footer button { background: rgba(255,255,255,.055); }
+body.dark .notificacoes-gestor-copy strong, body.dark .notificacoes-gestor-estado strong { color: #f8fafc; }
+@keyframes notifGestorEntrar { from { opacity:0; transform: translateY(-7px) scale(.98); } to { opacity:1; transform:none; } }
+@keyframes notifGestorGirar { to { transform: rotate(360deg); } }
+@media(max-width:640px){ .notificacoes-gestor-painel{max-height:calc(100vh - 82px)} .notificacoes-gestor-item{grid-template-columns:38px minmax(0,1fr) 20px}.notificacoes-gestor-icone{width:38px;height:38px} }
+
+/* Fase 8: estado lida / não lida */
+.notificacoes-gestor-item.is-read { opacity: .68; background: color-mix(in srgb, var(--panel-2, #f7f8fc) 58%, transparent); }
+.notificacoes-gestor-item.is-unread .notificacoes-gestor-copy strong { font-weight: 800; }
+.notificacoes-gestor-final { display:flex; align-items:center; justify-content:flex-end; gap:4px; min-width:42px; }
+.notificacoes-gestor-ponto { width:8px; height:8px; flex:0 0 8px; border-radius:999px; background:#ef4444; box-shadow:0 0 0 4px rgba(239,68,68,.10); }
+.notificacoes-gestor-lida { color:var(--muted, #6b7280); font-size:9px; font-weight:800; text-transform:uppercase; }
+.notificacoes-gestor-footer { display:grid; gap:8px; }
+.notificacoes-gestor-footer button .material-symbols-rounded { font-size:18px; }
+
+
+/* Centralização consistente dos Material Symbols na central de alertas. */
+.notificacoes-gestor-icone.material-symbols-rounded {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+  font-size: 22px;
+  padding: 0;
+}
+
+.notificacoes-gestor-final .material-symbols-rounded,
+.notificacoes-gestor-footer .material-symbols-rounded,
+.notificacoes-gestor-estado > .material-symbols-rounded {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+}
+
+.notificacoes-gestor-seta {
+  width: 20px;
+  height: 20px;
+}

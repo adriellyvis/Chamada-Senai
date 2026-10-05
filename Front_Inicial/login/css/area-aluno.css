@@ -212,3 +212,90 @@ body {
       font-weight: 500;
     }
     .help a:hover { text-decoration: underline; }
+
+/* =========================================================
+   LOGIN DO ALUNO — E-MAIL OU RA + DÍGITO + UF
+   ========================================================= */
+.login-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 5px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  background: #f0f0f0;
+}
+
+.login-mode-btn {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #666;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, color .2s, box-shadow .2s;
+}
+
+.login-mode-btn.ativo {
+  background: #fff;
+  color: #3b1fd4;
+  box-shadow: 0 4px 14px rgba(59, 31, 212, .14);
+}
+
+.login-mode-panel[hidden] {
+  display: none !important;
+}
+
+.ra-login-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 96px 88px;
+  gap: 10px;
+  align-items: end;
+}
+
+.ra-login-field {
+  min-width: 0;
+}
+
+.ra-login-grid input[type="text"],
+.ra-login-grid select {
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: none;
+  border-radius: 10px;
+  background: #f0f0f0;
+  color: #222;
+  font-size: .9rem;
+  outline: none;
+  margin-bottom: 8px;
+  transition: background .2s, box-shadow .2s;
+}
+
+.ra-login-grid select {
+  cursor: pointer;
+}
+
+.ra-login-grid input[type="text"]:focus,
+.ra-login-grid select:focus {
+  background: #e8e4fd;
+  box-shadow: 0 0 0 2px #7c5be0;
+}
+
+.ra-login-hint {
+  margin: 1px 0 18px;
+  color: #777;
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 620px) {
+  .ra-login-grid {
+    grid-template-columns: 1fr 90px;
+  }
+
+  .ra-login-principal {
+    grid-column: 1 / -1;
+  }
+}

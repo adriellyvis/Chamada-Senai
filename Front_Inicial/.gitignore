@@ -1,0 +1,12 @@
+# Dados biométricos locais - nunca versionar
+/dados_biometricos/
+/biometria-python/dados_biometricos/
+
+# Python
+**/__pycache__/
+*.py[cod]
+
+# Editor/Sistema
+.vscode/
+.DS_Store
+Thumbs.db

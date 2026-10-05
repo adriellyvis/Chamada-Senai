@@ -721,3 +721,220 @@ body.perfil-aluno-aberto {
     justify-content: stretch;
   }
 }
+
+
+/* =========================================================
+   FEEDBACK ACADÊMICO — PROFESSOR
+   ========================================================= */
+.aluno-acoes-wrap { min-width: 290px; }
+.aluno-acao-btn.feedback {
+  border-color: color-mix(in srgb, #7c3aed 38%, var(--line));
+  background: color-mix(in srgb, #7c3aed 8%, var(--panel));
+  color: #7c3aed;
+}
+.aluno-acao-btn.feedback:hover {
+  border-color: #7c3aed;
+  background: color-mix(in srgb, #7c3aed 15%, var(--panel));
+  transform: translateY(-1px);
+}
+.perfil-aluno-btn.feedback {
+  border: 1px solid #7c3aed;
+  background: color-mix(in srgb, #7c3aed 9%, var(--panel));
+  color: #7c3aed;
+}
+
+body.feedback-aluno-aberto { overflow: hidden; }
+.feedback-aluno-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, .62);
+  backdrop-filter: blur(7px);
+}
+.feedback-aluno-modal {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 28px 80px rgba(15,23,42,.3);
+}
+.feedback-aluno-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 28px 21px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.feedback-aluno-header > div > span { color: #7c3aed; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.feedback-aluno-header h2 { margin-top: 5px; font-size: 24px; }
+.feedback-aluno-header p { margin-top: 6px; color: var(--muted); line-height: 1.45; }
+.feedback-aluno-header button {
+  width: 40px; height: 40px; display: grid; place-items: center;
+  flex: 0 0 auto; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--panel); color: var(--text); cursor: pointer;
+}
+.feedback-aluno-form { display: flex; flex-direction: column; gap: 17px; padding: 24px 28px 28px; }
+.feedback-aluno-destinatario {
+  display: flex; align-items: center; gap: 12px; padding: 14px;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--panel-soft);
+}
+.feedback-aluno-avatar {
+  width: 46px; height: 46px; flex: 0 0 auto; display: grid; place-items: center;
+  border-radius: 14px; background: color-mix(in srgb, #7c3aed 14%, var(--panel));
+  color: #7c3aed; font-weight: 900;
+}
+.feedback-aluno-destinatario div:last-child { display: flex; flex-direction: column; min-width: 0; }
+.feedback-aluno-destinatario strong { font-size: 16px; }
+.feedback-aluno-destinatario span { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.feedback-aluno-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.feedback-aluno-form label { display: flex; flex-direction: column; gap: 7px; color: var(--text); font-weight: 800; }
+.feedback-aluno-form label small { color: var(--muted); font-weight: 600; }
+.feedback-aluno-form input,
+.feedback-aluno-form textarea {
+  width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 13px;
+  outline: none; background: var(--panel); color: var(--text); font: inherit; resize: vertical;
+}
+.feedback-aluno-form input:focus,
+.feedback-aluno-form textarea:focus { border-color: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,.1); }
+
+.feedback-melhoria-opcional {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.feedback-melhoria-toggle {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px !important;
+  padding: 14px 15px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-soft);
+  cursor: pointer;
+  user-select: none;
+}
+.feedback-melhoria-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.feedback-melhoria-check {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  transition: .18s ease;
+}
+.feedback-melhoria-check::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) scale(0);
+  transition: transform .18s ease;
+}
+.feedback-melhoria-toggle input:checked + .feedback-melhoria-check {
+  border-color: #7c3aed;
+  background: #7c3aed;
+}
+.feedback-melhoria-toggle input:checked + .feedback-melhoria-check::after {
+  transform: rotate(-45deg) scale(1);
+}
+.feedback-melhoria-toggle input:focus-visible + .feedback-melhoria-check {
+  box-shadow: 0 0 0 4px rgba(124,58,237,.12);
+}
+.feedback-melhoria-toggle > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.feedback-melhoria-toggle strong {
+  color: var(--text);
+  font-size: 14px;
+}
+.feedback-melhoria-toggle small {
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.feedback-melhoria-container {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, #7c3aed 22%, var(--line));
+  border-radius: 15px;
+  background: color-mix(in srgb, #7c3aed 4%, var(--panel));
+}
+.feedback-melhoria-container[hidden] { display: none !important; }
+.feedback-readonly {
+  min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 0 13px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel-soft);
+}
+.feedback-readonly strong { font-size: 18px; }
+.feedback-readonly span { color: var(--muted); font-size: 12px; text-align: right; }
+.feedback-readonly.regular strong { color: #16a34a; }
+.feedback-readonly.atencao strong { color: #d97706; }
+.feedback-readonly.risco strong { color: #dc2626; }
+.feedback-aluno-status { padding: 12px 14px; border-radius: 13px; font-weight: 750; }
+.feedback-aluno-status.sucesso { background: rgba(34,197,94,.12); color: #15803d; }
+.feedback-aluno-status.erro { background: rgba(239,68,68,.11); color: #b91c1c; }
+.feedback-aluno-acoes { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.feedback-aluno-acoes button {
+  min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 17px; border-radius: 12px; font-weight: 850; cursor: pointer;
+}
+.feedback-aluno-acoes .secundario { border: 1px solid var(--line); background: var(--panel); color: var(--text); }
+.feedback-aluno-acoes .primario { border: 1px solid #7c3aed; background: #7c3aed; color: #fff; }
+.feedback-aluno-acoes .primario:disabled { opacity: .65; cursor: wait; }
+.feedback-mini-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: feedbackSpin .7s linear infinite; }
+@keyframes feedbackSpin { to { transform: rotate(360deg); } }
+
+/* Três ações precisam de mais espaço. */
+.alunos-table th:nth-child(1), .alunos-table td:nth-child(1) { width: 21%; }
+.alunos-table th:nth-child(6), .alunos-table td:nth-child(6) { width: 25%; }
+
+@media (max-width: 760px) {
+  .feedback-aluno-overlay { padding: 12px; }
+  .feedback-aluno-modal { max-height: calc(100vh - 24px); border-radius: 19px; }
+  .feedback-aluno-header, .feedback-aluno-form { padding-left: 18px; padding-right: 18px; }
+  .feedback-aluno-grid { grid-template-columns: 1fr; }
+  .feedback-aluno-acoes { display: grid; grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   MÉDIA ACADÊMICA - notas reais do módulo acadêmico
+   ========================================================= */
+.media-academica-cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.media-academica-cell strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.media-academica-cell small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.58;
+}
+
+.media-academica-cell.boa strong { color: #16a66a; }
+.media-academica-cell.media strong { color: #d88a13; }
+.media-academica-cell.baixa strong { color: #dc4b55; }
+.media-academica-cell.sem-media strong { color: var(--muted, #7b8495); }

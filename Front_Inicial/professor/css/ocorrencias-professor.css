@@ -332,6 +332,7 @@
 .ocorrencias-page-content .filters-row {
   width: 100%;
   border-radius: 14px;
+  justify-content: center;
 }
 
 .search-pill input[type="search"]::-webkit-search-cancel-button {
@@ -355,5 +356,255 @@
 
   .ocorrencias-page-content .stat-card {
     height: 136px;
+  }
+}
+
+/* =========================
+   DETALHES DA OCORRÊNCIA
+========================= */
+.modal-ocorrencia-detalhes {
+  width: min(820px, 100%);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-modal-header {
+  margin: 0;
+  padding: 24px 26px 22px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--purple) 12%, transparent), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--purple-soft) 72%, var(--panel)), var(--panel));
+  border-bottom: 1px solid var(--line);
+}
+
+.ocorrencia-modal-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ocorrencia-modal-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--purple);
+  color: #fff;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--purple) 28%, transparent);
+}
+
+.ocorrencia-modal-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.15;
+}
+
+.ocorrencia-modal-kicker {
+  margin-bottom: 4px;
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.modal-ocorrencia-detalhes .modal-detalhes-header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+.modal-ocorrencia-detalhes .modal-detalhes-header p {
+  margin: 5px 0 0;
+}
+
+.modal-ocorrencia-detalhes .modal-detalhes-header button {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  transition: transform .18s ease, background .18s ease, color .18s ease;
+}
+
+.modal-ocorrencia-detalhes .modal-detalhes-header button:hover {
+  transform: translateY(-1px);
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.modal-ocorrencia-detalhes .modal-detalhes-header button svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.5;
+}
+
+.ocorrencia-modal-body {
+  padding: 24px 26px 26px;
+  overflow-y: auto;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-item {
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-2);
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-data {
+  grid-column: 1 / -1;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-label svg {
+  width: 15px;
+  height: 15px;
+  color: var(--purple);
+  stroke-width: 2.2;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-item > strong {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-item .ocorrencia-status,
+.modal-ocorrencia-detalhes .ocorrencia-detalhe-item .ocorrencia-label {
+  width: fit-content;
+  padding: 6px 10px;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-descricao-completa {
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel-2);
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-box-titulo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-box-titulo > span {
+  margin: 0;
+  color: inherit;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-box-icone {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-box-icone svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+.modal-ocorrencia-detalhes .ocorrencia-descricao-completa p {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.modal-ocorrencia-detalhes .resposta-gestor-box {
+  background: color-mix(in srgb, var(--green-soft) 58%, var(--panel));
+  border-color: color-mix(in srgb, var(--green) 20%, var(--line));
+}
+
+.modal-ocorrencia-detalhes .resposta-gestor-box .ocorrencia-box-icone {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.modal-ocorrencia-detalhes .resposta-gestor-box small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.modal-ocorrencia-detalhes .resposta-gestor-box small svg {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 640px) {
+  .modal-detalhes-overlay {
+    padding: 14px;
+  }
+
+  .modal-ocorrencia-detalhes .ocorrencia-modal-header {
+    padding: 20px 18px;
+    align-items: flex-start;
+  }
+
+  .ocorrencia-modal-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .modal-ocorrencia-detalhes .modal-detalhes-header h2 {
+    font-size: 19px;
+  }
+
+  .ocorrencia-modal-body {
+    padding: 18px;
+  }
+
+  .modal-ocorrencia-detalhes .ocorrencia-detalhes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-ocorrencia-detalhes .ocorrencia-detalhe-data {
+    grid-column: auto;
   }
 }

@@ -273,3 +273,124 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   CONFIRMAÇÃO BIOMÉTRICA PELO PROFESSOR
+========================================================= */
+.resumo-item--biometria-pendente {
+  background: rgba(37, 99, 235, 0.10) !important;
+}
+
+.badge-biometria-pendente {
+  background: rgba(37, 99, 235, 0.10);
+  color: var(--blue);
+  border: 1px solid rgba(37, 99, 235, 0.28);
+}
+
+.biometria-pendente-box {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.biometria-pendente-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.biometria-pendente-cabecalho > .material-symbols-rounded {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.biometria-pendente-cabecalho div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.biometria-pendente-cabecalho strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.biometria-pendente-cabecalho small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.biometria-pendente-acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-biometria-confirmar,
+.btn-biometria-recusar {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.btn-biometria-confirmar {
+  border: 1px solid rgba(24, 182, 109, 0.35);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.btn-biometria-confirmar:hover {
+  transform: translateY(-1px);
+  border-color: var(--green);
+}
+
+.btn-biometria-recusar {
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}
+
+.btn-biometria-recusar:hover {
+  transform: translateY(-1px);
+  border-color: #dc2626;
+}
+
+.btn-biometria-confirmar:disabled,
+.btn-biometria-recusar:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.btn-biometria-confirmar .material-symbols-rounded,
+.btn-biometria-recusar .material-symbols-rounded {
+  font-size: 17px;
+}
+
+@media (max-width: 760px) {
+  .biometria-pendente-acoes {
+    width: 100%;
+  }
+
+  .btn-biometria-confirmar,
+  .btn-biometria-recusar {
+    flex: 1;
+  }
+}

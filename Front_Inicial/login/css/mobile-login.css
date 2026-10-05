@@ -1,0 +1,86 @@
+/* Shared mobile layout for the three access pages. */
+@media (max-width: 700px) {
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 520px;
+    min-height: 0;
+    margin: auto;
+    flex-direction: column;
+    border-radius: 18px;
+  }
+
+  .left {
+    flex: 0 0 auto;
+    padding: 28px 22px 24px;
+  }
+
+  .left h1 {
+    font-size: clamp(1.45rem, 7vw, 1.75rem);
+  }
+
+  .left p {
+    max-width: 34rem;
+  }
+
+  .illustration {
+    margin-bottom: 14px;
+  }
+
+  .illustration svg {
+    width: 120px;
+  }
+
+  .right {
+    padding: 28px 22px 30px;
+    border-radius: 0;
+  }
+
+  .back-link {
+    margin-bottom: 22px;
+  }
+
+  .right h2 {
+    font-size: 1.45rem;
+  }
+
+  .subtitle {
+    margin-bottom: 22px;
+  }
+
+  .row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  .btn {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 380px) {
+  body {
+    padding: 8px;
+  }
+
+  .left,
+  .right {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .illustration svg {
+    width: 96px;
+  }
+}
