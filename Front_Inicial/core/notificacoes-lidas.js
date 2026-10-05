@@ -10,7 +10,7 @@ function obterUsuarioId() {
 }
 
 function chaveStorage(perfil) {
-  return `eyecount:${String(perfil || "usuario").toLowerCase()}:${obterUsuarioId()}:notificacoes-lidas`;
+  return `prezence:${String(perfil || "usuario").toLowerCase()}:${obterUsuarioId()}:notificacoes-lidas`;
 }
 
 function carregarLista(perfil) {

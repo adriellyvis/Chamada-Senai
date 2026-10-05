@@ -42,7 +42,7 @@ export async function abrirPerfilProfessor() {
           usuario,
           perfil: "professor",
           descricao:
-            "Consulte seus dados profissionais, turmas, disciplinas e informações acadêmicas vinculadas ao EyeCount."
+            "Consulte seus dados profissionais, turmas, disciplinas e informações acadêmicas vinculadas ao PreZence."
         })}
 
         <section class="perfil-grid">
@@ -145,7 +145,7 @@ function montarCardDadosProfessor(usuario) {
           <h3>Informações da conta</h3>
           <p>
             Os dados abaixo estão vinculados ao seu cadastro
-            profissional no EyeCount.
+            profissional no PreZence.
           </p>
         </div>
       </div>

@@ -68,7 +68,7 @@ export function montarHeroPerfil({ usuario, perfil, descricao }) {
         <div>
           <span class="perfil-eyebrow">Perfil ${escaparHtml(perfilLabel)}</span>
           <h2>${escaparHtml(nome)}</h2>
-          <p>${escaparHtml(descricao || "Confira seus dados e mantenha a biometria facial preparada para uso no EyeCount.")}</p>
+          <p>${escaparHtml(descricao || "Confira seus dados e mantenha a biometria facial preparada para uso no PreZence.")}</p>
         </div>
       </div>
 

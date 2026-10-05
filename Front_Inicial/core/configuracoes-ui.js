@@ -68,7 +68,7 @@ export function atualizarConfiguracoes(perfil, alteracoes = {}) {
 
   aplicarConfiguracoesInterface(perfilNormalizado, atualizadas);
 
-  window.dispatchEvent(new CustomEvent("eyecount:configuracoes-atualizadas", {
+  window.dispatchEvent(new CustomEvent("prezence:configuracoes-atualizadas", {
     detail: {
       perfil: perfilNormalizado,
       configuracoes: atualizadas
@@ -89,7 +89,7 @@ export function restaurarConfiguracoes(perfil) {
 
   aplicarConfiguracoesInterface(perfilNormalizado, padrao);
 
-  window.dispatchEvent(new CustomEvent("eyecount:configuracoes-atualizadas", {
+  window.dispatchEvent(new CustomEvent("prezence:configuracoes-atualizadas", {
     detail: {
       perfil: perfilNormalizado,
       configuracoes: padrao
@@ -168,7 +168,7 @@ export function montarPaginaConfiguracoes({
 
       <div class="configuracoes-grid">
         <article class="configuracoes-card">
-          ${cabecalhoCard("palette", "Aparência", "Escolha como o EyeCount deve aparecer para você.")}
+          ${cabecalhoCard("palette", "Aparência", "Escolha como o PreZence deve aparecer para você.")}
 
           <div class="configuracoes-bloco">
             <span class="configuracoes-label">Tema da interface</span>
@@ -232,7 +232,7 @@ export function montarPaginaConfiguracoes({
         </article>
 
         <article class="configuracoes-card configuracoes-card--account">
-          ${cabecalhoCard("manage_accounts", "Conta e sessão", "Dados usados nesta sessão do EyeCount.")}
+          ${cabecalhoCard("manage_accounts", "Conta e sessão", "Dados usados nesta sessão do PreZence.")}
 
           <div class="configuracoes-account">
             <div class="configuracoes-account-avatar" aria-hidden="true">
@@ -457,7 +457,7 @@ function configurarAcompanhamentoTemaSistema(perfil) {
 function obterTemaLegado(perfil) {
   const chaves = {
     aluno: ["tema-aluno"],
-    professor: ["tema-eyecount", "temaEyeCount"],
+    professor: ["tema-prezence", "temaPreZence"],
     gestor: ["tema-gestor", "tema"]
   }[perfil];
 
@@ -473,14 +473,14 @@ function salvarTemaLegado(perfil, temaResolvido) {
   if (perfil === "aluno") {
     localStorage.setItem("tema-aluno", temaResolvido);
   } else if (perfil === "professor") {
-    localStorage.setItem("tema-eyecount", temaResolvido);
+    localStorage.setItem("tema-prezence", temaResolvido);
   } else {
     localStorage.setItem("tema-gestor", temaResolvido);
   }
 }
 
 function chaveConfiguracoes(perfil) {
-  return `eyecount:${perfil}:${obterUsuarioId()}:configuracoes`;
+  return `prezence:${perfil}:${obterUsuarioId()}:configuracoes`;
 }
 
 function obterUsuarioId() {

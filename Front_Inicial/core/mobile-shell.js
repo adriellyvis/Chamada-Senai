@@ -12,7 +12,7 @@ function iniciarNavegacaoMobile() {
   botaoAbrir.type = "button";
   botaoAbrir.className = "mobile-menu-toggle";
   botaoAbrir.setAttribute("aria-label", "Abrir menu principal");
-  botaoAbrir.setAttribute("aria-controls", "eyecountSidebarMobile");
+  botaoAbrir.setAttribute("aria-controls", "prezenceSidebarMobile");
   botaoAbrir.setAttribute("aria-expanded", "false");
   botaoAbrir.innerHTML = `
     <span class="material-symbols-rounded" aria-hidden="true">menu</span>
@@ -30,7 +30,7 @@ function iniciarNavegacaoMobile() {
   overlay.className = "mobile-sidebar-overlay";
   overlay.setAttribute("aria-hidden", "true");
 
-  sidebar.id ||= "eyecountSidebarMobile";
+  sidebar.id ||= "prezenceSidebarMobile";
   sidebar.prepend(botaoFechar);
   document.body.append(botaoAbrir, overlay);
 

@@ -30,7 +30,7 @@ export function configurarNotificacoesProfessor() {
   });
   window.addEventListener("resize", fecharPainel);
   window.addEventListener("scroll", tratarScrollGlobal, true);
-  window.addEventListener("eyecount:biometria-professor-atualizada", () => {
+  window.addEventListener("prezence:biometria-professor-atualizada", () => {
     cacheAtualizadoEm = 0;
     atualizarIndicadorNotificacoes({ forcar: true });
   });

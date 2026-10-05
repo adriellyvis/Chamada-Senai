@@ -255,7 +255,7 @@ function renderizarTurmas(turmas) {
               <span class="turma-risco-badge ${classificacao.classe}">${classificacao.rotulo}</span>
               <span class="turma-turno-badge">${escaparHtml(turno)}</span>
             </div>
-            <p>${escaparHtml(turma.descricao || "Turma cadastrada no EyeCount")}</p>
+            <p>${escaparHtml(turma.descricao || "Turma cadastrada no PreZence")}</p>
           </div>
 
           <div class="turma-periodo-badge">
@@ -1270,7 +1270,7 @@ function abrirFormularioHorario(horario = null) {
             ${chipsDiasHorarioSelecionados()}
           </div>
           <small class="horario-dias-ajuda">
-            Selecione um ou vários dias. O EyeCount manterá o horário atual e criará os demais dias escolhidos quando necessário.
+            Selecione um ou vários dias. O PreZence manterá o horário atual e criará os demais dias escolhidos quando necessário.
           </small>
         </div>
 

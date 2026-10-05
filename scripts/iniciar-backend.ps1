@@ -4,7 +4,7 @@ $Root = Split-Path -Parent $PSScriptRoot
 $Backend = Join-Path $Root "back-and-Eycount\LogicaEycount"
 
 if (-not $env:DB_URL) {
-    $env:DB_URL = "jdbc:mysql://localhost:3306/eyecount"
+    $env:DB_URL = "jdbc:mysql://localhost:3306/prezence"
 }
 
 if (-not $env:DB_USER) {

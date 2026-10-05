@@ -3,7 +3,7 @@
 -- Compatível com 01_criar_estrutura_completa.sql
 --
 -- IMPORTANTE:
--- 1) Execute este arquivo em um banco EyeCount vazio, após os CREATEs.
+-- 1) Execute este arquivo em um banco PreZence vazio, após os CREATEs.
 -- 2) Todos os usuários abaixo usam a senha: 123456
 -- 3) A senha já está armazenada com BCrypt.
 -- 4) Biometria/amostras faciais NÃO são semeadas com dados falsos.
@@ -23,17 +23,17 @@ INSERT INTO perfis (id, nome) VALUES
 -- Senha de todos: 123456
 -- =========================================================
 INSERT INTO usuarios (id, nome, email, senha, perfil_id, ativo) VALUES
-(1,  'Ana Souza',       'ana.gestora@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
-(2,  'Bruno Lima',      'bruno.gestor@eyecount.com',        '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
-(3,  'Daniela Martins', 'daniela.professor@eyecount.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
-(4,  'Ricardo Oliveira','ricardo.professor@eyecount.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
-(5,  'Camila Santos',   'camila.professor@eyecount.com',    '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
-(6,  'Lucas Ferreira',  'lucas.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
-(7,  'Mariana Costa',   'mariana.aluno@eyecount.com',       '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
-(8,  'Pedro Almeida',   'pedro.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
-(9,  'Diego Alves',     'diego.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(1,  'Ana Souza',       'ana.gestora@prezence.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
+(2,  'Bruno Lima',      'bruno.gestor@prezence.com',        '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
+(3,  'Daniela Martins', 'daniela.professor@prezence.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(4,  'Ricardo Oliveira','ricardo.professor@prezence.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(5,  'Camila Santos',   'camila.professor@prezence.com',    '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(6,  'Lucas Ferreira',  'lucas.aluno@prezence.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(7,  'Mariana Costa',   'mariana.aluno@prezence.com',       '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(8,  'Pedro Almeida',   'pedro.aluno@prezence.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(9,  'Diego Alves',     'diego.aluno@prezence.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
 (10, 'Maicon Silva',    'maicon@senai.com',                  '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
-(11, 'Sofia Rodrigues', 'sofia.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE);
+(11, 'Sofia Rodrigues', 'sofia.aluno@prezence.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE);
 
 -- =========================================================
 -- TURMAS

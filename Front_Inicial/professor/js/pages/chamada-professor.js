@@ -535,7 +535,7 @@ async function confirmarBiometriaPendente(solicitacaoId, botao) {
 
   try {
     await confirmarSolicitacaoBiometrica(solicitacaoId);
-    window.dispatchEvent(new CustomEvent("eyecount:biometria-professor-atualizada"));
+    window.dispatchEvent(new CustomEvent("prezence:biometria-professor-atualizada"));
     await carregarAlunosChamada();
   } catch (erro) {
     console.error("Erro ao confirmar biometria:", erro);
@@ -559,7 +559,7 @@ async function recusarBiometriaPendente(solicitacaoId, botao) {
 
   try {
     await recusarSolicitacaoBiometrica(solicitacaoId);
-    window.dispatchEvent(new CustomEvent("eyecount:biometria-professor-atualizada"));
+    window.dispatchEvent(new CustomEvent("prezence:biometria-professor-atualizada"));
     await carregarAlunosChamada();
   } catch (erro) {
     console.error("Erro ao recusar biometria:", erro);

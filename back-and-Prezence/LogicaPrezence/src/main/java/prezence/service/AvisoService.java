@@ -241,7 +241,7 @@ public class AvisoService {
         // =====================================================
 
         /*
-         * A nota ainda é manual porque ainda não existe um módulo oficial de notas no EyeCount.
+         * A nota ainda é manual porque ainda não existe um módulo oficial de notas no PreZence.
          */
         if (
                 dto.getNota() != null

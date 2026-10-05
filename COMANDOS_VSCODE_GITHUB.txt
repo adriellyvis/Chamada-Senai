@@ -13,12 +13,12 @@ O GitHub sera usado para guardar e transferir o codigo.
 Nao use GitHub Pages para executar este sistema enquanto o backend estiver apenas na rede local,
 porque o Pages usa HTTPS e o backend local usa HTTP.
 
-A pasta correta para abrir no VS Code e a pasta EyeCount, que contem a pasta .git.
+A pasta correta para abrir no VS Code e a pasta PreZence, que contem a pasta .git.
 
 
 1. CONFERIR O GIT JA EXISTENTE
 ------------------------------
-Abra o terminal do VS Code na raiz EyeCount e execute:
+Abra o terminal do VS Code na raiz PreZence e execute:
 
 git status
 git remote -v
@@ -33,7 +33,7 @@ https://github.com/adriellyvis/Chamada-Senai.git
 git status
 git add -A
 git status
-git commit -m "Atualiza EyeCount com frontend, backend, biometria e agendamento"
+git commit -m "Atualiza PreZence com frontend, backend, biometria e agendamento"
 git pull --rebase origin main
 git push origin main
 
@@ -87,14 +87,14 @@ Opcao B - MySQL Workbench:
 
 Para apenas conferir os dados depois:
 
-cmd /c "mysql -u root -p eyecount < database\03_selects_conferencia.sql"
+cmd /c "mysql -u root -p prezence < database\03_selects_conferencia.sql"
 
 
 6. INICIAR O BACKEND
 --------------------
 Abra um terminal novo do VS Code na raiz e execute:
 
-$env:DB_URL="jdbc:mysql://localhost:3306/eyecount"
+$env:DB_URL="jdbc:mysql://localhost:3306/prezence"
 $env:DB_USER="root"
 $env:DB_PASSWORD="<SUA_SENHA_DO_MYSQL>"
 $env:JWT_SECRET="<CHAVE_ALEATORIA_COM_PELO_MENOS_32_CARACTERES>"
@@ -165,9 +165,9 @@ Nao e necessario trocar localhost manualmente nos arquivos JavaScript.
 --------------------------------------------
 Abra o PowerShell como administrador e execute:
 
-New-NetFirewallRule -DisplayName "EyeCount Frontend 5500" -Direction Inbound -Protocol TCP -LocalPort 5500 -Action Allow
-New-NetFirewallRule -DisplayName "EyeCount Backend 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
-New-NetFirewallRule -DisplayName "EyeCount Biometria 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow
+New-NetFirewallRule -DisplayName "PreZence Frontend 5500" -Direction Inbound -Protocol TCP -LocalPort 5500 -Action Allow
+New-NetFirewallRule -DisplayName "PreZence Backend 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
+New-NetFirewallRule -DisplayName "PreZence Biometria 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow
 
 Nao exponha a porta 3306 do MySQL para os computadores clientes.
 Somente o backend precisa acessar o banco no computador servidor.
@@ -196,7 +196,7 @@ git pull --rebase origin main
 
 LOGIN DOS DADOS DE DEMONSTRACAO
 -------------------------------
-Gestor: ana.gestora@eyecount.com
-Professor: carlos.professor@eyecount.com
-Aluno: alice.santos@eyecount.com
+Gestor: ana.gestora@prezence.com
+Professor: carlos.professor@prezence.com
+Aluno: alice.santos@prezence.com
 Senha: 123456

@@ -90,7 +90,7 @@ function montarHeroGestor(usuario) {
           <h2>${escaparHtml(nome)}</h2>
           <p>
             Consulte seus dados de acesso, indicadores institucionais
-            e responsabilidades administrativas no EyeCount.
+            e responsabilidades administrativas no PreZence.
           </p>
         </div>
       </div>

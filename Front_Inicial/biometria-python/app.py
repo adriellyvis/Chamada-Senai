@@ -14,7 +14,7 @@ from urllib import error as urllib_error
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SPRING_API_URL = os.environ.get(
-    "EYECOUNT_API_URL",
+    "PREZENCE_API_URL",
     "http://127.0.0.1:8080"
 ).rstrip("/")
 

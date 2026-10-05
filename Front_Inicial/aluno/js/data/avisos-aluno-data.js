@@ -142,7 +142,7 @@ function mapearTipoFiltro(origem, categoria) {
 function rotuloOrigem(origem) {
   if (origem === "professor") return "Professor";
   if (origem === "gestor") return "Gestão";
-  return "EyeCount";
+  return "PreZence";
 }
 
 function normalizarPrioridade(valor) {

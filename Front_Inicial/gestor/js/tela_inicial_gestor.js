@@ -147,7 +147,7 @@ function realizarLogout() {
   window.location.href = "../index.html";
 }
 
-window.addEventListener("eyecount:configuracoes-atualizadas", event => {
+window.addEventListener("prezence:configuracoes-atualizadas", event => {
   if (event?.detail?.perfil === "gestor") {
     atualizarIndicadorNotificacoesGestor({ forcar: true });
   }

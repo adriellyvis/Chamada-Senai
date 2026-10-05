@@ -261,7 +261,7 @@ function obterUsuarioLogado() {
 }
 
 function chaveDinamicasLidas() {
-  return `eyecount:aluno:${obterUsuarioLogado()?.id ?? "anonimo"}:notificacoes-dinamicas-lidas`;
+  return `prezence:aluno:${obterUsuarioLogado()?.id ?? "anonimo"}:notificacoes-dinamicas-lidas`;
 }
 
 function obterDinamicasLidas() {
