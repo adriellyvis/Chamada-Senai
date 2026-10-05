@@ -1,0 +1,16 @@
+EyeCount - serviço Python de biometria
+
+Para desenvolvimento local, a chave interna do Python foi alinhada com a chave configurada no backend Spring.
+
+Inicie por:
+
+INICIAR_BIOMETRIA_LOCAL.bat
+
+ou:
+
+py app.py
+
+A chave interna NÃO deve ser colocada no JavaScript do navegador.
+O navegador envia apenas os dados do fluxo para o Spring; o Spring é quem chama o Python.
+
+Antes da entrega/deploy, mova novamente a chave para variável de ambiente e gere uma nova chave.

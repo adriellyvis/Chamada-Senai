@@ -1,0 +1,4 @@
+python -m pip install -r requirements.txt
+
+vai abaixar tudo de requirements.txt que é as bibliotecas python para 
+utilizar coisas como cors e o flask

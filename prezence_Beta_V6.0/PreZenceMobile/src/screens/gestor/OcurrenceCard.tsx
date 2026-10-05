@@ -1,0 +1,1 @@
+export { GestorHomeScreen } from './GestorScreens';

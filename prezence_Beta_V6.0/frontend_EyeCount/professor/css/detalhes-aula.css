@@ -1,0 +1,2 @@
+
+.detalhes-aula-lista{display:grid;gap:10px}.detalhe-aluno-item{display:flex;justify-content:space-between;gap:14px;background:var(--panel-2);border-radius:12px;padding:13px}

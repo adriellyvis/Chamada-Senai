@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suporte de acesso - Prezence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/fluxo-acesso.css" />
+</head>
+<body>
+  <main class="acesso-page">
+    <aside class="acesso-aside">
+      <div class="acesso-aside-copy">
+        <div class="acesso-brand">Prezence • Atendimento</div>
+        <h1>Conte o que está impedindo seu acesso.</h1>
+        <p>Envie uma solicitação para a equipe gestora da instituição acompanhar seu problema de login, cadastro, biometria ou acesso ao sistema.</p>
+      </div>
+      <div class="acesso-aside-note">
+        Não envie sua senha. A equipe responsável pode confirmar seus dados e orientar os próximos passos, mas nunca deve solicitar sua senha atual.
+      </div>
+    </aside>
+
+    <section class="acesso-main">
+      <a href="./area-login-aluno.html" class="voltar-link" id="voltarLoginSuporte">‹ Voltar para o login</a>
+      <p class="eyebrow">Canal institucional</p>
+      <h2>Fale com a secretaria</h2>
+      <p class="intro">Preencha os dados abaixo. Quando o canal estiver habilitado no backend, a solicitação será enviada aos gestores responsáveis.</p>
+
+      <form id="formSuporte">
+        <div class="form-grid duplo">
+          <div class="campo">
+            <label for="nomeSuporte">Nome completo</label>
+            <input id="nomeSuporte" type="text" autocomplete="name" required />
+          </div>
+          <div class="campo">
+            <label for="emailSuporte">E-mail institucional</label>
+            <input id="emailSuporte" type="email" autocomplete="email" required />
+          </div>
+          <div class="campo">
+            <label for="perfilSuporte">Perfil</label>
+            <select id="perfilSuporte">
+              <option value="aluno">Aluno</option>
+              <option value="professor">Professor</option>
+              <option value="gestor">Gestor</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="assuntoSuporte">Assunto</label>
+            <select id="assuntoSuporte">
+              <option value="ACESSO">Não consigo acessar</option>
+              <option value="SENHA">Problema com senha</option>
+              <option value="BIOMETRIA">Problema com biometria</option>
+              <option value="CADASTRO">Dados/cadastro incorretos</option>
+              <option value="OUTRO">Outro assunto</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="campo" style="margin-top:16px">
+          <label for="mensagemSuporte">Descreva o problema ou solicitação</label>
+          <textarea id="mensagemSuporte" maxlength="1200" placeholder="Explique o que aconteceu, em qual tela e o que você precisa..." required></textarea>
+        </div>
+
+        <div class="info-box">
+          A mensagem deve ser registrada no servidor e disponibilizada para os gestores. O formulário não envia nem solicita senha.
+        </div>
+
+        <div class="acoes">
+          <button class="btn-acesso primario" id="btnEnviarSuporte" type="submit">Enviar para a equipe gestora</button>
+          <a class="btn-link" id="linkRecuperarSenha" href="./recuperar-senha.html">Quero tentar recuperar minha senha</a>
+        </div>
+        <div class="status" id="statusSuporte" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/suporte-instituicao.js"></script>
+</body>
+</html>

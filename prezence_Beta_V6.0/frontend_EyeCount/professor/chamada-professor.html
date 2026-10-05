@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chamada</title>
+  <link rel="stylesheet" href="chamada-professor.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Chamada</h1>
+    <a href="tela-inicial-professor.html"><button>Voltar tela inicial</button></a>
+    <button><a href="historico-professor.html">HISTORICO</a></button>
+
+    <select id="turmaSelect">
+      <option value="">Selecione uma turma</option>
+    </select>
+
+    <button id="btnAbrirChamada">Abrir Chamada</button>
+    <button id="btnEncerrarChamada">Encerrar Chamada</button>
+    <a href="tela-inicial-professor.html"><button id="btnVoltar">Voltar</button></a>
+
+    <div id="statusAula"></div>
+
+    <div id="listaAlunos"></div>
+  </div>
+
+  <script src="chamada-professor.js"></script>
+</body>
+</html>
