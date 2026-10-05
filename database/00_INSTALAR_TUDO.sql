@@ -1,24 +1,21 @@
--- EyeCount - instalacao completa
--- Estrutura + dados de demonstracao
+-- =========================================================
+-- =========================================================
+-- PreZence - Banco de dados
+-- CREATEs consolidados para o estado atual do projeto.
+-- =========================================================
+-- =========================================================
 
--- =========================================================
--- EyeCount - Estrutura completa do banco de dados
--- =========================================================
-CREATE DATABASE IF NOT EXISTS eyecount;
-USE eyecount;
+CREATE DATABASE IF NOT EXISTS prezence;
+USE prezence;
 
--- =========================================================
--- TABELA: perfis
--- =========================================================
+-- Tabela de perfis
 CREATE TABLE IF NOT EXISTS perfis (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,
     CONSTRAINT uk_perfis_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: usuarios
--- =========================================================
+-- Tabela de usuários
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -34,11 +31,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
     INDEX idx_usuarios_perfil (perfil_id),
     INDEX idx_usuarios_ativo (ativo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: turmas
--- =========================================================
+-- Tabela de turmas
 CREATE TABLE IF NOT EXISTS turmas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -50,33 +45,49 @@ CREATE TABLE IF NOT EXISTS turmas (
     data_inicio DATE NULL,
     data_fim_prevista DATE NULL,
 
+    CONSTRAINT chk_turmas_horario
+        CHECK (
+            horario_inicio IS NULL
+            OR horario_fim IS NULL
+            OR horario_fim > horario_inicio
+        ),
+    CONSTRAINT chk_turmas_periodo
+        CHECK (
+            data_inicio IS NULL
+            OR data_fim_prevista IS NULL
+            OR data_fim_prevista > data_inicio
+        ),
+
     INDEX idx_turmas_ativo (ativo),
     INDEX idx_turmas_periodo (data_inicio, data_fim_prevista)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: alunos
--- =========================================================
+-- Tabela de alunos
 CREATE TABLE IF NOT EXISTS alunos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     turma_id INT NOT NULL,
     matricula VARCHAR(50) NOT NULL,
+    digito_ra VARCHAR(2) NULL,
+    uf VARCHAR(2) NULL,
     data_nascimento DATE NULL,
 
     CONSTRAINT uk_alunos_usuario UNIQUE (usuario_id),
-    CONSTRAINT uk_alunos_matricula UNIQUE (matricula),
+    CONSTRAINT uk_aluno_ra_completo
+    UNIQUE (
+        matricula,
+        digito_ra,
+        uf
+    ),
     CONSTRAINT fk_aluno_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     CONSTRAINT fk_aluno_turma
         FOREIGN KEY (turma_id) REFERENCES turmas(id),
 
     INDEX idx_alunos_turma (turma_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: professores
--- =========================================================
+-- Tabela de professores
 CREATE TABLE IF NOT EXISTS professores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -85,11 +96,9 @@ CREATE TABLE IF NOT EXISTS professores (
     CONSTRAINT uk_professores_usuario UNIQUE (usuario_id),
     CONSTRAINT fk_professor_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: responsaveis
--- =========================================================
+-- Tabela de responsáveis
 CREATE TABLE IF NOT EXISTS responsaveis (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -97,11 +106,9 @@ CREATE TABLE IF NOT EXISTS responsaveis (
     telefone VARCHAR(20) NULL,
 
     CONSTRAINT uk_responsaveis_email UNIQUE (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: aluno_responsavel
--- =========================================================
+-- Relação entre alunos e responsáveis
 CREATE TABLE IF NOT EXISTS aluno_responsavel (
     aluno_id INT NOT NULL,
     responsavel_id INT NOT NULL,
@@ -113,21 +120,19 @@ CREATE TABLE IF NOT EXISTS aluno_responsavel (
         FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id),
 
     INDEX idx_aluno_responsavel_responsavel (responsavel_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: disciplinas
--- =========================================================
+-- Tabela de disciplinas
 CREATE TABLE IF NOT EXISTS disciplinas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
+    sigla VARCHAR(10) NOT NULL,
 
-    CONSTRAINT uk_disciplinas_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    CONSTRAINT uk_disciplinas_nome UNIQUE (nome),
+    CONSTRAINT uk_disciplinas_sigla UNIQUE (sigla)
+);
 
--- =========================================================
--- TABELA: turma_disciplina
--- =========================================================
+-- Relação entre turma, disciplina e professor
 CREATE TABLE IF NOT EXISTS turma_disciplina (
     id INT AUTO_INCREMENT PRIMARY KEY,
     turma_id INT NOT NULL,
@@ -140,23 +145,30 @@ CREATE TABLE IF NOT EXISTS turma_disciplina (
         FOREIGN KEY (disciplina_id) REFERENCES disciplinas(id),
     CONSTRAINT fk_td_professor
         FOREIGN KEY (professor_id) REFERENCES professores(id),
+    CONSTRAINT uk_turma_disciplina
+        UNIQUE (turma_id, disciplina_id, professor_id),
 
     INDEX idx_td_turma (turma_id),
     INDEX idx_td_disciplina (disciplina_id),
     INDEX idx_td_professor (professor_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
-
--- =========================================================
--- TABELA: horarios_aula
--- =========================================================
+-- Tabela de horários das aulas
 CREATE TABLE IF NOT EXISTS horarios_aula (
     id INT AUTO_INCREMENT PRIMARY KEY,
     turma_disciplina_id INT NOT NULL,
-    dia_semana VARCHAR(20) NOT NULL,
+    dia_semana ENUM(
+        'MONDAY',
+        'TUESDAY',
+        'WEDNESDAY',
+        'THURSDAY',
+        'FRIDAY',
+        'SATURDAY',
+        'SUNDAY'
+    ) NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fim TIME NOT NULL,
-    tolerancia_minutos INT NOT NULL DEFAULT 30,
+    tolerancia_minutos INT NOT NULL DEFAULT 0,
     abertura_automatica BOOLEAN NOT NULL DEFAULT TRUE,
     encerramento_automatico BOOLEAN NOT NULL DEFAULT TRUE,
     data_inicio_vigencia DATE NULL,
@@ -165,14 +177,24 @@ CREATE TABLE IF NOT EXISTS horarios_aula (
 
     CONSTRAINT fk_horario_turma_disciplina
         FOREIGN KEY (turma_disciplina_id) REFERENCES turma_disciplina(id),
+    CONSTRAINT chk_horario_intervalo
+        CHECK (hora_fim > hora_inicio),
+    CONSTRAINT chk_horario_tolerancia
+        CHECK (tolerancia_minutos BETWEEN 0 AND 180),
+    CONSTRAINT chk_horario_vigencia
+        CHECK (
+            data_inicio_vigencia IS NULL
+            OR data_fim_vigencia IS NULL
+            OR data_fim_vigencia >= data_inicio_vigencia
+        ),
 
-    INDEX idx_horario_dia_ativo (dia_semana, ativo),
-    INDEX idx_horario_turma_disciplina (turma_disciplina_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    INDEX idx_horarios_td (turma_disciplina_id),
+    INDEX idx_horarios_dia_inicio (dia_semana, hora_inicio),
+    INDEX idx_horarios_ativo (ativo),
+    INDEX idx_horarios_vigencia (data_inicio_vigencia, data_fim_vigencia)
+);
 
--- =========================================================
--- TABELA: aulas
--- =========================================================
+-- Tabela de aulas
 CREATE TABLE IF NOT EXISTS aulas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     turma_disciplina_id INT NOT NULL,
@@ -190,21 +212,20 @@ CREATE TABLE IF NOT EXISTS aulas (
     ) NOT NULL DEFAULT 'AGENDADA',
 
     CONSTRAINT uk_aulas_token UNIQUE (token),
+    CONSTRAINT uk_aula_horario_data UNIQUE (horario_aula_id, data_aula),
     CONSTRAINT fk_aula_turma_disciplina
         FOREIGN KEY (turma_disciplina_id) REFERENCES turma_disciplina(id),
-    CONSTRAINT fk_aula_horario_aula
+    CONSTRAINT fk_aula_horario
         FOREIGN KEY (horario_aula_id) REFERENCES horarios_aula(id),
 
     INDEX idx_aulas_turma_disciplina (turma_disciplina_id),
-    INDEX idx_aulas_horario_aula (horario_aula_id),
+    INDEX idx_aulas_horario (horario_aula_id),
     INDEX idx_aulas_data (data_aula),
     INDEX idx_aulas_status (status),
     INDEX idx_aulas_data_status (data_aula, status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: presencas
--- =========================================================
+-- Tabela de presenças
 CREATE TABLE IF NOT EXISTS presencas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     aluno_id INT NOT NULL,
@@ -215,7 +236,7 @@ CREATE TABLE IF NOT EXISTS presencas (
         'ATRASADO',
         'SAIDA_TEMPORARIA'
     ) NOT NULL DEFAULT 'AUSENTE',
-    horario_registro DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    horario_registro DATETIME NULL DEFAULT NULL,
     metodo ENUM(
         'MANUAL',
         'BIOMETRIA',
@@ -223,7 +244,7 @@ CREATE TABLE IF NOT EXISTS presencas (
     ) NOT NULL DEFAULT 'MANUAL',
     validacao_biometrica BOOLEAN NOT NULL DEFAULT FALSE,
 
-    CONSTRAINT uk_presencas_aluno_aula UNIQUE (aluno_id, aula_id),
+    CONSTRAINT uk_presenca_aluno_aula UNIQUE (aluno_id, aula_id),
     CONSTRAINT fk_presenca_aluno
         FOREIGN KEY (aluno_id) REFERENCES alunos(id),
     CONSTRAINT fk_presenca_aula
@@ -232,11 +253,9 @@ CREATE TABLE IF NOT EXISTS presencas (
     INDEX idx_presencas_aula (aula_id),
     INDEX idx_presencas_status (status),
     INDEX idx_presencas_metodo (metodo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: saidas_temporarias
--- =========================================================
+-- Tabela de saídas temporárias
 CREATE TABLE IF NOT EXISTS saidas_temporarias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     aluno_id INT NOT NULL,
@@ -249,14 +268,16 @@ CREATE TABLE IF NOT EXISTS saidas_temporarias (
         FOREIGN KEY (aluno_id) REFERENCES alunos(id),
     CONSTRAINT fk_saida_aula
         FOREIGN KEY (aula_id) REFERENCES aulas(id),
+    CONSTRAINT chk_saida_tempo_limite
+        CHECK (tempo_limite > 0),
+    CONSTRAINT chk_saida_retorno
+        CHECK (hora_retorno IS NULL OR hora_retorno >= hora_saida),
 
     INDEX idx_saidas_aluno (aluno_id),
     INDEX idx_saidas_aula (aula_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- =========================================================
--- TABELA: logs_acesso
--- =========================================================
+-- Tabela de logs de acesso
 CREATE TABLE IF NOT EXISTS logs_acesso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -269,11 +290,9 @@ CREATE TABLE IF NOT EXISTS logs_acesso (
 
     INDEX idx_logs_usuario (usuario_id),
     INDEX idx_logs_data (data_hora)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- =========================================================
--- TABELA: ocorrencias
--- =========================================================
+);
+-- 
+-- Tabela de ocorrências
 CREATE TABLE IF NOT EXISTS ocorrencias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     aluno_id INT NOT NULL,
@@ -311,11 +330,90 @@ CREATE TABLE IF NOT EXISTS ocorrencias (
     INDEX idx_ocorrencias_professor (professor_id),
     INDEX idx_ocorrencias_status (status),
     INDEX idx_ocorrencias_data (data_ocorrencia)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
 
 -- =========================================================
--- TABELA: biometria
+-- Tabela de avisos
 -- =========================================================
+CREATE TABLE IF NOT EXISTS avisos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    aluno_id INT NOT NULL,
+    autor_id INT NOT NULL,
+    turma_id INT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    mensagem TEXT NOT NULL,
+    categoria ENUM(
+        'GERAL',
+        'FREQUENCIA',
+        'ATENDIMENTO',
+        'DOCUMENTACAO',
+        'PRAZO',
+        'ACADEMICO',
+        'FEEDBACK',
+        'OUTRO'
+    ) NOT NULL DEFAULT 'GERAL',
+    prioridade ENUM(
+        'NORMAL',
+        'IMPORTANTE'
+    ) NOT NULL DEFAULT 'NORMAL',
+    lido BOOLEAN NOT NULL DEFAULT FALSE,
+    frequencia DOUBLE NULL,
+    nota FLOAT(53) NULL,
+    melhorias TEXT NULL,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_aviso_aluno
+        FOREIGN KEY (aluno_id) REFERENCES alunos(id),
+    CONSTRAINT fk_aviso_autor
+        FOREIGN KEY (autor_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_aviso_turma
+        FOREIGN KEY (turma_id) REFERENCES turmas(id),
+
+    INDEX idx_avisos_aluno (aluno_id),
+    INDEX idx_avisos_autor (autor_id),
+    INDEX idx_avisos_turma (turma_id),
+    INDEX idx_avisos_lido (lido),
+    INDEX idx_avisos_data (data_criacao)
+);
+
+-- =========================================================
+-- Solicitações de confirmação de presença biométrica
+-- =========================================================
+CREATE TABLE IF NOT EXISTS solicitacoes_presenca_biometrica (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    aluno_id INT NOT NULL,
+    aula_id INT NOT NULL,
+    status ENUM(
+        'PENDENTE',
+        'CONFIRMADA',
+        'RECUSADA'
+    ) NOT NULL DEFAULT 'PENDENTE',
+    status_sugerido ENUM(
+        'PRESENTE',
+        'AUSENTE',
+        'ATRASADO',
+        'SAIDA_TEMPORARIA'
+    ) NOT NULL,
+    horario_solicitacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    horario_decisao DATETIME NULL,
+    professor_usuario_id INT NULL,
+    motivo_recusa VARCHAR(500) NULL,
+
+    CONSTRAINT fk_solicitacao_biometrica_aluno
+        FOREIGN KEY (aluno_id) REFERENCES alunos(id),
+    CONSTRAINT fk_solicitacao_biometrica_aula
+        FOREIGN KEY (aula_id) REFERENCES aulas(id),
+    CONSTRAINT fk_solicitacao_biometrica_professor_usuario
+        FOREIGN KEY (professor_usuario_id) REFERENCES usuarios(id),
+
+    INDEX idx_solicitacao_aluno_aula (aluno_id, aula_id),
+    INDEX idx_solicitacao_status (status),
+    INDEX idx_solicitacao_professor (professor_usuario_id),
+    INDEX idx_solicitacao_horario (horario_solicitacao)
+);
+
+-- Tabela de biometria
 CREATE TABLE IF NOT EXISTS biometria (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -329,1046 +427,481 @@ CREATE TABLE IF NOT EXISTS biometria (
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
 
     INDEX idx_biometria_ativo (ativo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
 
 -- =========================================================
--- DADOS INICIAIS ESSENCIAIS
+-- Amostras faciais da biometria
+-- Cada biometria facial possui 5 amostras processadas.
+-- =========================================================
+CREATE TABLE IF NOT EXISTS biometria_amostras (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    biometria_id INT NOT NULL,
+    ordem_amostra INT NOT NULL,
+    etapa VARCHAR(40) NULL,
+    imagem_face LONGBLOB NOT NULL,
+    data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_biometria_amostra_biometria
+        FOREIGN KEY (biometria_id)
+        REFERENCES biometria(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uk_biometria_ordem_amostra
+        UNIQUE (biometria_id, ordem_amostra),
+
+    CONSTRAINT chk_biometria_ordem_amostra
+        CHECK (ordem_amostra BETWEEN 1 AND 5),
+
+    INDEX idx_biometria_amostras_biometria (biometria_id)
+);
+
+-- =========================================================
+-- Notas acadêmicas
+-- =========================================================
+CREATE TABLE IF NOT EXISTS notas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    aluno_id INT NOT NULL,
+    turma_disciplina_id INT NOT NULL,
+
+    titulo VARCHAR(100) NOT NULL,
+
+    nota FLOAT(53) NOT NULL,
+    nota_maxima FLOAT(53) NOT NULL DEFAULT 10.00,
+
+    bimestre INT NULL,
+
+    observacao VARCHAR(500) NULL,
+
+    data_avaliacao DATE NULL,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_nota_aluno
+        FOREIGN KEY (aluno_id)
+        REFERENCES alunos(id),
+
+    CONSTRAINT fk_nota_turma_disciplina
+        FOREIGN KEY (turma_disciplina_id)
+        REFERENCES turma_disciplina(id),
+
+    CONSTRAINT chk_nota_valor
+        CHECK (nota >= 0 AND nota <= nota_maxima),
+
+    CONSTRAINT chk_nota_maxima
+        CHECK (nota_maxima > 0),
+
+    CONSTRAINT chk_nota_bimestre
+        CHECK (bimestre IS NULL OR bimestre BETWEEN 1 AND 4),
+
+    INDEX idx_notas_aluno (aluno_id),
+    INDEX idx_notas_turma_disciplina (turma_disciplina_id),
+    INDEX idx_notas_bimestre (bimestre)
+);
+
+CREATE TABLE IF NOT EXISTS solicitacoes_suporte (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    nome VARCHAR(120) NOT NULL,
+    email VARCHAR(160) NOT NULL,
+    perfil VARCHAR(30) NOT NULL,
+
+    assunto VARCHAR(120) NOT NULL,
+    mensagem TEXT NOT NULL,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
+
+    resposta_gestor TEXT NULL,
+
+    gestor_usuario_id INT NULL,
+
+    data_criacao DATETIME(6) NOT NULL,
+    data_atualizacao DATETIME(6) NULL,
+
+    CONSTRAINT fk_solicitacoes_suporte_gestor
+        FOREIGN KEY (gestor_usuario_id)
+        REFERENCES usuarios(id)
+);
+
+CREATE INDEX idx_suporte_status_data
+    ON solicitacoes_suporte(status, data_criacao);
+    
+CREATE TABLE IF NOT EXISTS recuperacoes_senha (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    challenge_id VARCHAR(64) NOT NULL UNIQUE,
+
+    usuario_id INT NOT NULL,
+
+    status VARCHAR(30) NOT NULL,
+
+    tentativas INT NOT NULL DEFAULT 0,
+
+    criado_em DATETIME(6) NOT NULL,
+
+    expira_em DATETIME(6) NOT NULL,
+
+    biometria_validada_em DATETIME(6) NULL,
+
+    concluido_em DATETIME(6) NULL,
+
+    CONSTRAINT fk_recuperacao_senha_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+);
+
+CREATE INDEX idx_recuperacao_challenge
+    ON recuperacoes_senha(challenge_id);
+
+CREATE INDEX idx_recuperacao_usuario_status
+    ON recuperacoes_senha(usuario_id, status);
+    
+-- =========================================================
+-- PreZence - INSERTS de demonstração
+-- Compatível com 01_criar_estrutura_completa.sql
+--
+-- IMPORTANTE:
+-- 1) Execute este arquivo em um banco EyeCount vazio, após os CREATEs.
+-- 2) Todos os usuários abaixo usam a senha: 123456
+-- 3) A senha já está armazenada com BCrypt.
+-- 4) Biometria/amostras faciais NÃO são semeadas com dados falsos.
+--    Cadastre os rostos normalmente pelo sistema.
+-- =========================================================
+
+-- =========================================================
+-- PERFIS
 -- =========================================================
 INSERT INTO perfis (id, nome) VALUES
-    (1, 'aluno'),
-    (2, 'professor'),
-    (3, 'gestor')
-ON DUPLICATE KEY UPDATE nome = VALUES(nome);
-
+(1, 'aluno'),
+(2, 'professor'),
+(3, 'gestor');
 
 -- =========================================================
--- EYCOUNT - INSERTS DE DEMONSTRACAO
--- MySQL 8+
+-- USUÁRIOS
+-- Senha de todos: 123456
+-- =========================================================
+INSERT INTO usuarios (id, nome, email, senha, perfil_id, ativo) VALUES
+(1,  'Ana Souza',       'ana.gestora@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
+(2,  'Bruno Lima',      'bruno.gestor@eyecount.com',        '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 3, TRUE),
+(3,  'Daniela Martins', 'daniela.professor@eyecount.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(4,  'Ricardo Oliveira','ricardo.professor@eyecount.com',   '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(5,  'Camila Santos',   'camila.professor@eyecount.com',    '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 2, TRUE),
+(6,  'Lucas Ferreira',  'lucas.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(7,  'Mariana Costa',   'mariana.aluno@eyecount.com',       '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(8,  'Pedro Almeida',   'pedro.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(9,  'Diego Alves',     'diego.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(10, 'Maicon Silva',    'maicon@senai.com',                  '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE),
+(11, 'Sofia Rodrigues', 'sofia.aluno@eyecount.com',         '$2y$10$Gb5qJNCexwlvocxFoAGA1.fCiLhpDT2Ern27JQo5IXmXu8D219FyW', 1, TRUE);
+
+-- =========================================================
+-- TURMAS
+-- =========================================================
+INSERT INTO turmas
+(id, nome, descricao, sala, horario_inicio, horario_fim, ativo, data_inicio, data_fim_prevista)
+VALUES
+(1, 'DS 2026 - Turma A', 'Desenvolvimento de Sistemas - Turma A', 'Sala 101',
+ '13:00:00', '17:15:00', TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY),
+ DATE_ADD(CURDATE(), INTERVAL 120 DAY)),
+
+(2, 'DS 2026 - Turma B', 'Desenvolvimento de Sistemas - Turma B', 'Sala 102',
+ '13:00:00', '17:15:00', TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY),
+ DATE_ADD(CURDATE(), INTERVAL 120 DAY));
+
+-- =========================================================
+-- ALUNOS
+-- Observação importante:
+-- Diego Alves mantém usuario_id = 9 e aluno.id = 4.
+-- RA de demonstração: dígito 01 e UF SP para todos os alunos.
+-- =========================================================
+INSERT INTO alunos (id, usuario_id, turma_id, matricula, digito_ra, uf, data_nascimento) VALUES
+(1,  6, 1, '2026001', '01', 'SP', '2008-03-12'),
+(2,  7, 1, '2026002', '01', 'SP', '2007-11-08'),
+(3,  8, 1, '2026003', '01', 'SP', '2008-06-21'),
+(4,  9, 1, '2026004', '01', 'SP', '2007-09-17'),
+(5, 10, 2, '2026005', '01', 'SP', '2008-02-04'),
+(6, 11, 2, '2026006', '01', 'SP', '2007-12-15');
+
+-- =========================================================
+-- PROFESSORES
+-- =========================================================
+INSERT INTO professores (id, usuario_id, especialidade) VALUES
+(1, 3, 'Banco de Dados'),
+(2, 4, 'Programação Web'),
+(3, 5, 'Lógica de Programação');
+
+-- =========================================================
+-- RESPONSÁVEIS
+-- =========================================================
+INSERT INTO responsaveis (id, nome, email, telefone) VALUES
+(1, 'Carlos Ferreira', 'carlos.ferreira@email.com', '(11) 99999-1001'),
+(2, 'Fernanda Costa',  'fernanda.costa@email.com',  '(11) 99999-1002'),
+(3, 'Roberto Silva',   'roberto.silva@email.com',   '(11) 99999-1003');
+
+INSERT INTO aluno_responsavel (aluno_id, responsavel_id) VALUES
+(1, 1),
+(2, 2),
+(5, 3);
+
+-- =========================================================
+-- DISCIPLINAS
+-- =========================================================
+INSERT INTO disciplinas (id, nome, sigla) VALUES
+(1, 'Programação Web', 'PW'),
+(2, 'Banco de Dados',  'BD'),
+(3, 'Lógica de Programação', 'LOG');
+
+-- =========================================================
+-- TURMA + DISCIPLINA + PROFESSOR
 --
--- Pode ser executado mais de uma vez.
--- Usuarios, alunos, professores e biometrias usam chaves unicas.
--- Turmas, vinculos, aulas e ocorrencias possuem verificacao antes do INSERT.
---
--- Senha padrao dos usuarios de teste: 123456
+-- Daniela (professor.id 1) ministra Banco de Dados:
+-- turmaDisciplinaId 2 -> Turma A
+-- turmaDisciplinaId 5 -> Turma B
 -- =========================================================
-
-USE eyecount;
-
-SET SQL_SAFE_UPDATES = 0;
-
--- =========================================================
--- 1. PERFIS
--- =========================================================
-
-INSERT INTO perfis (id, nome) VALUES
-    (1, 'aluno'),
-    (2, 'professor'),
-    (3, 'gestor')
-ON DUPLICATE KEY UPDATE
-    nome = VALUES(nome);
-
-SET @perfil_aluno = (
-    SELECT id FROM perfis WHERE nome = 'aluno' LIMIT 1
-);
-
-SET @perfil_professor = (
-    SELECT id FROM perfis WHERE nome = 'professor' LIMIT 1
-);
-
-SET @perfil_gestor = (
-    SELECT id FROM perfis WHERE nome = 'gestor' LIMIT 1
-);
+INSERT INTO turma_disciplina (id, turma_id, disciplina_id, professor_id) VALUES
+(1, 1, 1, 2),
+(2, 1, 2, 1),
+(3, 1, 3, 3),
+(4, 2, 1, 2),
+(5, 2, 2, 1),
+(6, 2, 3, 3);
 
 -- =========================================================
--- 2. USUARIOS
+-- HORÁRIOS DE AULA
 -- =========================================================
+INSERT INTO horarios_aula
+(id, turma_disciplina_id, dia_semana, hora_inicio, hora_fim,
+ tolerancia_minutos, abertura_automatica, encerramento_automatico,
+ data_inicio_vigencia, data_fim_vigencia, ativo)
+VALUES
+(1, 1, 'MONDAY',    '13:00:00', '15:00:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE),
 
-INSERT INTO usuarios (nome, email, senha, perfil_id, ativo) VALUES
-    ('Ana Gestora', 'ana.gestora@eyecount.com', '123456', @perfil_gestor, TRUE),
-    ('Bruno Gestor', 'bruno.gestor@eyecount.com', '123456', @perfil_gestor, TRUE),
+(2, 2, 'TUESDAY',   '13:00:00', '15:00:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE),
 
-    ('Carlos Professor', 'carlos.professor@eyecount.com', '123456', @perfil_professor, TRUE),
-    ('Daniela Professora', 'daniela.professora@eyecount.com', '123456', @perfil_professor, TRUE),
-    ('Eduardo Professor', 'eduardo.professor@eyecount.com', '123456', @perfil_professor, TRUE),
+(3, 3, 'WEDNESDAY', '13:00:00', '15:00:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE),
 
-    ('Alice Santos', 'alice.santos@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Bruno Lima', 'bruno.lima@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Camila Rocha', 'camila.rocha@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Diego Alves', 'diego.alves@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Elisa Martins', 'elisa.martins@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Felipe Costa', 'felipe.costa@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Gabriela Souza', 'gabriela.souza@eyecount.com', '123456', @perfil_aluno, TRUE),
-    ('Henrique Dias', 'henrique.dias@eyecount.com', '123456', @perfil_aluno, TRUE)
-ON DUPLICATE KEY UPDATE
-    nome = VALUES(nome),
-    senha = VALUES(senha),
-    perfil_id = VALUES(perfil_id),
-    ativo = VALUES(ativo);
+(4, 4, 'THURSDAY',  '13:00:00', '15:00:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE),
 
--- IDs dos usuarios criados.
-SET @u_prof_carlos = (
-    SELECT id FROM usuarios
-    WHERE email = 'carlos.professor@eyecount.com'
-    LIMIT 1
-);
+(5, 5, 'FRIDAY',    '13:00:00', '15:00:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE),
 
-SET @u_prof_daniela = (
-    SELECT id FROM usuarios
-    WHERE email = 'daniela.professora@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_prof_eduardo = (
-    SELECT id FROM usuarios
-    WHERE email = 'eduardo.professor@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_alice = (
-    SELECT id FROM usuarios
-    WHERE email = 'alice.santos@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_bruno = (
-    SELECT id FROM usuarios
-    WHERE email = 'bruno.lima@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_camila = (
-    SELECT id FROM usuarios
-    WHERE email = 'camila.rocha@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_diego = (
-    SELECT id FROM usuarios
-    WHERE email = 'diego.alves@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_elisa = (
-    SELECT id FROM usuarios
-    WHERE email = 'elisa.martins@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_felipe = (
-    SELECT id FROM usuarios
-    WHERE email = 'felipe.costa@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_gabriela = (
-    SELECT id FROM usuarios
-    WHERE email = 'gabriela.souza@eyecount.com'
-    LIMIT 1
-);
-
-SET @u_henrique = (
-    SELECT id FROM usuarios
-    WHERE email = 'henrique.dias@eyecount.com'
-    LIMIT 1
-);
+(6, 6, 'WEDNESDAY', '15:15:00', '17:15:00', 10, TRUE, TRUE,
+ DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 120 DAY), TRUE);
 
 -- =========================================================
--- 3. TURMAS
+-- AULAS DE EXEMPLO
+-- Aulas encerradas recentes para alimentar dashboards/frequência.
 -- =========================================================
+INSERT INTO aulas
+(id, turma_disciplina_id, horario_aula_id, data_aula, hora_inicio, hora_fim, token, token_expiracao, status)
+VALUES
+(1,  1, 1, DATE_SUB(CURDATE(), INTERVAL 21 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(2,  2, 2, DATE_SUB(CURDATE(), INTERVAL 20 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(3,  3, 3, DATE_SUB(CURDATE(), INTERVAL 19 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(4,  1, 1, DATE_SUB(CURDATE(), INTERVAL 14 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(5,  2, 2, DATE_SUB(CURDATE(), INTERVAL 13 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(6,  3, 3, DATE_SUB(CURDATE(), INTERVAL 12 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
 
-INSERT INTO turmas (
-    nome,
-    descricao,
-    sala,
-    horario_inicio,
-    horario_fim,
-    ativo,
-    data_inicio,
-    data_fim_prevista
-)
-SELECT
-    'Desenvolvimento de Sistemas - Tarde',
-    'Turma de desenvolvimento web, banco de dados e programacao.',
-    'Sala 12',
-    '13:00:00',
-    '17:00:00',
-    TRUE,
-    DATE_SUB(CURDATE(), INTERVAL 60 DAY),
-    DATE_ADD(CURDATE(), INTERVAL 300 DAY)
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM turmas
-    WHERE nome = 'Desenvolvimento de Sistemas - Tarde'
-);
+(7,  4, 4, DATE_SUB(CURDATE(), INTERVAL 18 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(8,  5, 5, DATE_SUB(CURDATE(), INTERVAL 17 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(9,  6, 6, DATE_SUB(CURDATE(), INTERVAL 16 DAY), '15:15:00', '17:15:00', NULL, NULL, 'ENCERRADA'),
+(10, 4, 4, DATE_SUB(CURDATE(), INTERVAL 11 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(11, 5, 5, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '13:00:00', '15:00:00', NULL, NULL, 'ENCERRADA'),
+(12, 6, 6, DATE_SUB(CURDATE(), INTERVAL 9 DAY),  '15:15:00', '17:15:00', NULL, NULL, 'ENCERRADA');
 
-INSERT INTO turmas (
-    nome,
-    descricao,
-    sala,
-    horario_inicio,
-    horario_fim,
-    ativo,
-    data_inicio,
-    data_fim_prevista
-)
-SELECT
-    'Mecatronica - Manha',
-    'Turma de automacao, eletrica e sistemas industriais.',
-    'Laboratorio 03',
-    '07:30:00',
-    '11:30:00',
-    TRUE,
-    DATE_SUB(CURDATE(), INTERVAL 45 DAY),
-    DATE_ADD(CURDATE(), INTERVAL 320 DAY)
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM turmas
-    WHERE nome = 'Mecatronica - Manha'
-);
+-- =========================================================
+-- PRESENÇAS - TURMA A
+-- =========================================================
+INSERT INTO presencas
+(id, aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica)
+VALUES
+(1,  1, 1, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 21 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(2,  2, 1, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 21 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(3,  3, 1, 'ATRASADO', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 21 DAY), INTERVAL 13 HOUR), INTERVAL 18 MINUTE), 'MANUAL', FALSE),
+(4,  4, 1, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 21 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
 
-INSERT INTO turmas (
-    nome,
-    descricao,
-    sala,
-    horario_inicio,
-    horario_fim,
-    ativo,
-    data_inicio,
-    data_fim_prevista
-)
-SELECT
-    'Redes de Computadores - Noite',
-    'Turma de redes, infraestrutura e seguranca.',
-    'Sala 08',
-    '18:30:00',
-    '22:00:00',
-    TRUE,
-    DATE_SUB(CURDATE(), INTERVAL 30 DAY),
-    DATE_ADD(CURDATE(), INTERVAL 330 DAY)
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM turmas
-    WHERE nome = 'Redes de Computadores - Noite'
-);
+(5,  1, 2, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 20 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(6,  2, 2, 'AUSENTE',  NULL, 'MANUAL', FALSE),
+(7,  3, 2, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 20 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(8,  4, 2, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 20 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
 
-SET @turma_ds = (
-    SELECT id FROM turmas
-    WHERE nome = 'Desenvolvimento de Sistemas - Tarde'
-    LIMIT 1
-);
+(9,  1, 3, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 19 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(10, 2, 3, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 19 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(11, 3, 3, 'AUSENTE',  NULL, 'MANUAL', FALSE),
+(12, 4, 3, 'ATRASADO', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 19 DAY), INTERVAL 13 HOUR), INTERVAL 14 MINUTE), 'MANUAL', FALSE),
 
-SET @turma_mec = (
-    SELECT id FROM turmas
-    WHERE nome = 'Mecatronica - Manha'
-    LIMIT 1
-);
+(13, 1, 4, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(14, 2, 4, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(15, 3, 4, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(16, 4, 4, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
 
-SET @turma_redes = (
-    SELECT id FROM turmas
-    WHERE nome = 'Redes de Computadores - Noite'
-    LIMIT 1
+(17, 1, 5, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 13 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(18, 2, 5, 'ATRASADO', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 13 DAY), INTERVAL 13 HOUR), INTERVAL 16 MINUTE), 'MANUAL', FALSE),
+(19, 3, 5, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 13 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(20, 4, 5, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 13 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+
+(21, 1, 6, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 12 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(22, 2, 6, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 12 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(23, 3, 6, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 12 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(24, 4, 6, 'AUSENTE',  NULL, 'MANUAL', FALSE);
+
+-- =========================================================
+-- PRESENÇAS - TURMA B
+-- =========================================================
+INSERT INTO presencas
+(id, aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica)
+VALUES
+(25, 5, 7,  'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 18 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(26, 6, 7,  'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 18 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(27, 5, 8,  'ATRASADO', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 17 DAY), INTERVAL 13 HOUR), INTERVAL 15 MINUTE), 'MANUAL', FALSE),
+(28, 6, 8,  'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 17 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(29, 5, 9,  'PRESENTE', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 16 DAY), INTERVAL 15 HOUR), INTERVAL 15 MINUTE), 'MANUAL', FALSE),
+(30, 6, 9,  'AUSENTE',  NULL, 'MANUAL', FALSE),
+(31, 5, 10, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 11 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(32, 6, 10, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 11 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(33, 5, 11, 'PRESENTE', DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 10 DAY), INTERVAL 13 HOUR), 'MANUAL', FALSE),
+(34, 6, 11, 'ATRASADO', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 10 DAY), INTERVAL 13 HOUR), INTERVAL 17 MINUTE), 'MANUAL', FALSE),
+(35, 5, 12, 'AUSENTE',  NULL, 'MANUAL', FALSE),
+(36, 6, 12, 'PRESENTE', DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 9 DAY), INTERVAL 15 HOUR), INTERVAL 15 MINUTE), 'MANUAL', FALSE);
+
+-- =========================================================
+-- SAÍDA TEMPORÁRIA DE EXEMPLO
+-- =========================================================
+INSERT INTO saidas_temporarias
+(id, aluno_id, aula_id, hora_saida, hora_retorno, tempo_limite)
+VALUES
+(
+    1,
+    4,
+    4,
+    DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 14 HOUR),
+    DATE_ADD(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 14 DAY), INTERVAL 14 HOUR), INTERVAL 8 MINUTE),
+    15
 );
 
 -- =========================================================
--- 4. PROFESSORES
+-- OCORRÊNCIAS
 -- =========================================================
+INSERT INTO ocorrencias
+(id, aluno_id, professor_id, titulo, descricao, gravidade, status, tipo,
+ resposta_gestor, data_ocorrencia, data_atualizacao)
+VALUES
+(1, 3, 1,
+ 'Frequência em atenção',
+ 'Aluno apresentou ausência e atraso em aulas recentes.',
+ 'MEDIA', 'EM_ANALISE', 'INTERVENCAO',
+ 'Acompanhamento iniciado pela gestão.',
+ DATE_SUB(NOW(), INTERVAL 7 DAY),
+ DATE_SUB(NOW(), INTERVAL 5 DAY)),
 
-INSERT INTO professores (usuario_id, especialidade) VALUES
-    (@u_prof_carlos, 'Programacao e Banco de Dados'),
-    (@u_prof_daniela, 'Automacao Industrial'),
-    (@u_prof_eduardo, 'Redes e Seguranca')
-ON DUPLICATE KEY UPDATE
-    especialidade = VALUES(especialidade);
+(2, 4, 3,
+ 'Bom desempenho em atividade',
+ 'Aluno apresentou ótimo desempenho e participação durante a atividade.',
+ 'BAIXA', 'RESOLVIDA', 'DESTAQUE',
+ 'Registro concluído.',
+ DATE_SUB(NOW(), INTERVAL 4 DAY),
+ DATE_SUB(NOW(), INTERVAL 3 DAY)),
 
-SET @prof_carlos = (
-    SELECT id FROM professores
-    WHERE usuario_id = @u_prof_carlos
-    LIMIT 1
-);
-
-SET @prof_daniela = (
-    SELECT id FROM professores
-    WHERE usuario_id = @u_prof_daniela
-    LIMIT 1
-);
-
-SET @prof_eduardo = (
-    SELECT id FROM professores
-    WHERE usuario_id = @u_prof_eduardo
-    LIMIT 1
-);
-
--- =========================================================
--- 5. ALUNOS
--- =========================================================
-
-INSERT INTO alunos (
-    usuario_id,
-    turma_id,
-    matricula,
-    data_nascimento
-) VALUES
-    (@u_alice, @turma_ds, 'EC2026001', '2008-02-10'),
-    (@u_bruno, @turma_ds, 'EC2026002', '2007-11-21'),
-    (@u_camila, @turma_ds, 'EC2026003', '2008-05-14'),
-    (@u_diego, @turma_ds, 'EC2026004', '2007-09-03'),
-
-    (@u_elisa, @turma_mec, 'EC2026005', '2008-01-19'),
-    (@u_felipe, @turma_mec, 'EC2026006', '2007-07-27'),
-
-    (@u_gabriela, @turma_redes, 'EC2026007', '2008-03-30'),
-    (@u_henrique, @turma_redes, 'EC2026008', '2007-12-08')
-ON DUPLICATE KEY UPDATE
-    turma_id = VALUES(turma_id),
-    matricula = VALUES(matricula),
-    data_nascimento = VALUES(data_nascimento);
-
-SET @aluno_alice = (
-    SELECT id FROM alunos WHERE usuario_id = @u_alice LIMIT 1
-);
-
-SET @aluno_bruno = (
-    SELECT id FROM alunos WHERE usuario_id = @u_bruno LIMIT 1
-);
-
-SET @aluno_camila = (
-    SELECT id FROM alunos WHERE usuario_id = @u_camila LIMIT 1
-);
-
-SET @aluno_diego = (
-    SELECT id FROM alunos WHERE usuario_id = @u_diego LIMIT 1
-);
-
-SET @aluno_elisa = (
-    SELECT id FROM alunos WHERE usuario_id = @u_elisa LIMIT 1
-);
-
-SET @aluno_felipe = (
-    SELECT id FROM alunos WHERE usuario_id = @u_felipe LIMIT 1
-);
-
-SET @aluno_gabriela = (
-    SELECT id FROM alunos WHERE usuario_id = @u_gabriela LIMIT 1
-);
-
-SET @aluno_henrique = (
-    SELECT id FROM alunos WHERE usuario_id = @u_henrique LIMIT 1
-);
+(3, 6, 2,
+ 'Justificativa de ausência',
+ 'Ausência comunicada para análise da equipe.',
+ 'BAIXA', 'PENDENTE', 'JUSTIFICATIVA',
+ NULL,
+ DATE_SUB(NOW(), INTERVAL 2 DAY),
+ NULL);
 
 -- =========================================================
--- 6. DISCIPLINAS
+-- AVISOS / FEEDBACKS
 -- =========================================================
+INSERT INTO avisos
+(id, aluno_id, autor_id, turma_id, titulo, mensagem, categoria, prioridade,
+ lido, frequencia, nota, melhorias, data_criacao)
+VALUES
+(1, 4, 1, 1,
+ 'Atenção à frequência',
+ 'Acompanhe sua frequência e evite novas ausências.',
+ 'FREQUENCIA', 'IMPORTANTE',
+ FALSE, 83.33, NULL, NULL,
+ DATE_SUB(NOW(), INTERVAL 3 DAY)),
 
-INSERT INTO disciplinas (nome) VALUES
-    ('Logica de Programacao'),
-    ('Banco de Dados'),
-    ('Desenvolvimento Web'),
-    ('Automacao Industrial'),
-    ('Redes de Computadores'),
-    ('Seguranca da Informacao')
-ON DUPLICATE KEY UPDATE
-    nome = VALUES(nome);
+(2, 4, 3, 1,
+ 'Feedback de Banco de Dados',
+ 'Bom desempenho geral. Continue praticando consultas SQL e modelagem.',
+ 'FEEDBACK', 'NORMAL',
+ FALSE, 83.33, 8.50,
+ 'Praticar JOINs, agrupamentos e normalização.',
+ DATE_SUB(NOW(), INTERVAL 2 DAY)),
 
-SET @disc_logica = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Logica de Programacao'
-    LIMIT 1
-);
+(3, 2, 1, 1,
+ 'Documentação pendente',
+ 'Favor verificar a documentação acadêmica junto à secretaria.',
+ 'DOCUMENTACAO', 'IMPORTANTE',
+ FALSE, NULL, NULL, NULL,
+ DATE_SUB(NOW(), INTERVAL 1 DAY)),
 
-SET @disc_banco = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Banco de Dados'
-    LIMIT 1
-);
-
-SET @disc_web = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Desenvolvimento Web'
-    LIMIT 1
-);
-
-SET @disc_automacao = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Automacao Industrial'
-    LIMIT 1
-);
-
-SET @disc_redes = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Redes de Computadores'
-    LIMIT 1
-);
-
-SET @disc_seguranca = (
-    SELECT id FROM disciplinas
-    WHERE nome = 'Seguranca da Informacao'
-    LIMIT 1
-);
+(4, 5, 3, 2,
+ 'Feedback de Banco de Dados',
+ 'Boa evolução nas últimas atividades.',
+ 'FEEDBACK', 'NORMAL',
+ TRUE, 83.33, 7.80,
+ 'Revisar relacionamentos e chaves estrangeiras.',
+ DATE_SUB(NOW(), INTERVAL 4 DAY));
 
 -- =========================================================
--- 7. VINCULOS TURMA, DISCIPLINA E PROFESSOR
+-- NOTAS - TURMA A
 -- =========================================================
+INSERT INTO notas
+(id, aluno_id, turma_disciplina_id, titulo, nota, nota_maxima, bimestre,
+ observacao, data_avaliacao)
+VALUES
+(1,  1, 1, 'Atividade HTML/CSS',   8.50, 10.00, 1, 'Bom desempenho.', DATE_SUB(CURDATE(), INTERVAL 20 DAY)),
+(2,  1, 2, 'Modelagem de Dados',   9.00, 10.00, 1, 'Ótima modelagem.', DATE_SUB(CURDATE(), INTERVAL 19 DAY)),
+(3,  1, 3, 'Lista de Lógica',      8.00, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 18 DAY)),
 
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_ds, @disc_logica, @prof_carlos
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_logica
-      AND professor_id = @prof_carlos
-);
+(4,  2, 1, 'Atividade HTML/CSS',   7.50, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 20 DAY)),
+(5,  2, 2, 'Modelagem de Dados',   6.50, 10.00, 1, 'Revisar normalização.', DATE_SUB(CURDATE(), INTERVAL 19 DAY)),
+(6,  2, 3, 'Lista de Lógica',      8.20, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 18 DAY)),
 
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_ds, @disc_banco, @prof_carlos
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_banco
-      AND professor_id = @prof_carlos
-);
+(7,  3, 1, 'Atividade HTML/CSS',   6.00, 10.00, 1, 'Melhorar organização do código.', DATE_SUB(CURDATE(), INTERVAL 20 DAY)),
+(8,  3, 2, 'Modelagem de Dados',   5.80, 10.00, 1, 'Reforçar relacionamentos.', DATE_SUB(CURDATE(), INTERVAL 19 DAY)),
+(9,  3, 3, 'Lista de Lógica',      6.40, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 18 DAY)),
 
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_ds, @disc_web, @prof_carlos
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_web
-      AND professor_id = @prof_carlos
-);
+(10, 4, 1, 'Atividade HTML/CSS',   8.00, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 20 DAY)),
+(11, 4, 2, 'Modelagem de Dados',   8.50, 10.00, 1, 'Bom domínio do conteúdo.', DATE_SUB(CURDATE(), INTERVAL 19 DAY)),
+(12, 4, 3, 'Lista de Lógica',      7.50, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 18 DAY)),
 
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_mec, @disc_automacao, @prof_daniela
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_mec
-      AND disciplina_id = @disc_automacao
-      AND professor_id = @prof_daniela
-);
-
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_redes, @disc_redes, @prof_eduardo
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_redes
-      AND disciplina_id = @disc_redes
-      AND professor_id = @prof_eduardo
-);
-
-INSERT INTO turma_disciplina (
-    turma_id,
-    disciplina_id,
-    professor_id
-)
-SELECT @turma_redes, @disc_seguranca, @prof_eduardo
-WHERE NOT EXISTS (
-    SELECT 1 FROM turma_disciplina
-    WHERE turma_id = @turma_redes
-      AND disciplina_id = @disc_seguranca
-      AND professor_id = @prof_eduardo
-);
-
-SET @td_ds_logica = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_logica
-      AND professor_id = @prof_carlos
-    LIMIT 1
-);
-
-SET @td_ds_banco = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_banco
-      AND professor_id = @prof_carlos
-    LIMIT 1
-);
-
-SET @td_ds_web = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_ds
-      AND disciplina_id = @disc_web
-      AND professor_id = @prof_carlos
-    LIMIT 1
-);
-
-SET @td_mec_automacao = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_mec
-      AND disciplina_id = @disc_automacao
-      AND professor_id = @prof_daniela
-    LIMIT 1
-);
-
-SET @td_redes = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_redes
-      AND disciplina_id = @disc_redes
-      AND professor_id = @prof_eduardo
-    LIMIT 1
-);
-
-SET @td_seguranca = (
-    SELECT id FROM turma_disciplina
-    WHERE turma_id = @turma_redes
-      AND disciplina_id = @disc_seguranca
-      AND professor_id = @prof_eduardo
-    LIMIT 1
-);
+(13, 1, 1, 'Projeto Front-End',    9.00, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 7 DAY)),
+(14, 1, 2, 'Consultas SQL',        8.80, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 6 DAY)),
+(15, 2, 1, 'Projeto Front-End',    8.30, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 7 DAY)),
+(16, 2, 2, 'Consultas SQL',        7.20, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 6 DAY)),
+(17, 3, 1, 'Projeto Front-End',    6.50, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 7 DAY)),
+(18, 3, 2, 'Consultas SQL',        6.00, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 6 DAY)),
+(19, 4, 1, 'Projeto Front-End',    8.70, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 7 DAY)),
+(20, 4, 2, 'Consultas SQL',        9.00, 10.00, 2, NULL, DATE_SUB(CURDATE(), INTERVAL 6 DAY));
 
 -- =========================================================
--- 8. AULAS HISTORICAS
+-- NOTAS - TURMA B
 -- =========================================================
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_ds_logica,
-    DATE_SUB(CURDATE(), INTERVAL 4 DAY),
-    '13:00:00',
-    '15:00:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_ds_logica
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 4 DAY)
-      AND hora_inicio = '13:00:00'
-);
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_ds_banco,
-    DATE_SUB(CURDATE(), INTERVAL 3 DAY),
-    '15:00:00',
-    '17:00:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_ds_banco
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-      AND hora_inicio = '15:00:00'
-);
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_ds_web,
-    DATE_SUB(CURDATE(), INTERVAL 2 DAY),
-    '13:00:00',
-    '15:00:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_ds_web
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 2 DAY)
-      AND hora_inicio = '13:00:00'
-);
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_ds_logica,
-    DATE_SUB(CURDATE(), INTERVAL 1 DAY),
-    '13:00:00',
-    '15:00:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_ds_logica
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-      AND hora_inicio = '13:00:00'
-);
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_mec_automacao,
-    DATE_SUB(CURDATE(), INTERVAL 2 DAY),
-    '07:30:00',
-    '11:30:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_mec_automacao
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 2 DAY)
-      AND hora_inicio = '07:30:00'
-);
-
-INSERT INTO aulas (
-    turma_disciplina_id,
-    data_aula,
-    hora_inicio,
-    hora_fim,
-    status
-)
-SELECT
-    @td_redes,
-    DATE_SUB(CURDATE(), INTERVAL 1 DAY),
-    '18:30:00',
-    '20:10:00',
-    'ENCERRADA'
-WHERE NOT EXISTS (
-    SELECT 1 FROM aulas
-    WHERE turma_disciplina_id = @td_redes
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-      AND hora_inicio = '18:30:00'
-);
-
-SET @aula_ds_1 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_ds_logica
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 4 DAY)
-      AND hora_inicio = '13:00:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
-
-SET @aula_ds_2 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_ds_banco
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-      AND hora_inicio = '15:00:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
-
-SET @aula_ds_3 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_ds_web
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 2 DAY)
-      AND hora_inicio = '13:00:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
-
-SET @aula_ds_4 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_ds_logica
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-      AND hora_inicio = '13:00:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
-
-SET @aula_mec_1 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_mec_automacao
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 2 DAY)
-      AND hora_inicio = '07:30:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
-
-SET @aula_redes_1 = (
-    SELECT id FROM aulas
-    WHERE turma_disciplina_id = @td_redes
-      AND data_aula = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
-      AND hora_inicio = '18:30:00'
-    ORDER BY id DESC
-    LIMIT 1
-);
+INSERT INTO notas
+(id, aluno_id, turma_disciplina_id, titulo, nota, nota_maxima, bimestre,
+ observacao, data_avaliacao)
+VALUES
+(21, 5, 4, 'Atividade HTML/CSS', 7.80, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 17 DAY)),
+(22, 5, 5, 'Modelagem de Dados', 7.50, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 16 DAY)),
+(23, 5, 6, 'Lista de Lógica',    8.10, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 15 DAY)),
+(24, 6, 4, 'Atividade HTML/CSS', 8.60, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 17 DAY)),
+(25, 6, 5, 'Modelagem de Dados', 8.20, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 16 DAY)),
+(26, 6, 6, 'Lista de Lógica',    7.90, 10.00, 1, NULL, DATE_SUB(CURDATE(), INTERVAL 15 DAY));
 
 -- =========================================================
--- 9. PRESENCAS
+-- LOGS DE ACESSO
 -- =========================================================
-
--- Aula DS 1.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_alice, @aula_ds_1, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 4 DAY), '13:03:00'), 'BIOMETRIA', TRUE),
-    (@aluno_bruno, @aula_ds_1, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 4 DAY), '13:05:00'), 'MANUAL', FALSE),
-    (@aluno_camila, @aula_ds_1, 'ATRASADO', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 4 DAY), '13:35:00'), 'BIOMETRIA', TRUE),
-    (@aluno_diego, @aula_ds_1, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 4 DAY), '15:00:00'), 'MANUAL', FALSE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- Aula DS 2.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_alice, @aula_ds_2, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 3 DAY), '15:02:00'), 'BIOMETRIA', TRUE),
-    (@aluno_bruno, @aula_ds_2, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 3 DAY), '17:00:00'), 'MANUAL', FALSE),
-    (@aluno_camila, @aula_ds_2, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 3 DAY), '15:04:00'), 'MANUAL', FALSE),
-    (@aluno_diego, @aula_ds_2, 'ATRASADO', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 3 DAY), '15:40:00'), 'BIOMETRIA', TRUE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- Aula DS 3.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_alice, @aula_ds_3, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '13:01:00'), 'BIOMETRIA', TRUE),
-    (@aluno_bruno, @aula_ds_3, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '13:06:00'), 'BIOMETRIA', TRUE),
-    (@aluno_camila, @aula_ds_3, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '13:08:00'), 'MANUAL', FALSE),
-    (@aluno_diego, @aula_ds_3, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '15:00:00'), 'MANUAL', FALSE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- Aula DS 4.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_alice, @aula_ds_4, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '13:02:00'), 'BIOMETRIA', TRUE),
-    (@aluno_bruno, @aula_ds_4, 'ATRASADO', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '13:36:00'), 'BIOMETRIA', TRUE),
-    (@aluno_camila, @aula_ds_4, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '15:00:00'), 'MANUAL', FALSE),
-    (@aluno_diego, @aula_ds_4, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '15:00:00'), 'MANUAL', FALSE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- Aula Mecatronica.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_elisa, @aula_mec_1, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '07:32:00'), 'BIOMETRIA', TRUE),
-    (@aluno_felipe, @aula_mec_1, 'ATRASADO', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '08:05:00'), 'MANUAL', FALSE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- Aula Redes.
-INSERT INTO presencas (
-    aluno_id, aula_id, status, horario_registro, metodo, validacao_biometrica
-) VALUES
-    (@aluno_gabriela, @aula_redes_1, 'PRESENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '18:33:00'), 'BIOMETRIA', TRUE),
-    (@aluno_henrique, @aula_redes_1, 'AUSENTE', TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '20:10:00'), 'MANUAL', FALSE)
-ON DUPLICATE KEY UPDATE
-    status = VALUES(status),
-    horario_registro = VALUES(horario_registro),
-    metodo = VALUES(metodo),
-    validacao_biometrica = VALUES(validacao_biometrica);
-
--- =========================================================
--- 10. OCORRENCIAS
--- =========================================================
-
-INSERT INTO ocorrencias (
-    aluno_id,
-    professor_id,
-    titulo,
-    descricao,
-    gravidade,
-    status,
-    tipo,
-    resposta_gestor,
-    data_ocorrencia,
-    data_atualizacao
-)
-SELECT
-    @aluno_diego,
-    @prof_carlos,
-    'Faltas consecutivas',
-    'Aluno apresentou faltas em aulas recentes e precisa de acompanhamento.',
-    'MEDIA',
-    'PENDENTE',
-    'INTERVENCAO',
-    NULL,
-    DATE_SUB(NOW(), INTERVAL 1 DAY),
-    NULL
-WHERE NOT EXISTS (
-    SELECT 1 FROM ocorrencias
-    WHERE aluno_id = @aluno_diego
-      AND titulo = 'Faltas consecutivas'
-);
-
-INSERT INTO ocorrencias (
-    aluno_id,
-    professor_id,
-    titulo,
-    descricao,
-    gravidade,
-    status,
-    tipo,
-    resposta_gestor,
-    data_ocorrencia,
-    data_atualizacao
-)
-SELECT
-    @aluno_camila,
-    @prof_carlos,
-    'Atestado medico apresentado',
-    'Documento apresentado para justificar ausencia.',
-    'BAIXA',
-    'RESOLVIDA',
-    'ATESTADO',
-    'Documento conferido e justificativa aceita.',
-    DATE_SUB(NOW(), INTERVAL 3 DAY),
-    DATE_SUB(NOW(), INTERVAL 2 DAY)
-WHERE NOT EXISTS (
-    SELECT 1 FROM ocorrencias
-    WHERE aluno_id = @aluno_camila
-      AND titulo = 'Atestado medico apresentado'
-);
-
-INSERT INTO ocorrencias (
-    aluno_id,
-    professor_id,
-    titulo,
-    descricao,
-    gravidade,
-    status,
-    tipo,
-    resposta_gestor,
-    data_ocorrencia,
-    data_atualizacao
-)
-SELECT
-    @aluno_alice,
-    @prof_carlos,
-    'Destaque em projeto',
-    'Aluna apresentou excelente desempenho no projeto da disciplina.',
-    'BAIXA',
-    'RESOLVIDA',
-    'DESTAQUE',
-    'Destaque registrado no historico da aluna.',
-    DATE_SUB(NOW(), INTERVAL 5 DAY),
-    DATE_SUB(NOW(), INTERVAL 4 DAY)
-WHERE NOT EXISTS (
-    SELECT 1 FROM ocorrencias
-    WHERE aluno_id = @aluno_alice
-      AND titulo = 'Destaque em projeto'
-);
-
-INSERT INTO ocorrencias (
-    aluno_id,
-    professor_id,
-    titulo,
-    descricao,
-    gravidade,
-    status,
-    tipo,
-    resposta_gestor,
-    data_ocorrencia,
-    data_atualizacao
-)
-SELECT
-    @aluno_felipe,
-    @prof_daniela,
-    'Atrasos frequentes',
-    'Aluno chegou depois do horario em mais de uma atividade.',
-    'MEDIA',
-    'EM_ANALISE',
-    'DISCIPLINAR',
-    'Caso encaminhado para acompanhamento.',
-    DATE_SUB(NOW(), INTERVAL 2 DAY),
-    DATE_SUB(NOW(), INTERVAL 1 DAY)
-WHERE NOT EXISTS (
-    SELECT 1 FROM ocorrencias
-    WHERE aluno_id = @aluno_felipe
-      AND titulo = 'Atrasos frequentes'
-);
-
--- =========================================================
--- 11. BIOMETRIAS DE TESTE
---
--- Estes embeddings sao apenas dados ficticios para preencher o banco.
--- Eles nao substituem o cadastro facial real feito pelo servidor Python.
--- =========================================================
-
-INSERT INTO biometria (
-    usuario_id,
-    embedding_facial,
-    tipo,
-    ativo
-) VALUES
-    (@u_alice, '[0.11,0.22,0.33,0.44]', 'face', TRUE),
-    (@u_camila, '[0.15,0.25,0.35,0.45]', 'face', TRUE),
-    (@u_elisa, '[0.18,0.28,0.38,0.48]', 'face', TRUE),
-    (@u_gabriela, '[0.21,0.31,0.41,0.51]', 'face', TRUE),
-    (@u_prof_carlos, '[0.12,0.24,0.36,0.48]', 'face', TRUE)
-ON DUPLICATE KEY UPDATE
-    embedding_facial = VALUES(embedding_facial),
-    ativo = VALUES(ativo);
-
--- =========================================================
--- 12. HORARIOS DE AULA
---
--- Execute este bloco apenas se a tabela horarios_aula existir.
--- Os horarios entram DESATIVADOS para nao abrirem chamadas inesperadas.
--- Para testar, altere ativo para TRUE e ajuste o dia e a hora.
--- =========================================================
-
-INSERT INTO horarios_aula (
-    turma_disciplina_id,
-    dia_semana,
-    hora_inicio,
-    hora_fim,
-    tolerancia_minutos,
-    abertura_automatica,
-    encerramento_automatico,
-    data_inicio_vigencia,
-    data_fim_vigencia,
-    ativo
-)
-SELECT
-    @td_ds_logica,
-    'MONDAY',
-    '13:00:00',
-    '15:00:00',
-    30,
-    TRUE,
-    TRUE,
-    CURDATE(),
-    DATE_ADD(CURDATE(), INTERVAL 6 MONTH),
-    FALSE
-WHERE NOT EXISTS (
-    SELECT 1 FROM horarios_aula
-    WHERE turma_disciplina_id = @td_ds_logica
-      AND dia_semana = 'MONDAY'
-      AND hora_inicio = '13:00:00'
-);
-
-INSERT INTO horarios_aula (
-    turma_disciplina_id,
-    dia_semana,
-    hora_inicio,
-    hora_fim,
-    tolerancia_minutos,
-    abertura_automatica,
-    encerramento_automatico,
-    data_inicio_vigencia,
-    data_fim_vigencia,
-    ativo
-)
-SELECT
-    @td_ds_banco,
-    'WEDNESDAY',
-    '15:00:00',
-    '17:00:00',
-    20,
-    TRUE,
-    TRUE,
-    CURDATE(),
-    DATE_ADD(CURDATE(), INTERVAL 6 MONTH),
-    FALSE
-WHERE NOT EXISTS (
-    SELECT 1 FROM horarios_aula
-    WHERE turma_disciplina_id = @td_ds_banco
-      AND dia_semana = 'WEDNESDAY'
-      AND hora_inicio = '15:00:00'
-);
-
-INSERT INTO horarios_aula (
-    turma_disciplina_id,
-    dia_semana,
-    hora_inicio,
-    hora_fim,
-    tolerancia_minutos,
-    abertura_automatica,
-    encerramento_automatico,
-    data_inicio_vigencia,
-    data_fim_vigencia,
-    ativo
-)
-SELECT
-    @td_mec_automacao,
-    'TUESDAY',
-    '07:30:00',
-    '11:30:00',
-    15,
-    TRUE,
-    TRUE,
-    CURDATE(),
-    DATE_ADD(CURDATE(), INTERVAL 6 MONTH),
-    FALSE
-WHERE NOT EXISTS (
-    SELECT 1 FROM horarios_aula
-    WHERE turma_disciplina_id = @td_mec_automacao
-      AND dia_semana = 'TUESDAY'
-      AND hora_inicio = '07:30:00'
-);
-
-INSERT INTO horarios_aula (
-    turma_disciplina_id,
-    dia_semana,
-    hora_inicio,
-    hora_fim,
-    tolerancia_minutos,
-    abertura_automatica,
-    encerramento_automatico,
-    data_inicio_vigencia,
-    data_fim_vigencia,
-    ativo
-)
-SELECT
-    @td_redes,
-    'THURSDAY',
-    '18:30:00',
-    '20:10:00',
-    20,
-    TRUE,
-    TRUE,
-    CURDATE(),
-    DATE_ADD(CURDATE(), INTERVAL 6 MONTH),
-    FALSE
-WHERE NOT EXISTS (
-    SELECT 1 FROM horarios_aula
-    WHERE turma_disciplina_id = @td_redes
-      AND dia_semana = 'THURSDAY'
-      AND hora_inicio = '18:30:00'
-);
-
-SET SQL_SAFE_UPDATES = 1;
-
--- =========================================================
--- FIM DOS INSERTS
--- =========================================================
+INSERT INTO logs_acesso (id, usuario_id, data_hora, acao, ip) VALUES
+(1, 1,  DATE_SUB(NOW(), INTERVAL 2 HOUR), 'LOGIN_GESTOR',     '127.0.0.1'),
+(2, 3,  DATE_SUB(NOW(), INTERVAL 1 HOUR), 'LOGIN_PROFESSOR',  '127.0.0.1'),
+(3, 9,  DATE_SUB(NOW(), INTERVAL 30 MINUTE), 'LOGIN_ALUNO',   '127.0.0.1');
