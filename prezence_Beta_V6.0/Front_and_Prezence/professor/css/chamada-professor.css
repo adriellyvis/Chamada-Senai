@@ -1,0 +1,541 @@
+.chamada-card,
+.form-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.chamada-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.chamada-alunos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chamada-aluno-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.chamada-aluno-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.chamada-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.chamada-status-text {
+  font-weight: 800;
+}
+
+.chamada-status-text.presente {
+  color: var(--green);
+}
+
+.chamada-status-text.ausente {
+  color: var(--pink);
+}
+
+.chamada-status-text.atrasado {
+  color: var(--orange);
+}
+
+.chamada-metodo-presenca {
+  margin-top: 8px;
+}
+
+.badge-presenca {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.badge-biometria {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid rgba(24, 182, 109, 0.35);
+}
+
+.badge-manual {
+  background: var(--orange-soft);
+  color: var(--orange);
+  border: 1px solid rgba(242, 155, 24, 0.35);
+}
+
+.badge-pendente {
+  background: var(--blue-soft);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.acoes-chamada,
+.chamada-acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-status {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-status.presente.ativo,
+.btn-status.presente:hover {
+  background: var(--green-soft);
+  border-color: rgba(24, 182, 109, 0.45);
+  color: var(--green);
+}
+
+.btn-status.ausente.ativo,
+.btn-status.ausente:hover {
+  background: #ffe8ef;
+  border-color: rgba(255, 79, 122, 0.45);
+  color: var(--pink);
+}
+
+.btn-status.atrasado.ativo,
+.btn-status.atrasado:hover {
+  background: var(--orange-soft);
+  border-color: rgba(242, 155, 24, 0.45);
+  color: var(--orange);
+}
+
+@media (max-width: 760px) {
+  .chamada-aluno-item,
+  .chamada-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .acoes-chamada,
+  .chamada-acoes {
+    width: 100%;
+  }
+
+  .btn-status {
+    flex: 1;
+  }
+}
+
+.btn-danger {
+  border: 0;
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.22);
+  border-radius: 9px;
+  min-height: 35px;
+  padding: 0 17px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+  background: #dc2626;
+}
+
+.btn-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.chamada-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+#btnAtualizarPresencas {
+  white-space: nowrap;
+}
+
+.btn-status:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-status:disabled:hover {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.chamada-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.chamada-resumo-grid--completo {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+}
+
+.chamada-resumo-grid .resumo-item,
+.chamada-resumo-grid > div {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  min-height: 82px;
+}
+
+.chamada-resumo-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.chamada-resumo-grid strong {
+  color: var(--text);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.resumo-item--total {
+  background: var(--blue-soft) !important;
+}
+
+.resumo-item--presente {
+  background: var(--green-soft) !important;
+}
+
+.resumo-item--ausente {
+  background: #ffe8ef !important;
+}
+
+.resumo-item--atrasado,
+.resumo-item--manual {
+  background: var(--orange-soft) !important;
+}
+
+.resumo-item--biometria {
+  background: rgba(124, 58, 237, 0.10) !important;
+}
+
+@media (max-width: 980px) {
+  .chamada-resumo-grid,
+  .chamada-resumo-grid--completo {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .chamada-resumo-grid,
+  .chamada-resumo-grid--completo {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CONFIRMAÇÃO BIOMÉTRICA PELO PROFESSOR
+========================================================= */
+.resumo-item--biometria-pendente {
+  background: rgba(37, 99, 235, 0.10) !important;
+}
+
+.badge-biometria-pendente {
+  background: rgba(37, 99, 235, 0.10);
+  color: var(--blue);
+  border: 1px solid rgba(37, 99, 235, 0.28);
+}
+
+.biometria-pendente-box {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.biometria-pendente-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.biometria-pendente-cabecalho > .material-symbols-rounded {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.biometria-pendente-cabecalho div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.biometria-pendente-cabecalho strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.biometria-pendente-cabecalho small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.biometria-pendente-acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-biometria-confirmar,
+.btn-biometria-recusar {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+
+.btn-biometria-confirmar {
+  border: 1px solid rgba(24, 182, 109, 0.35);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.btn-biometria-confirmar:hover {
+  transform: translateY(-1px);
+  border-color: var(--green);
+}
+
+.btn-biometria-recusar {
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}
+
+.btn-biometria-recusar:hover {
+  transform: translateY(-1px);
+  border-color: #dc2626;
+}
+
+.btn-biometria-confirmar:disabled,
+.btn-biometria-recusar:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.btn-biometria-confirmar .material-symbols-rounded,
+.btn-biometria-recusar .material-symbols-rounded {
+  font-size: 17px;
+}
+
+@media (max-width: 760px) {
+  .biometria-pendente-acoes {
+    width: 100%;
+  }
+
+  .btn-biometria-confirmar,
+  .btn-biometria-recusar {
+    flex: 1;
+  }
+}
+
+
+.chamada-feedback-local {
+  margin-bottom: 12px;
+  padding: 11px 13px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.chamada-feedback-local--success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+body.dark .chamada-feedback-local--success {
+  border-color: rgba(52, 211, 153, .24);
+  background: rgba(16, 185, 129, .12);
+  color: #a7f3d0;
+}
+
+/* =========================================================
+   AJUSTE DE ESPAÇAMENTO — TELA DE CHAMADA DO PROFESSOR
+   Melhora a leitura sem alterar a lógica da chamada.
+========================================================= */
+.chamada-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.chamada-card h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.chamada-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.chamada-card-header {
+  align-items: flex-start;
+}
+
+.chamada-card-header > div {
+  min-width: 0;
+}
+
+.chamada-config-card .chamada-card-header {
+  margin-bottom: 20px;
+}
+
+.chamada-form {
+  display: grid;
+  grid-template-columns: minmax(0, 430px);
+  gap: 9px;
+}
+
+.chamada-form label {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.chamada-form .chamada-select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 14px;
+}
+
+.chamada-botoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.chamada-resumo-card > h2 {
+  margin-bottom: 4px;
+}
+
+.chamada-resumo-grid {
+  margin-top: 20px;
+  gap: 14px;
+}
+
+.chamada-resumo-grid .resumo-item,
+.chamada-resumo-grid > div {
+  padding: 16px 18px;
+  min-height: 88px;
+}
+
+.chamada-resumo-grid span {
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.chamada-resumo-grid strong {
+  line-height: 1.1;
+}
+
+.chamada-alunos-card .chamada-card-header {
+  margin-bottom: 18px;
+}
+
+.chamada-alunos-card .chamada-card-header p {
+  max-width: 720px;
+}
+
+#listaAlunosChamada .empty-state {
+  margin: 0;
+  padding: 20px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .chamada-card h2 {
+    font-size: 21px;
+  }
+
+  .chamada-form {
+    grid-template-columns: 1fr;
+  }
+
+  .chamada-botoes,
+  .chamada-botoes .btn-primary,
+  .chamada-botoes .btn-danger {
+    width: 100%;
+  }
+
+  .chamada-botoes .btn-primary,
+  .chamada-botoes .btn-danger {
+    justify-content: center;
+  }
+}

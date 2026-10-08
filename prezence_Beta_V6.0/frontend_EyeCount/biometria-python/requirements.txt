@@ -1,4 +1,0 @@
-flask
-flask-cors
-opencv-contrib-python==4.14.0.94
-numpy

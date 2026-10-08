@@ -1,11 +1,11 @@
 -- =========================================================
 -- =========================================================
--- PreZence - Banco de dados
+-- EyeCount - Banco de dados
 -- CREATEs consolidados para o estado atual do projeto.
 -- =========================================================
 -- =========================================================
 
-CREATE DATABASE IF NOT EXISTS prezence;
+CREATE DATABASE  prezence;
 USE prezence;
 
 -- Tabela de perfis
@@ -359,7 +359,7 @@ CREATE TABLE IF NOT EXISTS avisos (
     ) NOT NULL DEFAULT 'NORMAL',
     lido BOOLEAN NOT NULL DEFAULT FALSE,
     frequencia DOUBLE NULL,
-    nota FLOAT(53) NULL,
+    nota DECIMAL(5,2) NULL,
     melhorias TEXT NULL,
     data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -499,7 +499,7 @@ CREATE TABLE IF NOT EXISTS notas (
     INDEX idx_notas_bimestre (bimestre)
 );
 
-CREATE TABLE IF NOT EXISTS solicitacoes_suporte (
+CREATE TABLE solicitacoes_suporte (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     nome VARCHAR(120) NOT NULL,
@@ -526,7 +526,7 @@ CREATE TABLE IF NOT EXISTS solicitacoes_suporte (
 CREATE INDEX idx_suporte_status_data
     ON solicitacoes_suporte(status, data_criacao);
     
-CREATE TABLE IF NOT EXISTS recuperacoes_senha (
+   CREATE TABLE recuperacoes_senha (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     challenge_id VARCHAR(64) NOT NULL UNIQUE,
@@ -556,3 +556,19 @@ CREATE INDEX idx_recuperacao_challenge
 CREATE INDEX idx_recuperacao_usuario_status
     ON recuperacoes_senha(usuario_id, status);
     
+    SELECT
+    id,
+    challenge_id,
+    usuario_id,
+    status,
+    tentativas,
+    criado_em,
+    expira_em
+FROM recuperacoes_senha
+ORDER BY id DESC
+LIMIT 5;	
+
+USE prezence;
+
+ALTER TABLE avisos
+MODIFY COLUMN nota FLOAT(53) NULL;
