@@ -42,3 +42,13 @@ Thumbs.db
 *backup*.sql
 *dump*.sql
 *local*.sql
+
+# Arquivos locais, gerados e sensiveis
+**/.env
+**/node_modules/
+**/.expo/
+**/target/
+**/.idea/
+**/__pycache__/
+**/*.pyc
+**/dados_biometricos/
