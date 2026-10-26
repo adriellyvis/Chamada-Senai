@@ -10,21 +10,24 @@ import {
 } from 'react-native';
 
 import { AppColors } from '../theme/colors';
+import { AppIcon, AppIconName } from './ui/AppIcon';
 import { Card } from './ui/Card';
 import { Screen } from './layout/Screen';
 
 export { Card, Screen };
 
 export function Icon({
+  name,
   glyph,
   color,
   size = 18,
 }: {
-  glyph: string;
+  name?: AppIconName;
+  glyph?: string;
   color?: string;
   size?: number;
 }) {
-  return <Text style={{ color, fontSize: size, fontWeight: '800' }}>{glyph}</Text>;
+  return <AppIcon name={name} glyph={glyph} color={color} size={size} />;
 }
 
 export function initials(name?: string | null): string {

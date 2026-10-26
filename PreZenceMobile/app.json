@@ -7,6 +7,17 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O PreZence usa a câmera para validar sua presença por biometria facial.",
+          "microphonePermission": "O PreZence não utiliza o microfone para a biometria facial.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ]
+    ]
   }
 }

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppColors, colors as defaultColors } from '../../theme/colors';
@@ -18,6 +19,7 @@ interface ScreenProps {
   refreshing?: boolean;
   onRefresh?: () => void;
   scroll?: boolean;
+  showBack?: boolean;
 }
 
 export function Screen({
@@ -28,10 +30,23 @@ export function Screen({
   refreshing = false,
   onRefresh,
   scroll = true,
+  showBack,
 }: ScreenProps) {
+  const navigation = useNavigation<any>();
+  const navigationState = navigation.getState?.();
+  const isStackChild = navigationState?.type === 'stack' && navigationState.index > 0;
+  const shouldShowBack = showBack ?? isStackChild;
+
   const content = (
     <View style={styles.content}>
-      {title ? <Header colors={colors} title={title} subtitle={subtitle} /> : null}
+      {title ? (
+        <Header
+          colors={colors}
+          title={title}
+          subtitle={subtitle}
+          onBackPress={shouldShowBack && navigation.canGoBack?.() ? () => navigation.goBack() : undefined}
+        />
+      ) : null}
       {children}
     </View>
   );

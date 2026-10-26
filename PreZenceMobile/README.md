@@ -1,6 +1,6 @@
 # PreZence Mobile
 
-Aplicativo mobile do PreZence: Expo (SDK 57) + React Native + React Navigation + TypeScript.
+Aplicativo mobile do PreZence: Expo (SDK 58) + React Native + React Navigation + TypeScript.
 
 Fluxo de dados: **Celular → Spring Boot → MySQL** (o app nunca acessa o banco diretamente).
 
@@ -53,4 +53,4 @@ Verificação de tipos: `npm run typecheck`.
 
 ## Próximos passos
 
-A estrutura de navegação dos três perfis está funcional. Algumas telas ainda são provisórias e serão ligadas aos endpoints reais do backend nas próximas etapas.
+A estrutura de navegação dos três perfis está funcional. O perfil Aluno já possui dashboard, agenda, frequência, notas, avisos/ocorrências e consulta do estado da chamada facial integrados ao backend. A captura facial usa expo-camera. O envio ao reconhecedor facial fica habilitado quando EXPO_PUBLIC_BIOMETRIA_URL estiver configurada.

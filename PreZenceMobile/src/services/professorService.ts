@@ -7,6 +7,7 @@ import {
   DesempenhoTurma,
   DetalheAula,
   HistoricoAula,
+  HistoricoPresencaAlunoProfessor,
   NotaProfessor,
   OcorrenciaProfessor,
   PresencaAlunoProfessor,
@@ -354,3 +355,115 @@ export async function recusarBiometria(
   return data;
 }
 
+
+
+function normalizarTextoProfessor(valor?: string | null): string {
+  return String(valor ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function timestampHistoricoProfessor(aula: HistoricoAula): number {
+  const texto = `${aula.data ?? ''}T${String(aula.horaInicio ?? '00:00').slice(0, 8)}`;
+  const ts = new Date(texto).getTime();
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
+/**
+ * Consolida as notas de um aluno em todas as disciplinas que o professor
+ * ministra para a turma informada. Usa apenas os endpoints já existentes.
+ */
+export async function getNotasAlunoProfessor(
+  alunoId: number,
+  turmaId: number
+): Promise<NotaProfessor[]> {
+  const vinculos = (await getProfessorTurmas()).filter(
+    (item) => Number(item.turmaId) === Number(turmaId)
+  );
+
+  const resultados = await Promise.allSettled(
+    vinculos.map((item) => getNotasPorVinculo(item.turmaDisciplinaId))
+  );
+
+  if (resultados.length > 0 && resultados.every((resultado) => resultado.status === 'rejected')) {
+    const primeiroErro = resultados.find((resultado) => resultado.status === 'rejected');
+    if (primeiroErro?.status === 'rejected') throw primeiroErro.reason;
+  }
+
+  return resultados
+    .flatMap((resultado) => resultado.status === 'fulfilled' ? resultado.value : [])
+    .filter((nota) => Number(nota.alunoId) === Number(alunoId))
+    .sort((a, b) => String(b.dataAvaliacao ?? b.dataCriacao ?? '').localeCompare(String(a.dataAvaliacao ?? a.dataCriacao ?? '')));
+}
+
+/**
+ * Monta os registros recentes de presença de um aluno consultando o histórico
+ * de aulas do professor e os detalhes de cada aula. O limite evita uma rajada
+ * excessiva de requisições quando há muito histórico.
+ */
+export async function getPresencasRecentesAlunoProfessor(
+  alunoId: number,
+  turmaNome: string,
+  limiteAulas = 15
+): Promise<HistoricoPresencaAlunoProfessor[]> {
+  const turmaNormalizada = normalizarTextoProfessor(turmaNome);
+  const historico = (await getHistoricoProfessor())
+    .filter((aula) => {
+      const aulaTurma = normalizarTextoProfessor(aula.turma);
+      if (!turmaNormalizada) return true;
+      if (!aulaTurma) return false;
+      return aulaTurma === turmaNormalizada || aulaTurma.includes(turmaNormalizada) || turmaNormalizada.includes(aulaTurma);
+    })
+    .sort((a, b) => timestampHistoricoProfessor(b) - timestampHistoricoProfessor(a))
+    .slice(0, Math.max(1, limiteAulas));
+
+  const detalhes = await Promise.allSettled(
+    historico.map(async (aula) => ({ aula, itens: await getDetalhesAula(aula.id) }))
+  );
+
+  if (detalhes.length > 0 && detalhes.every((resultado) => resultado.status === 'rejected')) {
+    const primeiroErro = detalhes.find((resultado) => resultado.status === 'rejected');
+    if (primeiroErro?.status === 'rejected') throw primeiroErro.reason;
+  }
+
+  return detalhes.flatMap((resultado) => {
+    if (resultado.status !== 'fulfilled') return [];
+    const { aula, itens } = resultado.value;
+    const registro = itens.find((item) => Number(item.alunoId) === Number(alunoId));
+    if (!registro) return [];
+
+    return [{
+      aulaId: aula.id,
+      alunoId: registro.alunoId,
+      turma: aula.turma,
+      data: aula.data,
+      horaInicio: aula.horaInicio,
+      horaFim: aula.horaFim,
+      statusAula: aula.status,
+      status: registro.status,
+      metodo: registro.metodo,
+      horarioRegistro: registro.horarioRegistro,
+    }];
+  });
+}
+
+export interface FeedbackProfessorPayload {
+  alunoId: number;
+  turmaId?: number | null;
+  turmaNome?: string | null;
+  titulo: string;
+  mensagem: string;
+  frequencia?: number | null;
+  nota?: number | null;
+  melhorias?: string | null;
+  categoria: string;
+  prioridade: string;
+}
+
+export async function enviarFeedbackProfessor(
+  payload: FeedbackProfessorPayload
+): Promise<void> {
+  await api.post('/professor/avisos', payload);
+}

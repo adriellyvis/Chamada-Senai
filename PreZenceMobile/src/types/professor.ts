@@ -60,6 +60,20 @@ export interface DetalheAula {
   metodo?: string | null;
 }
 
+
+export interface HistoricoPresencaAlunoProfessor {
+  aulaId: number;
+  alunoId: number;
+  turma: string;
+  data: string;
+  horaInicio?: string | null;
+  horaFim?: string | null;
+  statusAula?: string | null;
+  status: string;
+  metodo?: string | null;
+  horarioRegistro?: string | null;
+}
+
 export interface ChamadaAbertaProfessor {
   aulaId: number;
   turmaDisciplinaId: number;

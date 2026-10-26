@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 
 import { AppColors } from '../../theme/colors';
+import { AppIcon } from './AppIcon';
 
 interface AccordionSectionProps {
   colors: AppColors;
@@ -34,8 +35,10 @@ export function AccordionSection({
       ]}
     >
       <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
         onPress={() => setOpen(value => !value)}
-        style={styles.header}
+        style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
         <Text
           style={[
@@ -46,14 +49,11 @@ export function AccordionSection({
           {title}
         </Text>
 
-        <Text
-          style={[
-            styles.arrow,
-            { color: colors.textSecondary },
-          ]}
-        >
-          {open ? '⌃' : '⌄'}
-        </Text>
+        <AppIcon
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={20}
+          color={colors.textSecondary}
+        />
       </Pressable>
 
       {open && (
@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     overflow: 'hidden',
   },
-
   header: {
     minHeight: 54,
     paddingHorizontal: 16,
@@ -85,17 +84,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
+  pressed: {
+    opacity: 0.7,
+  },
   title: {
     fontSize: 14,
     fontWeight: '800',
   },
-
-  arrow: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
   content: {
     borderTopWidth: 1,
     padding: 16,

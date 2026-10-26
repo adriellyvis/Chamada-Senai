@@ -6,13 +6,14 @@ import {
 } from 'react-native';
 
 import { AppColors, colors as defaultColors } from '../../theme/colors';
+import { AppIcon, AppIconName } from './AppIcon';
 
 interface StatCardProps {
   colors?: AppColors;
   label: string;
   value: string | number;
   hint?: string;
-  icon?: string;
+  icon?: AppIconName;
 }
 
 export function StatCard({
@@ -41,14 +42,7 @@ export function StatCard({
             },
           ]}
         >
-          <Text
-            style={[
-              styles.icon,
-              { color: colors.primaryStrong },
-            ]}
-          >
-            {icon}
-          </Text>
+          <AppIcon name={icon} size={19} color={colors.primaryStrong} />
         </View>
       )}
 
@@ -92,7 +86,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
   },
-
   iconContainer: {
     width: 38,
     height: 38,
@@ -101,23 +94,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-
-  icon: {
-    fontSize: 17,
-    fontWeight: '800',
-  },
-
   value: {
     fontSize: 23,
     fontWeight: '800',
   },
-
   label: {
     marginTop: 3,
     fontSize: 12,
     fontWeight: '700',
   },
-
   hint: {
     marginTop: 4,
     fontSize: 11,
