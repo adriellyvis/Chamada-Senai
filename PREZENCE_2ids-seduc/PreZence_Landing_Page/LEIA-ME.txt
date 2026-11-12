@@ -1,0 +1,19 @@
+PREZENCE — LANDING PAGE
+
+Como visualizar:
+1. Extraia a pasta do ZIP.
+2. Abra lading.html no navegador (ou use a extensão Live Server no VS Code).
+
+Arquivos:
+- lading.html: estrutura da página
+- lading.css: identidade visual e responsividade
+- lading.js: menu mobile, animações e seletor de perfis
+- assets/images/prezence-eye.svg: símbolo vetorial criado para esta proposta
+- assets/images/team/: fotos dos integrantes (proporção 4:5, 640x800) usadas na seção Equipe
+
+Antes de publicar:
+- Confira se o link do GitHub (https://github.com/adriellyvis/Chamada-Senai) é o repositório definitivo.
+- O mockup dos perfis é ilustrativo; substitua-o por capturas reais quando disponíveis.
+- Revise textos e funcionalidades conforme a versão efetivamente implementada.
+
+Fontes e ícones externos (Google Fonts e Font Awesome) precisam de conexão com a internet.

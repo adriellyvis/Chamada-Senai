@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" fill="none">
+<defs><linearGradient id="g" x1="42" y1="44" x2="370" y2="215" gradientUnits="userSpaceOnUse"><stop stop-color="#48E4F5"/><stop offset=".52" stop-color="#637BFF"/><stop offset="1" stop-color="#A477FF"/></linearGradient><radialGradient id="r"><stop stop-color="#43DDF4" stop-opacity=".35"/><stop offset="1" stop-color="#43DDF4" stop-opacity="0"/></radialGradient><filter id="blur"><feGaussianBlur stdDeviation="9"/></filter></defs>
+<ellipse cx="210" cy="130" rx="165" ry="94" fill="url(#r)" filter="url(#blur)"/>
+<path d="M28 130C73 69 137 39 210 39s137 30 182 91c-45 61-109 91-182 91S73 191 28 130Z" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M66 130c38-39 86-59 144-59s106 20 144 59c-38 39-86 59-144 59s-106-20-144-59Z" stroke="url(#g)" stroke-width="2" opacity=".55"/>
+<circle cx="210" cy="130" r="51" stroke="url(#g)" stroke-width="7"/><circle cx="210" cy="130" r="34" fill="url(#g)" fill-opacity=".15" stroke="#58DFF4" stroke-width="2"/><circle cx="210" cy="130" r="17" fill="url(#g)"/><circle cx="210" cy="130" r="7" fill="#E9FDFF"/>
+<path d="M210 17v18M210 225v18M13 130h18M389 130h18" stroke="#56DFF3" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+<path d="M85 53 99 67M321 193l14 14M335 53l-14 14M99 193l-14 14" stroke="#8B83FF" stroke-width="2" stroke-linecap="round"/>
+</svg>
