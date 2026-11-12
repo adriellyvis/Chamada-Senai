@@ -159,47 +159,6 @@ As tecnologias e ferramentas utilizadas no desenvolvimento do PreZence incluem:
 
 ---
 
-## Instalação e Execução
-
-O PreZence foi desenvolvido para execução em ambiente local.
-
-### Pré-requisitos
-
-- Java e JDK compatíveis com a versão utilizada no projeto.
-- IntelliJ IDEA ou ambiente de desenvolvimento Java equivalente.
-- MySQL Server.
-- Visual Studio Code ou editor equivalente.
-- Navegador atualizado.
-- Credenciais e configurações das APIs externas utilizadas.
-
-### 1. Clonar o repositório
-
-```bash
-git clone URL_DO_REPOSITORIO
-```
-
-### 2. Configurar o banco de dados
-
-Inicie o MySQL e crie o banco de dados conforme o nome definido na configuração do Back-End.
-
-Configure as credenciais de acesso no arquivo `application.properties`.
-
-### 3. Executar o Back-End
-
-Abra o projeto no IntelliJ IDEA, verifique as dependências do Maven e execute a classe principal da aplicação Spring Boot.
-
-### 4. Executar o Front-End
-
-Abra os arquivos do Front-End no Visual Studio Code e execute a aplicação utilizando o servidor local configurado para o projeto.
-
-### 5. Acessar o sistema
-
-Com o Back-End e o Front-End em execução, acesse o endereço local configurado para a aplicação no navegador.
-
-> **Observação:** as configurações de conexão com o banco de dados e as APIs externas devem ser ajustadas conforme o ambiente de execução.
-
----
-
 ## Equipe de Desenvolvimento
 
 O PreZence foi desenvolvido pela equipe **ByID**, formada por estudantes do curso técnico em Desenvolvimento de Sistemas.
