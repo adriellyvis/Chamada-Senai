@@ -1,0 +1,189 @@
+/* Agenda escolar compartilhada por gestor e professor. Classes isoladas do restante do portal. */
+.agenda-escolar { --ae-text: var(--text, #152238); --ae-muted: var(--muted, #68778a); --ae-panel: var(--panel, #fff); --ae-line: var(--line, #e2e7f0); --ae-fundo: var(--bg, #f5f7fb); --ae-primario: #6554e8; color:var(--ae-text); padding:28px clamp(16px,3.5vw,46px) 54px; max-width:1500px; margin:auto; font-family:Arial,sans-serif; }
+.agenda-escolar *,.ae-modal * { box-sizing:border-box; }
+.agenda-escolar button,.ae-modal button { cursor:pointer; font:inherit; }
+.ae-cabecalho { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:24px; }
+.ae-sobretitulo,.ae-painel-titulo small,.ae-modal-topo small { color:#7467d7; font-size:11px; letter-spacing:.14em; font-weight:800; }
+.ae-cabecalho h1 { font-size:clamp(25px,2.7vw,34px); margin:5px 0; font-weight:800; color:var(--ae-text); }
+.ae-cabecalho p { color:var(--ae-muted); font-size:14px; margin:5px 0 0; line-height:1.5; }
+.ae-btn { display:inline-flex; align-items:center; justify-content:center; border-radius:11px; padding:12px 17px; gap:8px; border:1px solid var(--ae-line); transition:background .15s,transform .15s; font-size:13px; font-weight:700!important; white-space:nowrap; }
+.ae-btn:hover { transform:translateY(-1px); }
+.agenda-escolar .ae-btn:disabled { opacity:.52; cursor:not-allowed; transform:none; box-shadow:none; }
+.ae-btn-primario { background:#6554e8; color:white; border-color:#6554e8; box-shadow:0 7px 16px rgba(101,84,232,.15); }
+.ae-btn-primario:hover { background:#5040ca; }
+.ae-btn-secundario { background:var(--ae-panel); color:var(--ae-text); }
+.ae-btn-curto { background:transparent; color:#6959df; border:1px solid #c9c1ff; padding:8px 10px; font-size:12px; }
+.ae-indicadores { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:15px; margin-bottom:22px; }
+.ae-indicadores article,.ae-calendario,.ae-lateral { background:var(--ae-panel); border:1px solid var(--ae-line); border-radius:17px; box-shadow:0 8px 24px rgba(20,28,60,.035); }
+.ae-indicadores article { padding:19px 20px; min-width:0; display:flex; flex-direction:column; gap:8px; }
+.ae-indicadores article>span { color:var(--ae-muted); font-size:12px; font-weight:700; }
+.ae-indicadores article>strong { font-size:29px; font-weight:800; line-height:1; }
+.ae-indicadores article>small { color:var(--ae-muted); font-size:11px; }
+.ae-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin:24px 0 14px; }
+.ae-troca-mes { display:flex; align-items:center; gap:8px; }
+.ae-troca-mes h2 { font-size:19px; margin:0 8px; white-space:nowrap; font-weight:800; min-width:166px; }
+.ae-troca-mes>button { border:1px solid var(--ae-line); background:var(--ae-panel); color:var(--ae-text); height:36px; min-width:34px; border-radius:10px; font-size:22px; font-weight:600; }
+.ae-troca-mes .ae-hoje { padding:0 10px; font-size:12px; }
+.ae-filtros { display:flex; gap:11px; flex-wrap:wrap; }
+.ae-filtros label { display:flex; flex-direction:column; gap:5px; font-size:11px; font-weight:700; color:var(--ae-muted); }
+.ae-filtros input,.ae-filtros select { min-height:36px; padding:7px 11px; width:min(240px,70vw); border:1px solid var(--ae-line); border-radius:9px; background:var(--ae-panel); color:var(--ae-text); outline-offset:2px; font-size:13px; }
+.ae-filtros select { width:174px; }
+.ae-paineis { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(295px,1fr); gap:18px; align-items:start; }
+.ae-calendario { padding:18px; }
+.ae-dias-semana,.ae-grade { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; }
+.ae-dias-semana { margin-bottom:11px; }
+.ae-dias-semana span { text-align:center; font-size:11px; font-weight:800; color:var(--ae-muted); text-transform:uppercase; padding:12px 2px; }
+.ae-celula,.ae-celula-vazia { min-height:73px; border-radius:10px; min-width:0; }
+.ae-celula { background:var(--ae-fundo); border:1px solid transparent; color:var(--ae-text); text-align:left; padding:9px; display:flex; flex-direction:column; gap:6px; position:relative; }
+.ae-celula>strong { font-size:13px; }
+.ae-celula:hover { border-color:#beb4ff; background:#f2efff; color:#34218e; }
+.ae-celula-hoje { border-color:#ad9efa; }
+.ae-celula-selecionada,.ae-celula-selecionada:hover { background:#6554e8; border-color:#6554e8; color:white; }
+.ae-celula small { margin-top:auto; font-size:10px; color:inherit; opacity:.74; }
+.ae-pontos { display:flex; gap:3px; align-items:center; }
+.ae-ponto { width:7px; height:7px; display:inline-block; border-radius:99px; flex:0 0 auto; }
+.ae-ponto-institucional { background:#4b8cef; }
+.ae-ponto-privado { background:#f8ab54; }
+.ae-legenda { border-top:1px solid var(--ae-line); padding:16px 4px 1px; margin-top:16px; display:flex; gap:18px; color:var(--ae-muted); font-size:11px; }
+.ae-legenda>span { display:flex; align-items:center; gap:7px; }
+.ae-lateral { padding:18px; max-height:900px; overflow:auto; }
+.ae-painel-titulo { display:flex; align-items:center; justify-content:space-between; gap:7px; margin-bottom:17px; }
+.ae-painel-titulo h3 { font-size:17px; line-height:1.35; margin-top:5px; text-transform:capitalize; }
+.ae-painel-titulo-segundo { border-top:1px solid var(--ae-line); padding-top:20px; margin-top:22px; }
+.ae-evento { border:1px solid var(--ae-line); border-left:4px solid #4b8cef; border-radius:11px; padding:13px; margin:0 0 11px; background:var(--ae-panel); }
+.ae-evento-privado { border-left-color:#f8ab54; }
+.ae-evento-superior,.ae-evento-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.ae-evento-superior time { font-size:11px; color:var(--ae-muted); }
+.ae-tag { display:inline-block; font-size:10px; font-weight:700; background:#eeebff; color:#5848d4; padding:5px 8px; border-radius:99px; }
+.ae-evento h4 { font-size:14px; margin:9px 0 6px; line-height:1.35; }
+.ae-evento p { font-size:12px; line-height:1.5; color:var(--ae-muted); margin:0 0 8px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ae-local { color:var(--ae-muted); font-size:11px; }
+.ae-evento-footer { border-top:1px solid var(--ae-line); margin-top:10px; padding-top:9px; color:var(--ae-muted); font-size:11px; }
+.ae-acoes { display:flex; gap:12px; }
+.ae-acoes button { font-size:11px; font-weight:700; border:0; background:transparent; color:#6959df; padding:4px; }
+.ae-acoes .ae-excluir { color:#db4e62; }
+.ae-somente-leitura { font-size:10px; font-style:italic; }
+.ae-vazio { border:1px dashed var(--ae-line); color:var(--ae-muted); background:var(--ae-fundo); font-size:12px; padding:24px 12px; text-align:center; border-radius:11px; }
+.ae-loading { padding:40px; color:var(--ae-muted); }
+.ae-aviso,.ae-falha { padding:15px 18px; font-size:13px; line-height:1.5; background:#fff8e6; border:1px solid #efd59d; border-radius:12px; margin-bottom:16px; color:#735522; }
+.ae-aviso button { border:0; text-decoration:underline; background:transparent; color:inherit; margin-left:5px; font-weight:700; }
+.ae-falha { background:#fff1f2; color:#8f2440; border-color:#f5bac5; }
+.ae-falha p { margin:5px 0 12px; }
+.ae-falha button { margin-right:8px; margin-bottom:4px; }
+.ae-modal { border:1px solid #dddaf3; border-radius:19px; box-shadow:0 20px 80px #07042670; padding:0; width:min(610px,calc(100% - 28px)); max-height:92vh; background:var(--panel,#fff); color:var(--text,#18243c); overflow:auto; margin:auto; }
+.ae-modal::backdrop { background:#15102c92; backdrop-filter:blur(2px); }
+.ae-formulario { padding:25px; display:flex; flex-direction:column; gap:15px; }
+.ae-modal-topo { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:7px; }
+.ae-modal-topo h2 { margin-top:5px; font-size:22px; }
+.ae-fechar { font-size:25px!important; border:0; background:transparent; color:inherit; width:32px; }
+.ae-formulario>label,.ae-form-duas>label { font-weight:700; font-size:12px; display:flex; flex-direction:column; gap:7px; }
+.ae-formulario input,.ae-formulario select,.ae-formulario textarea { width:100%; border:1px solid var(--line,#dfe5ef); border-radius:10px; background:var(--panel,#fff); color:var(--text,#18243c); padding:11px; font-size:14px; font-weight:400; resize:vertical; }
+.ae-form-duas { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.ae-form-alerta { background:var(--panel-2,#f5f4ff); border-radius:9px; padding:12px; font-size:12px; line-height:1.5; color:var(--muted,#626b7d); }
+.ae-form-feedback { padding:10px; border-radius:8px; background:#fff1f2; color:#9f2443; font-size:13px; }
+.ae-form-acoes { display:flex; justify-content:end; gap:10px; }
+@media (max-width:1050px) { .ae-paineis { grid-template-columns:1fr; } .ae-lateral { max-height:none; } }
+@media (max-width:720px) { .agenda-escolar { padding:17px 13px 32px; } .ae-cabecalho { align-items:start; } .ae-indicadores { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .ae-indicadores article { padding:14px; } .ae-cabecalho .ae-btn { padding:10px 9px; font-size:11px; } .ae-dias-semana,.ae-grade { gap:3px; } .ae-calendario { padding:9px; } .ae-celula,.ae-celula-vazia { min-height:51px; padding:6px; } .ae-troca-mes h2 { font-size:15px; min-width:auto; margin:0 2px; } .ae-form-duas { grid-template-columns:1fr; } .ae-formulario { padding:18px; } }
+/* Eventos institucionais integrados à agenda/grade do aluno. */
+.ae-aluno-section { margin-bottom:24px; background:var(--panel,#fff); border:1px solid var(--line,#e1e6ef); border-radius:16px; padding:19px; color:var(--text,#1b2540); }
+.ae-aluno-header small { font-size:10px; font-weight:800; color:#6857db; letter-spacing:.11em; }
+.ae-aluno-header h2 { font-size:19px; margin:5px 0; }
+.ae-aluno-header p { font-size:12px; color:var(--muted,#667487); line-height:1.5; }
+.ae-aluno-lista { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:18px; }
+.ae-aluno-evento { display:flex; gap:13px; border:1px solid var(--line,#e1e6ef); border-radius:12px; padding:14px; min-width:0; }
+.ae-aluno-data { flex:0 0 52px; border-radius:10px; background:#eeebff; color:#6554e8; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:8px 3px; align-self:flex-start; }
+.ae-aluno-data strong { font-size:19px; }
+.ae-aluno-data span { font-size:11px; text-transform:uppercase; }
+.ae-aluno-evento>div:last-child { min-width:0; }
+.ae-aluno-evento small { font-size:10px; color:#6554e8; font-weight:700; }
+.ae-aluno-evento h3 { font-size:14px; margin:5px 0; overflow-wrap:anywhere; }
+.ae-aluno-evento p { font-size:12px; line-height:1.4; margin:0 0 8px; color:var(--muted,#667487); overflow-wrap:anywhere; white-space:pre-wrap; }
+.ae-aluno-evento div>span { color:var(--muted,#667487); font-size:11px; }
+.ae-aluno-vazio { grid-column:1/-1; border-radius:10px; background:var(--panel-2,#f5f7fb); font-size:12px; padding:20px; color:var(--muted,#667487); }
+.ae-aluno-aviso { background:#fff8e6; color:#74562a; padding:11px; border:1px solid #edd5a5; border-radius:9px; font-size:12px; margin-top:12px; }
+@media(max-width:740px) { .ae-aluno-lista { grid-template-columns:1fr; } }
+
+/* Visualizações adicionais: semana e lista, sem dependências externas. */
+.ae-visualizacoes { display:flex; align-items:center; gap:3px; align-self:end; padding:3px; border:1px solid var(--ae-line); border-radius:10px; background:var(--ae-fundo); }
+.ae-visualizacoes button { padding:8px 12px; font-size:12px; font-weight:700; border-radius:7px; border:0; background:transparent; color:var(--ae-muted); }
+.ae-visualizacoes button.ae-vis-ativa { background:var(--ae-panel); color:var(--ae-text); box-shadow:0 1px 6px #00000016; }
+.ae-visualizacoes button:focus-visible { outline:2px solid #6554e8; outline-offset:2px; }
+.ae-semana-titulo { font-size:14px; font-weight:800; margin:0 0 17px; color:var(--ae-muted); text-transform:capitalize; }
+.ae-semana-grade { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+.ae-semana-coluna { min-width:0; border:1px solid var(--ae-line); border-radius:10px; overflow:hidden; background:var(--ae-fundo); }
+.ae-semana-dia { width:100%; min-height:70px; border:0; background:transparent; color:var(--ae-text); display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; }
+.ae-semana-dia span { font-size:11px; color:var(--ae-muted); font-weight:700; }
+.ae-semana-dia strong { font-size:20px; }
+.ae-semana-dia.ae-semana-hoje { outline:2px solid #6554e8; outline-offset:-2px; }
+.ae-semana-dia.ae-semana-selecionada { background:#6554e8; color:white; }
+.ae-semana-dia.ae-semana-selecionada span { color:white; }
+.ae-semana-eventos { padding:5px; display:flex; flex-direction:column; gap:6px; min-height:70px; }
+.ae-semana-chip { border-left:3px solid #4b8cef; border-radius:5px; padding:7px 5px; background:var(--ae-panel); min-width:0; overflow-wrap:anywhere; }
+.ae-semana-chip-privado { border-left-color:#f8ab54; }
+.ae-semana-chip small { display:block; color:var(--ae-muted); font-size:9px; margin-bottom:3px; }
+.ae-semana-chip strong { display:block; font-size:10px; line-height:1.4; }
+.ae-semana-vazio { display:block; text-align:center; color:var(--ae-muted); padding:14px 0; }
+.ae-modo-lista { grid-template-columns:minmax(0,1.25fr) minmax(275px,.75fr); }
+.ae-lista-completa { display:flex; flex-direction:column; gap:19px; }
+.ae-lista-grupo { border-bottom:1px solid var(--ae-line); padding-bottom:10px; }
+.ae-lista-grupo:last-child { border-bottom:0; }
+.ae-lista-data { border:0; background:transparent; color:var(--ae-text); text-transform:capitalize; font-size:14px; font-weight:800; margin-bottom:10px; padding:4px 0; }
+.ae-lista-data:hover { color:#6554e8; }
+@media (max-width:1100px) { .ae-semana-grade { grid-template-columns:repeat(7,minmax(0,1fr)); } .ae-modo-lista { grid-template-columns:1fr; } }
+@media (max-width:730px) { .ae-visualizacoes { width:100%; } .ae-visualizacoes button { flex:1; } .ae-semana-grade { overflow-x:auto; grid-template-columns:repeat(7,minmax(72px,1fr)); } .ae-semana-dia { min-height:53px; } .ae-semana-chip strong { font-size:10px; } }
+
+/* Correção: o CSS geral de professor aplica height:32px e min-width aos
+   elementos select/textarea/input. Dentro da agenda, essas regras cortavam
+   o texto das opções e deixavam "Observações" com somente uma linha. */
+.ae-modal .ae-form-duas > label,
+.ae-modal .ae-formulario > label {
+  min-width: 0;
+}
+.ae-modal .ae-formulario input,
+.ae-modal .ae-formulario select,
+.ae-modal .ae-formulario textarea {
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  padding: 10px 12px;
+  line-height: 1.45;
+  font-size: 14px;
+  font-weight: 400;
+}
+.ae-modal .ae-formulario select {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 35px 0 12px;
+  line-height: normal;
+  text-overflow: ellipsis;
+}
+.ae-modal .ae-formulario input[type="datetime-local"] {
+  min-height: 44px;
+  padding: 8px 10px;
+}
+.ae-modal .ae-formulario textarea {
+  height: 112px;
+  min-height: 96px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.ae-modal {
+  overscroll-behavior: contain;
+}
+.ae-modal .ae-form-acoes {
+  flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+  .ae-modal {
+    width: calc(100% - 18px);
+    max-height: calc(100dvh - 18px);
+  }
+  .ae-modal .ae-form-acoes .ae-btn {
+    flex: 1 1 130px;
+    white-space: normal;
+  }
+}

@@ -75,6 +75,7 @@ function abrirPaginaInicialGestor() {
   const elementos = {
     dashboard: "menuDashboard",
     turmas: "menuTurmas",
+    agenda: "menuAgenda",
     alunos: "menuAlunos",
     ocorrencias: "menuOcorrencias",
     disciplinas: "menuDisciplinas"
