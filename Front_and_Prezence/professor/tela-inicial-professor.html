@@ -23,9 +23,11 @@
   <link rel="stylesheet" href="./css/detalhes-aula.css" />
   <link rel="stylesheet" href="../biometria/perfil-biometrico.css" />
   <link rel="stylesheet" href="./css/perfil-biometrico.css?v=2" />
+  <link rel="stylesheet" href="../core/agenda-escolar.css">
   <link rel="stylesheet" href="../core/ui-feedback.css">
   <link rel="stylesheet" href="../core/mobile-shell.css">
   <link rel="stylesheet" href="../core/dark-theme-polish.css">
+  <script src="../core/runtime-config.js"></script>
 </head>
 <body>
   <div class="layout-shell">
@@ -55,6 +57,11 @@
         <a class="nav-item" href="#" data-page="alunos">
           <i data-lucide="users-round" class="nav-icon"></i>
           <span>Alunos</span>
+        </a>
+
+        <a class="nav-item" href="#" data-page="agenda">
+          <i data-lucide="calendar-days" class="nav-icon"></i>
+          <span>Agenda</span>
         </a>
 
         <a class="nav-item" href="#" data-page="notas">
@@ -109,5 +116,6 @@
   <script type="module" src="./js/main-professor.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script type="module" src="../core/mobile-shell.js"></script>
+  <script src="../core/qr-login-sessao.js"></script>
 </body>
 </html>

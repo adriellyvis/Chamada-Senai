@@ -40,10 +40,24 @@ export function atualizarIcones() {
   }
 }
 
+
+async function abrirAgendaProfessorSeguro() {
+  const conteudo = document.getElementById("conteudoPrincipal");
+  if (conteudo) conteudo.innerHTML = '<div class="agenda-escolar"><p class="ae-loading">Abrindo agenda...</p></div>';
+  try {
+    const { abrirAgendaProfessor } = await import("./pages/agenda-professor.js");
+    await abrirAgendaProfessor();
+  } catch (erro) {
+    console.error("Falha ao abrir a Agenda do professor:", erro);
+    if (conteudo) conteudo.innerHTML = `<section class="agenda-escolar"><div class="ae-falha" role="alert"><strong>A Agenda não pôde ser aberta.</strong><p>Verifique se os arquivos da pasta core e professor/js/pages/agenda-professor.js estão instalados. Depois atualize a página.</p><button class="ae-btn ae-btn-secundario" type="button" onclick="location.reload()">Recarregar página</button></div></section>`;
+  }
+}
+
 const rotas = {
   perfil: abrirPerfilProfessor,
   dashboard: abrirDashboardProfessor,
   turmas: abrirTurmasProfessor,
+  agenda: abrirAgendaProfessorSeguro,
   alunos: abrirAlunosProfessor,
   notas: abrirNotasProfessor,
   historico: abrirHistoricoProfessor,

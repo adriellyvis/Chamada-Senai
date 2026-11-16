@@ -1,3 +1,4 @@
+import { iniciarEventosInstitucionaisAluno } from "../../../core/agenda-eventos-aluno.js";
 import { request } from "../../../core/api.js";
 
 const DIAS = [
@@ -50,6 +51,9 @@ export async function abrirAgendaAluno(container) {
       abrirAgendaAluno(container);
     });
   }
+
+  // O calendário institucional funciona independentemente da grade de aulas.
+  await iniciarEventosInstitucionaisAluno(container, usuario);
 }
 
 function montarAgenda(agenda) {
