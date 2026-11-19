@@ -252,7 +252,7 @@ Projeto desenvolvido pela equipe **ByID**, formada por estudantes do curso técn
 ---
 
 <p align="center">
-  <img src="assets/logo-prezence.png" width="120" alt="Logo PreZence">
+  <img src="assets/logo.png" width="120" alt="Logo PreZence">
 </p>
 
 <h2 align="center">PreZence</h2>
