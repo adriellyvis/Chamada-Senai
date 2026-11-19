@@ -1,7 +1,7 @@
 # PreZence | Controle Inteligente de Frequência Escolar
 
 <p align="center">
-  <img src="assets/banner-prezence.png" width="100%" alt="PreZence — A chamada do futuro é a Biometria">
+  <img src="assets/logo.png" width="100%" alt="PreZence — A escola do futuro é a tecnologia">
 </p>
 
 <p align="center">
